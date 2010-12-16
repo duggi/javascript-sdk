@@ -28,5 +28,7 @@ G.provide('', {
 });
 
 G.provide('ApiClient', {
+ REST_METHODS: ['get', 'post','delete', 'put']
+
 
 });
