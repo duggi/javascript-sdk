@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!--
+Test Runner:
+
+We Load the entire groupit-sdk into the page, and then load our script runner
+to execute tests against the sdk.
+
+Note: Qunit is a open source project maintained here:
+  https://github.com/jquery/qunit
+
+We could link to the most recent version using these links if needed
+  http://github.com/jquery/qunit/raw/master/qunit/qunit.js
+  http://github.com/jquery/qunit/raw/master/qunit/qunit.css
+
+-->
+<html>
+  <head>
+    <title>QUnit Test Suite</title>
+    <link rel="stylesheet" href="qunit/qunit.css" type="text/css" media="screen">
+    <script type="text/javascript" src="qunit/qunit.js"></script>
+    <script type="text/javascript" src="../groupit.min.js"></script>
+    <script type="text/javascript" src="runner.js"></script>
+  </head>
+  <body>
+    <h1 id="qunit-header">QUnit Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+  </body>
+</html>

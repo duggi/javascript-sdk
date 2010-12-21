@@ -1,0 +1,6 @@
+G.provide("log", function(){
+
+
+
+
+});
