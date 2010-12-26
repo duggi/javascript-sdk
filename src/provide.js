@@ -31,7 +31,7 @@
 
 //Save references in case of overwrite/no conflict mode
 var _G = window.G;
-var _is_logging = true;
+var _isLogging = true;
 
 var G = G || {
   /**
@@ -106,6 +106,9 @@ var G = G || {
     }
 
     return G;
+  },
+  testfn: function(){
+    return "wee";
   }
 };
 

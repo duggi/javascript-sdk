@@ -31,18 +31,24 @@ G.provide('', {
   },
   
   test: function(){
-    G.api('account/rest_test.json', 'get', {
-      id: 123
+    var doc = document
+    G.api('view_modules/page', 'get', {
+      name: 'view_modules/test'
     }, function(r){
-      console.log(r);
-    });     
+      console.log(r)
+      var div = doc.createElement('div');
+      div.innerHTML = r;
+      doc.body.appendChild(div)
+    //      eval("function fn1(){return "+r.toString()+";}")
+    //      fn1()();
+    });
+    
   }
 });
 
 G.provide('ApiClient', {
   REST_METHODS: ['get', 'post','delete', 'put'],
   REST_BASE_URL: "http://localhost:3000/",
-  IFRAME: null,
 
   /**
    *   rest: REST access to our server with various calling options.
@@ -109,27 +115,27 @@ G.provide('ApiClient', {
 
 
   /**
-     * iframeRequest: Creates a form and submits from params
-     * 
-     *
-     * @access private
-     * @param path      {String}   the url path
-     * @param method    {String}   the http method
-     * @param params    {Object}   the parameters for the query
-     * @param cb        {Function} the callback function for the response 
-     */
-    
-
+   * iframeRequest: Creates a form and submits from params
+   *
+   *
+   * @access private
+   * @param path      {String}   the url path
+   * @param method    {String}   the http method
+   * @param params    {Object}   the parameters for the query
+   * @param cb        {Function} the callback function for the response
+   */
   iframeRequest: function(path, method, params, cb){
      
-    //Clean start with the iframe each time. slackerware
-    if(this.IFRAME){
-      this.IFRAME.parentNode.removeChild(this.IFRAME);
-    }
-     
-    var iframe = this.IFRAME = document.createElement('iframe');
+    var iframe = document.createElement('iframe');
+    iframe.style.display = "absolute";
+    iframe.style.top = "-10000px";
+    iframe.style.height = "0px";
+    iframe.style.width = "0px";
+    
     document.body.appendChild(iframe); //initializes iframe
-     
+    
+    G['iframe'] = iframe;
+
     var form = document.createElement('form');
     form.action = this.REST_BASE_URL + path;
     form.method = method;
@@ -141,16 +147,44 @@ G.provide('ApiClient', {
       input.value = params[key];
       form.appendChild(input);
     }
-     
+
     //Load the content after submission to the callback
     if(cb){
       iframe.onload = function(){
-        content = this.contentWindow.document.body.innerHTML;
+
+        var content;
+        //the callback() method is inserted into our frame as a JSONP method
+        if(!!iframe.contentWindow.callback){
+          content= iframe.contentWindow.callback();
+        }else{
+          //Not a JSONP response, assume html/js is response and pass back
+          if(!!iframe.contentWindow.callback2){
+            fn = iframe.contentWindow.callback2//.call(window)
+            eval("function fn1(){return "+fn.toString()+";}")
+            fn1.call(window)();
+            console.log("called callback2");
+          }
+          content = iframe.contentWindow.document.body.innerHTML;
+          
+        }
+
+        console.log(content)
+        //        //Apply callback in the context of the callee instead of the iframe
         cb(content);
+        //We have to set a timeout to kill the parent and let the onload
+        //finish otherwise we get errors in browsers thinking that the response
+        //never arrived. Functions like a 'after_load' event
+        setTimeout(function(){
+          //          document.body.removeChild(iframe);
+          //          console.log(cb)
+          //          console.log("callback coming")
+          
+          }, 1000); //IE doesn't accept 0 and all browsers round up to min delay ~10ms
+
       }
     }
       
-    iframe.contentWindow.document.body.appendChild(form);
+    iframe.contentWindow.document.body.appendChild(form);    
     form.submit();
   }
 

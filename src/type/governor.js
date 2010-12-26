@@ -22,42 +22,11 @@
  *
  */
 
-/**
- * Base class for most standard objects in library. Allows for a private scope
- * and public method exposure.
- *
- * To inherit you must create a instance of the function base and assign it
- * to the prototype of the function that is its subclass.
- *
- * Example:
- *
- *  function base(){
- *    this.something = true;
- *  }
- *
- *
- *  function person(){
- *    this.prototype = new base();
- *  }
- *
- *  var p = new person();
- *  assert(p.something, we inherited from base using prototype chains);
- *
- */
 
-G.provide("base", function(){
-
-  //public methods for gift
-  var methods = {}
-
-  if ( methods[method] ) {
-    return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
-  } else if ( typeof method === 'object' || ! method ) {
-    return methods.init.apply( this, arguments );
-  } else {
-    G.log( 'Method ' +  method + ' does not exist on' + this.toString() );
-    return null;
+G.provide("",{
+  governor: function(fn){
+    //want only G to be visible from the pages...
+    eval("function fn1(){return "+fn.toString()+";}")
+    fn1()();
   }
-
-
 });
