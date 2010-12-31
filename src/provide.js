@@ -25,13 +25,15 @@
 /**
  * Entry point into groupit javascript SDK.
  *
- * Must be included before all other files.
- *
+ * The entire SDK is wrapped in a closure when compiled so don't let
+ * the seemingly global definitions confuse you. They are global to the SDK
+ * but not to the app.
  */
 
 //Save references in case of overwrite/no conflict mode
 var _G = window.G;
 var _isLogging = true;
+window.A = "Primary window"; //DEBUG
 
 var G = G || {
   /**
@@ -99,19 +101,21 @@ var G = G || {
     //noConflicting with G sets to default
     if(altName == "G"){
       window.G = G;
+      
     }
     else if (altName){
       window[altName] = G;
-      window.G = _G;
+      window.G = _G; //replace G with what was G before
     }
 
+    globalName = altName;
     return G;
-  },
-  testfn: function(){
-    return "wee";
   }
 };
 
 //Do the proper bindings for the window.
 window.G = G;
+
+//SDK reference to itself in the caller's global namespace
+var globalName = "G";
 

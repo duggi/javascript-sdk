@@ -20,6 +20,9 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
+ * @provides G.api G.ApiClient
+ * @requires G.provide G.Array
+ *
  */
  
 G.provide('', {
@@ -28,22 +31,8 @@ G.provide('', {
   //for richer debuging support, etc
   api: function(){
     G.ApiClient.rest.apply(G.ApiClient, arguments);    
-  },
-  
-  test: function(){
-    var doc = document
-    G.api('view_modules/page', 'get', {
-      name: 'view_modules/test'
-    }, function(r){
-      console.log(r)
-      var div = doc.createElement('div');
-      div.innerHTML = r;
-      doc.body.appendChild(div)
-    //      eval("function fn1(){return "+r.toString()+";}")
-    //      fn1()();
-    });
-    
   }
+
 });
 
 G.provide('ApiClient', {
@@ -91,7 +80,7 @@ G.provide('ApiClient', {
       } else if (type === 'object' && !params) {
         params = next;
       } else {
-        G.log('Invalid argument passed to FB.api(): ' + next);
+        G.log('Invalid argument passed to G.api(): ' + next);
         return;
       }
       next = args.shift();
@@ -113,7 +102,6 @@ G.provide('ApiClient', {
     G.ApiClient.iframeRequest(path, method, params,cb);
   },
 
-
   /**
    * iframeRequest: Creates a form and submits from params
    *
@@ -134,7 +122,6 @@ G.provide('ApiClient', {
     
     document.body.appendChild(iframe); //initializes iframe
     
-    G['iframe'] = iframe;
 
     var form = document.createElement('form');
     form.action = this.REST_BASE_URL + path;
@@ -158,28 +145,19 @@ G.provide('ApiClient', {
           content= iframe.contentWindow.callback();
         }else{
           //Not a JSONP response, assume html/js is response and pass back
-          if(!!iframe.contentWindow.callback2){
-            fn = iframe.contentWindow.callback2//.call(window)
-            eval("function fn1(){return "+fn.toString()+";}")
-            fn1.call(window)();
-            console.log("called callback2");
-          }
           content = iframe.contentWindow.document.body.innerHTML;
-          
         }
 
-        console.log(content)
-        //        //Apply callback in the context of the callee instead of the iframe
+        //Remember javascript uses static scoping (this callback will run
+        //in the context of its definition and not where its being called--iframe)
         cb(content);
+        
         //We have to set a timeout to kill the parent and let the onload
         //finish otherwise we get errors in browsers thinking that the response
         //never arrived. Functions like a 'after_load' event
         setTimeout(function(){
-          //          document.body.removeChild(iframe);
-          //          console.log(cb)
-          //          console.log("callback coming")
-          
-          }, 1000); //IE doesn't accept 0 and all browsers round up to min delay ~10ms
+          document.body.removeChild(iframe);
+        }, 1); //IE doesn't accept 0 and all browsers round up to min delay ~10ms
 
       }
     }

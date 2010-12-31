@@ -23,10 +23,42 @@
  */
 
 
-G.provide("",{
-  governor: function(fn){
-    //want only G to be visible from the pages...
-    eval("function fn1(){return "+fn.toString()+";}")
-    fn1()();
+G.provide("user",{
+
+  /**
+   * Param Options
+   * {
+   *   name: name,
+   *   email: email,
+   *   password: password,
+   *   password_confirm: passwordConfirm
+   * }
+   */
+  create:function(params, callback){
+    G.api("/users", "post", params, callback);
+  },
+
+  /**
+   *  Param options
+   * {id: userId}
+   */
+  read:function(params, callback){
+    G.api("/users", "get", params, callback);
+  },
+  
+  /**
+   * Param options are any subset of create
+   */
+  update:function(params, callback){
+    G.api("/users", "put", params, callback);
+  },
+
+  /**
+   *  Param options
+   * { gift_hash: giftHash } or {id: giftId}
+   */
+  remove:function(params, callback){
+    G.api("/users", "put", params, callback);
   }
+
 });

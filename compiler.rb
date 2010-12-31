@@ -9,7 +9,7 @@ class Compiler < Thor
 
     params = {
       :js_code => master_file,
-      :compilation_level => "SIMPLE_OPTIMIZATIONS",
+      :compilation_level => "WHITESPACE_ONLY", #SIMPLE_OPTIMIZATIONS
       :output_format => "text",
       :output_info => "compiled_code"
     }
