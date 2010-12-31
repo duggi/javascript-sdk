@@ -156,7 +156,7 @@ G.provide('ApiClient', {
         //finish otherwise we get errors in browsers thinking that the response
         //never arrived. Functions like a 'after_load' event
         setTimeout(function(){
-          document.body.removeChild(iframe);
+          //document.body.removeChild(iframe);
         }, 1); //IE doesn't accept 0 and all browsers round up to min delay ~10ms
 
       }

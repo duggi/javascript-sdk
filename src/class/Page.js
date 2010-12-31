@@ -74,8 +74,6 @@ G.provide("Page", {
       return;
     }
 
-    console.log(pageName);
-
     G.Page.constructors[pageName] = pageConstructor;
   },
   
@@ -127,6 +125,7 @@ G.provide("Page", {
       preamble: preamble
     }, function(html){
 
+      console.log(pageName)
       G.pages[pageName] = G.Page.instantiate(pageName, container, html);
 
       if(!!callback){
