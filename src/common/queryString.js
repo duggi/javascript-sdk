@@ -20,45 +20,36 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
+ * @provides G.api G.ApiClient
+ * @requires G.provide G.Array
+ *
  */
 
-
-G.provide("user",{
-
+G.provide("QS", {
   /**
-   * Param Options
-   * {
-   *   name: name,
-   *   email: email,
-   *   password: password,
-   *   password_confirm: passwordConfirm
-   * }
+   * Encode parameters to a query string.
+   *
+   * @access private
+   * @param   params {Object}  the parameters to encode
+   * @param   sep    {String}  the separator string (defaults to '&')
+   * @param   encode {Boolean} indicate if the key/value should be URI encoded
+   * @return        {String}  the query string
    */
-  create:function(params, callback){
-    G.api("/users", "post", params, callback);
-  },
+  encode: function(params, seperator, encode) {
+    seperator = seperator === undefined ? '&' : seperator;
+    encode = encode === false ? function(s) {
+      return s;
+    } : encodeURIComponent;
 
-  /**
-   *  Param options
-   * {id: userId}
-   */
-  read:function(params, callback){
-    G.api("/users", "get", params, callback);
-  },
-  
-  /**
-   * Param options are any subset of create
-   */
-  update:function(params, callback){
-    G.api("/users", "put", params, callback);
-  },
-
-  /**
-   *  Param options
-   * { gift_hash: giftHash } or {id: giftId}
-   */
-  remove:function(params, callback){
-    G.api("/users", "put", params, callback);
+    var kvPairs = [];
+    for(var key in params){
+      var val = params[key];
+      if (val !== null && typeof val != 'undefined') {
+        kvPairs.push(encode(key) + '=' + encode(val));
+      }
+    }
+    kvPairs.sort();
+    return kvPairs.join(seperator);
   }
-
+  
 });

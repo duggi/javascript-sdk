@@ -1,3 +1,4 @@
+#In case of bugs go here http://closure-compiler.appspot.com/home
 class Compiler < Thor
   require 'net/http'
   require 'uri'
@@ -15,10 +16,11 @@ class Compiler < Thor
     }
 
     res = Net::HTTP.post_form(URI.parse(GoogleCompilerURL), params)
+    
 
-    if(res["serverErrors"])
+    if(res["errors"])
       puts "Server error occured"
-      puts res
+      p res
     else
       puts "JS File written successfully"
       File.open("groupit.min.js", 'w+') {|f| f.write(res.body)}
@@ -26,11 +28,13 @@ class Compiler < Thor
   end
 
 
-  
   desc "debug", "Writes the raw concat of the selected files out"
   def debug
     puts "JS File written successfully"
-    File.open("groupit.min.js", 'w+') {|f| f.write(master_file)}
+    File.open("groupit.min.js", 'w+') do |f|
+      f.write("/**\n  *FILE IS GENERATED DON'T MODIFY \n*/")
+      f.write(master_file)
+    end
   end
 
   private

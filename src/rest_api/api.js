@@ -95,25 +95,100 @@ G.provide('ApiClient', {
     }
 
     if (G.Array.indexOf(G.ApiClient.REST_METHODS, method) < 0){
-      console.log('failed on rest methods');
+      G.log('failed on rest methods');
       return; //Need to create a logging mech
     }
 
-    G.ApiClient.iframeRequest(path, method, params,cb);
+    G.ApiClient.corsRequest(path, method, params, cb);
+
+  //    var form = G.ApiClient.createForm(path, method, params);
+
+  //    G.ApiClient.iframeRequest(form, cb);
+  },
+
+  corsRequest:function(path, method, params, cb){
+    var isGet = method.toLowerCase() == "get"
+    var queryString = G.QS.encode(params);
+
+    var url = this.REST_BASE_URL + path;
+    if(isGet){
+      url += "?" + queryString;
+    }
+    
+
+    var xhr = new XMLHttpRequest();
+    if ("withCredentials" in xhr){
+      xhr.open(method, url, true);
+    } else if (typeof XDomainRequest != "undefined"){
+      xhr = new XDomainRequest();
+      xhr.open(method, url);
+    } else {
+      throw("corsRequest: cross site xhr not available");
+      return;
+    }
+
+    if(cb){
+      xhr.onload = function(){
+        var response = xhr.responseText
+        var contentType = xhr.getResponseHeader("Content-Type").toLowerCase()
+        if(contentType.indexOf("application/json") != -1){
+          eval('var response = '+response);
+        }
+        cb(response, xhr);
+      }
+    }
+
+
+
+    if(isGet){
+      xhr.send();
+    }else{
+      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      xhr.send(queryString);
+    }
+
   },
 
   /**
-   * iframeRequest: Creates a form and submits from params
+   *  createForm: Creates a form to submit as a substitute for XHRs.
    *
    *
    * @access private
    * @param path      {String}   the url path
    * @param method    {String}   the http method
    * @param params    {Object}   the parameters for the query
+   *
+   */
+
+  createForm:function(path, method, params){
+    var form = document.createElement('form');
+    form.action = this.REST_BASE_URL + path;
+    form.method = method;
+
+    for(var key in params){
+      var input = document.createElement('input');
+      input.type ='text'; //DEBUG text
+      input.name = key;
+      input.value = params[key];
+      form.appendChild(input);
+    }
+
+    return form;
+  },
+
+  /**
+   * iframeRequest: Submits a form using a spawned Iframe.
+   *
+   *
+   * @access private
+   * @param form      {object}   Dom node representing a form for submission
    * @param cb        {Function} the callback function for the response
    */
-  iframeRequest: function(path, method, params, cb){
-     
+  iframeRequest: function(form, cb){
+
+    //Prevents form passed in from being destroyed in call.
+    form = form.cloneNode(true);
+
     var iframe = document.createElement('iframe');
     iframe.style.display = "absolute";
     iframe.style.top = "-10000px";
@@ -123,20 +198,8 @@ G.provide('ApiClient', {
     document.body.appendChild(iframe); //initializes iframe
     
 
-    var form = document.createElement('form');
-    form.action = this.REST_BASE_URL + path;
-    form.method = method;
-
-    for(key in params){
-      var input = document.createElement('input');
-      input.type ='text'; //DEBUG text
-      input.name = key;
-      input.value = params[key];
-      form.appendChild(input);
-    }
-
     //Load the content after submission to the callback
-    if(cb){
+    if(false){
       iframe.onload = function(){
 
         var content;
@@ -157,13 +220,14 @@ G.provide('ApiClient', {
         //never arrived. Functions like a 'after_load' event
         setTimeout(function(){
           //document.body.removeChild(iframe);
-        }, 1); //IE doesn't accept 0 and all browsers round up to min delay ~10ms
+          }, 1); //IE doesn't accept 0 and all browsers round up to min delay ~10ms
 
       }
     }
       
-    iframe.contentWindow.document.body.appendChild(form);    
+    iframe.contentWindow.document.body.appendChild(form);
     form.submit();
   }
+
 
 });
