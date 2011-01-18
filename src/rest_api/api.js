@@ -131,7 +131,7 @@ G.provide('ApiClient', {
       xhr.onload = function(){
         var response = xhr.responseText
         var contentType = xhr.getResponseHeader("Content-Type").toLowerCase()
-        if(contentType.indexOf("application/json") != -1){
+        if(contentType.indexOf("application/json") != -1 && response.replace(/\s*/, "")){
           eval('var response = '+response);
         }
         cb(response, xhr);

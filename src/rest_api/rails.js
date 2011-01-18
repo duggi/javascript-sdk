@@ -25,6 +25,8 @@
 
 G.provide("restfulRails",{
 
+  sessionToken: null,
+
   Base:function(root_path, request_type, object_name){
 
     /**
@@ -32,6 +34,7 @@ G.provide("restfulRails",{
      */
     this.index = function(params, callback){
       var path = root_path + request_type;
+      params = injectSessionToken(params);
       G.api(path , "get", params, callback);
     }
 
@@ -41,8 +44,12 @@ G.provide("restfulRails",{
      */
     this.create = function(params, callback){
       var path = root_path + request_type;
-      G.api(path, "post", railify(params,object_name), function(json, xhr){
-        callback(json[object_name], xhr);
+      params = railify(params,object_name);
+      params = injectSessionToken(params);
+      G.api(path, "post", params, function(json, xhr){
+        if(callback){
+          callback(json[object_name], xhr);
+        }
       });
     }
 
@@ -50,18 +57,26 @@ G.provide("restfulRails",{
      * Base Read call for all restfulRails Objects
      */
     this.read = function(params, callback){
-      G.api(root_path, "get", params, callback);
+      var path = root_path+"/"+params.id+ request_type;
+      params = injectSessionToken(params);
+      G.api(path, "get", params, callback);
     }
 
     /**
      * Base Update call for all restfulRails Objects.
      * Automatically pulls out a singular object from the json response
      */
-    this.update = function(object_params, std_params, callback){
-      var path = root_path +"/"+object_params.id+ request_type,
-      params = G.copy(railify(object_params,object_name), std_params);
-      G.api(path, "put", params, function(json, xhr){
-        callback(json[object_name], xhr);
+    this.update = function(params, callback){
+      var path = root_path +"/"+params.id+ request_type,
+      params_cp = {};
+      G.copy(params_cp, params); //Make a copy so we don't modify the orginal
+      delete params_cp.id; //remove id so we don't try to modify it
+      params_cp = railify(params_cp,object_name);
+      params_cp = injectSessionToken(params_cp);
+      G.api(path, "put", params_cp, function(json, xhr){
+        if(callback){
+          callback(json[object_name], xhr);
+        }
       });
     }
     /**
@@ -69,6 +84,7 @@ G.provide("restfulRails",{
      */
     this.destroy = function(params, callback){
       var path = root_path +"/"+params.id+ request_type;
+      params = injectSessionToken(params);
       G.api(path, "delete", params, callback);
     }
 
@@ -85,6 +101,11 @@ G.provide("restfulRails",{
       return rails_params;
     }
 
+    function injectSessionToken(params){
+      params['session_token'] = G.restfulRails.sessionToken;
+      return params;
+    }
+
   }
 
 });
@@ -97,22 +118,55 @@ G.provide("restfulRails",{
  */
 G.provide("",{
 
-
   user:function(){
-    return new G.restfulRails.Base("/users", ".json", "user");
+    //We allow a couple convience functions for logging in users
+    function override(){
+      this.login = function(params, callback){
+        G.userSession.create(params, callback);
+      }
+
+      this.logout = function(params, callback){
+        G.userSession.destroy(params, callback);
+      }
+      
+    }
+    override.prototype = new G.restfulRails.Base("/users", ".json", "user");;
+
+    return new override();
   }(),
-  gift:function(){
-    return new G.restfulRails.Base("/gifts", ".json", "gift");
+
+  groupit:function(){
+    return new G.restfulRails.Base("/groupits", ".json", "groupit");
   }(),
+  
   userSession:function(){
 
+    var base = new G.restfulRails.Base("/user_sessions", ".json", "user_session");
+
     function override(){
+      this.create = function(params, callback){
+        base.create(params, function(userSession, xhr){
+          G.restfulRails.sessionToken = userSession.token;
+          if(callback){
+            callback(userSession, xhr);
+          }
+        });
+      }
+
       delete this.update;
       delete this.read;
       delete this.index;
+      
+      this.destroy = function(params, callback){
+        G.restfulRails.sessionToken = null;
+        params = {
+          id:0 //Simple hack to make rails route correctly
+        }
+        base.destroy(params, callback);
+      }
     }
-
-    override.prototype = new G.restfulRails.Base("/user_sessions", ".json", "user_session");
+    
+    override.prototype = base;
 
     return new override();
   }()

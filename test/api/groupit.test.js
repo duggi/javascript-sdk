@@ -21,25 +21,25 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-
 (function(){
-  module("User");
+  module("Groupit");
   //Keys that should be included in every response from the server
   var keys =["id"];
 
-  function createUser(callback){
-    G.user.create({
-      name:"Tim Test2",
-      login:"test2",
-      password:"password",
-      password_confirmation: "password",
-      app_key : "060f13390ecab0dd28dc6faf684632fe"
-    }, callback)
+
+  function createGroupit(callback){
+    G.groupit.create({
+      product: "Ipod",
+      price: 234,
+      surprise: true,
+      quantity: 1
+    },callback);
   }
 
-//  T.testDestroy("user", createUser);
-//  T.testCreate("user", keys, createUser);
-//  T.testShow("user", keys, createUser);
-//  T.testUpdate("user", createUser);
-  
+
+  T.testDestroy("groupit", createGroupit);
+//  T.testCreate("groupit", keys, createGroupit);
+//  T.testShow("groupit", keys, createGroupit);
+//  T.testUpdate("groupit", createGroupit);
+
 })();
