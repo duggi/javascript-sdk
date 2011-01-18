@@ -32,14 +32,15 @@
       product: "Ipod",
       price: 234,
       surprise: true,
-      quantity: 1
+      quantity: 1,
+      app_key : "060f13390ecab0dd28dc6faf684632fe"
     },callback);
   }
 
 
   T.testDestroy("groupit", createGroupit);
-//  T.testCreate("groupit", keys, createGroupit);
-//  T.testShow("groupit", keys, createGroupit);
-//  T.testUpdate("groupit", createGroupit);
+  T.testCreate("groupit", keys, createGroupit);
+  T.testShow("groupit", keys, createGroupit);
+  T.testUpdate("groupit", createGroupit);
 
 })();
