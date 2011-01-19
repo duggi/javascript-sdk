@@ -86,7 +86,8 @@
             }
             params += ","
           }
-          params = params.slice(0, params.length-2)
+
+          params = params.slice(0, params.length-1)
           params += "}";
 
           eval("G."+modelName+".update("+params+", assertAndDestroy)");

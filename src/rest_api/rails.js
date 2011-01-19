@@ -27,7 +27,8 @@ G.provide("restfulRails",{
 
   sessionToken: null,
 
-  Base:function(root_path, request_type, object_name){
+  Base:function(root_path, object_name){
+    var request_type = ".json"
 
     /**
      * Base Index call for all restfulRails Objects
@@ -130,18 +131,19 @@ G.provide("",{
       }
       
     }
-    override.prototype = new G.restfulRails.Base("/users", ".json", "user");;
+    override.prototype = new G.restfulRails.Base("/users", "user");
+    ;
 
     return new override();
   }(),
 
   groupit:function(){
-    return new G.restfulRails.Base("/groupits", ".json", "groupit");
+    return new G.restfulRails.Base("/groupits", "groupit");
   }(),
   
   userSession:function(){
 
-    var base = new G.restfulRails.Base("/user_sessions", ".json", "user_session");
+    var base = new G.restfulRails.Base("/user_sessions", "user_session");
 
     function override(){
       this.create = function(params, callback){
@@ -169,6 +171,42 @@ G.provide("",{
     override.prototype = base;
 
     return new override();
+  }(),
+
+  participant:function(){
+    return new G.restfulRails.Base("/participants", "participant");
+  }(),
+
+  paymentResponse:function(){
+    return new G.restfulRails.Base("/payment_responses", "payment_response");
+  }(),
+
+  note:function(){
+    return new G.restfulRails.Base("/notes", "note");
+  }(),
+
+  feedPost:function(){
+    return new G.restfulRails.Base("/feed_posts", "feed_post");
+  }(),
+
+  email:function(){
+    return new G.restfulRails.Base("/emails", "email");
+  }(),
+
+  contribution:function(){
+    return new G.restfulRails.Base("/contributions", "contribution");
+  }(),
+
+  authentication:function(){
+    return new G.restfulRails.Base("/authentications", "authentication");
+  }(),
+  
+  app:function(){
+    return new G.restfulRails.Base("/apps", "app");
+  }(),
+
+  address:function(){
+    return new G.restfulRails.Base("/addresses", "address");
   }()
 
 });

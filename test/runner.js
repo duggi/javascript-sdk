@@ -67,11 +67,19 @@
   loadTest("provide.test.js");
 
   //Base must be loaded before rails objects
-  loadTest("api/restfulRailsBase.test.js"); 
+  loadTest("api/restfulRailsBase.test.js");
   loadTest("api/user.test.js");
   loadTest("api/groupit.test.js");
-
-//  loadTest("api/userSession.test.js");
+  loadTest("api/participant.test.js");
+  loadTest("api/paymentResponse.test.js");
+  loadTest("api/note.test.js");
+  loadTest("api/feedPost.test.js");
+  loadTest("api/email.test.js");
+  loadTest("api/contribution.test.js");
+  loadTest("api/authentication.test.js");
+  loadTest("api/app.test.js");
+  loadTest("api/address.test.js");
+  loadTest("api/userSession.test.js");
 
 })();
 
