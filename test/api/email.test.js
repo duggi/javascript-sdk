@@ -25,7 +25,7 @@
   module("Email");
   //Keys that should be included in every response from the server
   var keys =["id", "address", "primary", "user_id", "retail_contact",
-    "app_key"];
+  "app_key"];
 
 
   function createEmail(callback){
@@ -38,9 +38,6 @@
     }, callback);
   }
 
-  T.testDestroy("email", createEmail);
-  T.testCreate("email", keys, createEmail);
-  T.testShow("email", keys, createEmail);
-  T.testUpdate("email", createEmail);
+  T.testCRUD("email", keys, createEmail, true);
 
 })();

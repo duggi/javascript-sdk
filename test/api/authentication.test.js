@@ -25,7 +25,7 @@
   module("Authentication");
   //Keys that should be included in every response from the server
   var keys =["id", "user_id", "provider", "uid", "user_id", "app_key",
-    "is_public"];
+  "is_public"];
 
   function createAuthentication(callback){
     G.authentication.create({
@@ -38,9 +38,6 @@
     }, callback);
   }
 
-  T.testDestroy("authentication", createAuthentication);
-  T.testCreate("authentication", keys, createAuthentication);
-  T.testShow("authentication", keys, createAuthentication);
-  T.testUpdate("authentication", createAuthentication);
+  T.testCRUD("authentication", keys, createAuthentication, true);
 
 })();

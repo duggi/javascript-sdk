@@ -45,9 +45,6 @@
     }, callback);
   }
 
-  T.testDestroy("address", createAddress);
-  T.testCreate("address", keys, createAddress);
-  T.testShow("address", keys, createAddress);
-  T.testUpdate("address", createAddress);
+  T.testCRUD("address", keys, createAddress, true);
 
 })();

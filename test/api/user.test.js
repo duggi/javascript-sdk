@@ -37,9 +37,6 @@
     }, callback)
   }
 
-  T.testDestroy("user", createUser);
-  T.testCreate("user", keys, createUser);
-  T.testShow("user", keys, createUser);
-  T.testUpdate("user", createUser);
+  T.testCRUD("user", keys, createUser, true);
   
 })();

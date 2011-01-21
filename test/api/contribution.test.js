@@ -36,6 +36,7 @@
       amount: 123.40,
       user_id: 341,
       transaction_id: "234dfs32",
+      surcharge: 0,
       tax: 12.43,
       payment_response_id: 123,
       app_key: "060f13390ecab0dd28dc6faf684632fe",
@@ -43,9 +44,8 @@
     }, callback);
   }
 
-  T.testDestroy("contribution", createContribution);
-  T.testCreate("contribution", keys, createContribution);
-  T.testShow("contribution", keys, createContribution);
-  T.testUpdate("contribution", createContribution);
+  T.testCRUD("contribution", keys, createContribution, true);
+
+  
 
 })();

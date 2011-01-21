@@ -41,9 +41,6 @@
   }
 
 
-  T.testDestroy("note", createNote);
-  T.testCreate("note", keys, createNote);
-  T.testShow("note", keys, createNote);
-  T.testUpdate("note", createNote);
+  T.testCRUD("note", keys, createNote, true);
 
 })();

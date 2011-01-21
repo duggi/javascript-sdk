@@ -26,6 +26,7 @@
 G.provide("restfulRails",{
 
   sessionToken: null,
+  appKey:null,
 
   Base:function(root_path, object_name){
     var request_type = ".json"
@@ -35,7 +36,7 @@ G.provide("restfulRails",{
      */
     this.index = function(params, callback){
       var path = root_path + request_type;
-      params = injectSessionToken(params);
+      params = injectRailsParams(params);
       G.api(path , "get", params, callback);
     }
 
@@ -46,7 +47,7 @@ G.provide("restfulRails",{
     this.create = function(params, callback){
       var path = root_path + request_type;
       params = railify(params,object_name);
-      params = injectSessionToken(params);
+      params = injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr){
         if(callback){
           callback(json[object_name], xhr);
@@ -59,7 +60,7 @@ G.provide("restfulRails",{
      */
     this.read = function(params, callback){
       var path = root_path+"/"+params.id+ request_type;
-      params = injectSessionToken(params);
+      params = injectRailsParams(params);
       G.api(path, "get", params, callback);
     }
 
@@ -73,7 +74,7 @@ G.provide("restfulRails",{
       G.copy(params_cp, params); //Make a copy so we don't modify the orginal
       delete params_cp.id; //remove id so we don't try to modify it
       params_cp = railify(params_cp,object_name);
-      params_cp = injectSessionToken(params_cp);
+      params_cp = injectRailsParams(params_cp);
       G.api(path, "put", params_cp, function(json, xhr){
         if(callback){
           callback(json[object_name], xhr);
@@ -85,7 +86,7 @@ G.provide("restfulRails",{
      */
     this.destroy = function(params, callback){
       var path = root_path +"/"+params.id+ request_type;
-      params = injectSessionToken(params);
+      params = injectRailsParams(params);
       G.api(path, "delete", params, callback);
     }
 
@@ -102,8 +103,9 @@ G.provide("restfulRails",{
       return rails_params;
     }
 
-    function injectSessionToken(params){
+    function injectRailsParams(params){
       params['session_token'] = G.restfulRails.sessionToken;
+      params['app_key'] = G.restfulRails.appKey;
       return params;
     }
 
@@ -132,13 +134,8 @@ G.provide("",{
       
     }
     override.prototype = new G.restfulRails.Base("/users", "user");
-    ;
 
     return new override();
-  }(),
-
-  groupit:function(){
-    return new G.restfulRails.Base("/groupits", "groupit");
   }(),
   
   userSession:function(){
@@ -172,13 +169,21 @@ G.provide("",{
 
     return new override();
   }(),
+  
+  paymentResponse:function(){
+    return new G.restfulRails.Base("/payment_responses", "payment_response");
+  }(),
+
+  contribution:function(){
+    return new G.restfulRails.Base("/contributions", "contribution");
+  }(),
+
+  groupit:function(){
+    return new G.restfulRails.Base("/groupits", "groupit");
+  }(),
 
   participant:function(){
     return new G.restfulRails.Base("/participants", "participant");
-  }(),
-
-  paymentResponse:function(){
-    return new G.restfulRails.Base("/payment_responses", "payment_response");
   }(),
 
   note:function(){
@@ -191,10 +196,6 @@ G.provide("",{
 
   email:function(){
     return new G.restfulRails.Base("/emails", "email");
-  }(),
-
-  contribution:function(){
-    return new G.restfulRails.Base("/contributions", "contribution");
   }(),
 
   authentication:function(){

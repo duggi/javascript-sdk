@@ -35,9 +35,6 @@
     }, callback);
   }
 
-  T.testDestroy("app", createApp);
-  T.testCreate("app", keys, createApp);
-  T.testShow("app", keys, createApp);
-  T.testUpdate("app", createApp);
+  T.testCRUD("app", keys, createApp, true);
 
 })();

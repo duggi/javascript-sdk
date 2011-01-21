@@ -38,9 +38,6 @@
   }
 
 
-  T.testDestroy("groupit", createGroupit);
-  T.testCreate("groupit", keys, createGroupit);
-  T.testShow("groupit", keys, createGroupit);
-  T.testUpdate("groupit", createGroupit);
+  T.testCRUD("groupit", keys, createGroupit, true);
 
 })();

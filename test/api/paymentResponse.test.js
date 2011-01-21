@@ -24,12 +24,13 @@
 (function(){
   module("PaymentReponse");
   //Keys that should be included in every response from the server
-  var keys =["id", "groupit_id", "ip_address", "success", "deleted", "response",
-    "app_key"];
+  var keys =["id", "user_id", "groupit_id", "ip_address", "success", "deleted", "response",
+  "app_key"];
 
   function createPaymentResponse(callback){
     G.paymentResponse.create({
       groupit_id: 123,
+      user_id: 123,
       ip_address: "192.168.1.1",
       success: true,
       deleted: false,
@@ -38,9 +39,6 @@
     }, callback);
   }
 
-  T.testDestroy("paymentResponse", createPaymentResponse);
-  T.testCreate("paymentResponse", keys, createPaymentResponse);
-  T.testShow("paymentResponse", keys, createPaymentResponse);
-  T.testUpdate("paymentResponse", createPaymentResponse);
+  T.testCRUD("paymentResponse", keys, createPaymentResponse, true);
 
 })();

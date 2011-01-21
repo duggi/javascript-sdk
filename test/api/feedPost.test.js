@@ -25,7 +25,7 @@
   module("FeedPost");
   //Keys that should be included in every response from the server
   var keys =["id","user_id", "groupit_id", "message",
-    "app_key", "is_public"];
+  "app_key", "is_public"];
 
 
   function createFeedPost(callback){
@@ -39,9 +39,7 @@
   }
 
 
-  T.testDestroy("feedPost", createFeedPost);
-  T.testCreate("feedPost", keys, createFeedPost);
-  T.testShow("feedPost", keys, createFeedPost);
-  T.testUpdate("feedPost", createFeedPost);
+
+  T.testCRUD("feedPost", keys, createFeedPost, true);
 
 })();

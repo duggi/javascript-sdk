@@ -24,10 +24,11 @@
 (function(){
   module("Participant");
   //Keys that should be included in every response from the server
-  var keys =["id", "groupit_id", "contacted", "is_public", "app_key"];
+  var keys =["id", "user_id","groupit_id", "contacted", "is_public", "app_key"];
 
   function createParticipant(callback){
     G.participant.create({
+      user_id: 123,
       groupit_id: 123,
       contacted: false,
       deleted: false,
@@ -36,10 +37,6 @@
     },callback);
   }
 
-
-  T.testDestroy("participant", createParticipant);
-  T.testCreate("participant", keys, createParticipant);
-  T.testShow("participant", keys, createParticipant);
-  T.testUpdate("participant", createParticipant);
+  T.testCRUD("participant", keys, createParticipant, true);
 
 })();

@@ -1,8 +1,33 @@
 (function(){
 
-  T.testDestroy = function(modelName, createFn){
+  /**
+   * Tests the CRUD suite.
+   *
+   * @param modelName {String}         the name of the model to use in the api
+   * @param keys      {Array}          list of keys required to be accessible in
+   *                                    the returned object
+   * @param createFn  {Function}       function that creates and returns model
+   * @param login     {Boolean}        if we should login a valid user or not
+   */
+  
+  T.testCRUD = function(modelName, keys, createFn, login){
+    T.testDestroy(modelName, createFn, login);
+    T.testCreate(modelName, keys, createFn, login);
+    T.testShow(modelName, keys, createFn, login);
+    T.testUpdate(modelName, createFn, login);
+  }
+
+
+  /**
+   * Tests the destroy call to the server.
+   *
+   * @param modelName {String}         the name of the model to use in the api
+   * @param createFn  {Function}       function that creates and returns model
+   * @param login     {Boolean}        if we should login a valid user or not
+   */
+  T.testDestroy = function(modelName, createFn, login){
     asyncTest("Destroy "+modelName, function(){
-      createUserAndLogin(function (user){
+      createUserAndLogin(login, function (user){
 
         //Create the model
         createFn(function(model){
@@ -16,7 +41,7 @@
 
           function fail(model,xhr){
             T.assert_failure(xhr);
-            destroyUserAndLogout(user.id);
+            destroyUserAndLogout(user.id, login);
             start();
           }
         });
@@ -24,9 +49,18 @@
     });
   }
 
-  T.testCreate = function(modelName, keys, createFn){
+  /**
+   * Tests the create call to the server.
+   *
+   * @param modelName {String}         the name of the model to use in the api
+   * @param keys      {Array}          list of keys required to be accessible in 
+   *                                    the returned object
+   * @param createFn  {Function}       function that creates and returns model
+   * @param login     {Boolean}        if we should login a valid user or not
+   */
+  T.testCreate = function(modelName, keys, createFn, login){
     asyncTest("Create new "+modelName, function(){
-      createUserAndLogin(function (user){
+      createUserAndLogin(login, function (user){
         createFn(function(model){
 
           assert_keys(model, keys);
@@ -35,7 +69,7 @@
           eval("G."+modelName+".destroy("+params+", logout)");
 
           function logout(){
-            destroyUserAndLogout(user.id);
+            destroyUserAndLogout(user.id, login);
             start();
           }
         });
@@ -44,9 +78,19 @@
     });
   }
 
-  T.testShow = function(modelName, keys, createFn){
+
+  /**
+   * Tests the show call to the server.
+   *
+   * @param modelName {String}         the name of the model to use in the api
+   * @param keys      {Array}          list of keys required to be accessible in
+   *                                    the returned object
+   * @param createFn  {Function}       function that creates and returns model
+   * @param login     {Boolean}        if we should login a valid user or not
+   */
+  T.testShow = function(modelName, keys, createFn, login){
     asyncTest("Show "+modelName, function(){
-      createUserAndLogin(function(user){
+      createUserAndLogin(login, function(user){
         createFn(function(model){
           var params ="{id:"+model.id+"}"
 
@@ -58,7 +102,7 @@
           }
 
           function logout(){
-            destroyUserAndLogout(user.id);
+            destroyUserAndLogout(user.id, login);
             start();
           }
         });
@@ -66,9 +110,23 @@
     });
   }
 
-  T.testUpdate = function(modelName, createFn){
+  /**
+   * Tests the Update call to the server.
+   *
+   * Anything that is not the id or the persitance token is taken and updated.
+   * We check that those updates persist in the returned object.
+   *
+   * #TODO need to add the app_key to the that list of non editable objects OR
+   * just not return it from the default create function
+   *
+   *
+   * @param modelName {String}         the name of the model to use in the api
+   * @param createFn  {Function}       function that creates and returns model
+   * @param login     {Boolean}        if we should login a valid user or not
+   */
+  T.testUpdate = function(modelName, createFn, login){
     asyncTest("Update existing user", function(){
-      createUserAndLogin(function (user){
+      createUserAndLogin(login, function (user){
         createFn(function(original_model){
           var testString ="someString",
           testNum = 1234;
@@ -108,7 +166,7 @@
             eval("G."+modelName+".destroy("+params+", logout)");
 
             function logout(){
-              destroyUserAndLogout(user.id);
+              destroyUserAndLogout(user.id, login);
               start();
             }
           }
@@ -127,7 +185,7 @@
   }
 
 
-  function createUserAndLogin(callback){
+  function createUserAndLogin(login, callback){
     G.user.create({
       name:"Tim Test",
       login:"test",
@@ -136,22 +194,31 @@
       app_key : "060f13390ecab0dd28dc6faf684632fe"
     }, function(user, xhr){
       T.assert_success(xhr);
-      G.user.login({
-        password:"password",
-        login:"test"
-      }, function(){
+
+      if(login){
+        G.user.login({
+          password:"password",
+          login:"test"
+        }, function(){
+          callback(user, xhr);
+        });
+      }
+      else{
         callback(user, xhr);
-      });
+      }
+
     });
   }
 
-  function destroyUserAndLogout(userId, callback){
+  function destroyUserAndLogout(userId, loggedIn, callback){
     G.user.destroy({
       id:userId
     },
     function() {
-      G.user.logout();
-    })
+      if(loggedIn){
+        G.user.logout();
+      }
+    });
   }
 
 })();
