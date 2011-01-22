@@ -33,11 +33,10 @@
       provider: "facebook",
       uid: '1232d',
       user_id: 341,
-      app_key: "060f13390ecab0dd28dc6faf684632fe",
       is_public: true
     }, callback);
   }
 
-  T.testCRUD("authentication", keys, createAuthentication, true);
+  T.testCRUD("authentication", keys, createAuthentication);
 
 })();

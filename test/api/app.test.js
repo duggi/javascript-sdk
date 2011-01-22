@@ -35,6 +35,7 @@
     }, callback);
   }
 
-  T.testCRUD("app", keys, createApp, true);
+
+  T.testCRUD("app", keys, createApp);
 
 })();

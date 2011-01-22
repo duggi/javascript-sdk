@@ -21,22 +21,13 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
-  module("Groupit");
-  //Keys that should be included in every response from the server
-  var keys =["id"];
 
 
-  function createGroupit(callback){
-    G.groupit.create({
-      product: "Ipod",
-      price: 234,
-      surprise: true,
-      quantity: 1,
-      app_key : "060f13390ecab0dd28dc6faf684632fe"
-    },callback);
-  }
 
-  T.testCRUD("groupit", keys, createGroupit);
+G.provide("", {
   
-})();
+  init:function(appKey, endpoint){
+    G.RestObject.init(appKey);
+    G.ApiClient.init(endpoint);
+  }
+});

@@ -38,6 +38,6 @@
     }, callback);
   }
 
-  T.testCRUD("email", keys, createEmail, true);
+  T.testCRUD("email", keys, createEmail);
 
 })();

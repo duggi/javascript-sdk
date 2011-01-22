@@ -25,7 +25,7 @@
 (function(){
   module("User");
   //Keys that should be included in every response from the server
-  var keys =["id"];
+  var keys =["id", "name", "login"];
 
   function createUser(callback){
     G.user.create({
@@ -33,10 +33,10 @@
       login:"test2",
       password:"password",
       password_confirmation: "password",
-      app_key : "060f13390ecab0dd28dc6faf684632fe"
     }, callback)
   }
 
-  T.testCRUD("user", keys, createUser, true);
+ 
+  T.testCRUD("user", keys, createUser);
   
 })();

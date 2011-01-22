@@ -35,19 +35,6 @@
     },
     assert_failure: function (xhr){
       ok(xhr.status.toString().match(/^[4,5]../), "Response was a failure");
-    },
-
-    createUser:function(callback){
-      G.user.create({
-        name:"Tim Test",
-        login:"test",
-        password:"password",
-        password_confirmation: "password",
-        app_key : "060f13390ecab0dd28dc6faf684632fe"
-      }, function(user, xhr){
-        T.assert_success(xhr);
-        callback(user, xhr);
-      });
     }
   }
 
@@ -60,6 +47,7 @@
     x.parentNode.insertBefore(s, x);
   }
 
+  G.init("5619f7ca7b9050eb2926cb2d1717f510", "http://localhost:3000/");
 
   //Long list of all the tests files we load for testing
   loadTest("api/api.test.js");
@@ -67,7 +55,7 @@
   loadTest("provide.test.js");
 
   //Base must be loaded before rails objects
-  loadTest("api/restfulRailsBase.test.js");
+  loadTest("api/restObject.test.js");
   loadTest("api/user.test.js");
   loadTest("api/groupit.test.js");
   loadTest("api/participant.test.js");
@@ -80,6 +68,9 @@
   loadTest("api/app.test.js");
   loadTest("api/address.test.js");
   loadTest("api/userSession.test.js");
+
+//Cleanup
+//  T.destroyTestUser();
 
 })();
 

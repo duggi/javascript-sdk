@@ -25,8 +25,8 @@
   module("Contribution");
   //Keys that should be included in every response from the server
   var keys =["id", "groupit_id", "address_id", "amount", "user_id",
-    "transaction_id", "surcharge", "tax", "payment_response_id", "app_key",
-    "is_public"];
+  "transaction_id", "surcharge", "tax", "payment_response_id", "app_key",
+  "is_public"];
 
 
   function createContribution(callback){
@@ -39,13 +39,12 @@
       surcharge: 0,
       tax: 12.43,
       payment_response_id: 123,
-      app_key: "060f13390ecab0dd28dc6faf684632fe",
       is_public: true
     }, callback);
   }
 
-  T.testCRUD("contribution", keys, createContribution, true);
 
+  T.testCRUD("contribution", keys, createContribution);
   
 
 })();

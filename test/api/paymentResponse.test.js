@@ -34,11 +34,10 @@
       ip_address: "192.168.1.1",
       success: true,
       deleted: false,
-      response: "BIG OL response",
-      app_key: "060f13390ecab0dd28dc6faf684632fe"
+      response: "BIG OL response"
     }, callback);
   }
 
-  T.testCRUD("paymentResponse", keys, createPaymentResponse, true);
+  T.testCRUD("paymentResponse", keys, createPaymentResponse);
 
 })();

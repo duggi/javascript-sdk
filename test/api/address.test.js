@@ -40,11 +40,10 @@
       phone_number: '209-968-1342',
       user_id: 341,
       address_type: "test",
-      app_key: "060f13390ecab0dd28dc6faf684632fe",
       is_public: true
     }, callback);
   }
 
-  T.testCRUD("address", keys, createAddress, true);
+  T.testCRUD("address", keys, createAddress);
 
 })();

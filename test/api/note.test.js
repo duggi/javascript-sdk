@@ -25,7 +25,7 @@
   module("Note");
   //Keys that should be included in every response from the server
   var keys =["id","note", "metadata_id", "metadata_type",
-    "user_id", "app_key", "is_public"];
+  "user_id", "app_key", "is_public"];
 
 
 
@@ -35,12 +35,10 @@
       metadata_id: 123,
       metadata_type: "test",
       user_id: 213,
-      app_key : "060f13390ecab0dd28dc6faf684632fe",
       is_public: false
     },callback);
   }
 
-
-  T.testCRUD("note", keys, createNote, true);
+  T.testCRUD("note", keys, createNote);
 
 })();

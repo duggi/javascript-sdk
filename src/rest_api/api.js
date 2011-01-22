@@ -39,6 +39,10 @@ G.provide('ApiClient', {
   REST_METHODS: ['get', 'post','delete', 'put'],
   REST_BASE_URL: "http://localhost:3000/",
 
+  init:function(endpoint){
+    REST_BASE_URL = endpoint;
+  },
+
   /**
    *   rest: REST access to our server with various calling options.
    *    

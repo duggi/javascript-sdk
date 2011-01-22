@@ -32,11 +32,12 @@
       groupit_id: 123,
       contacted: false,
       deleted: false,
-      is_public: false,
-      app_key : "060f13390ecab0dd28dc6faf684632fe"
+      is_public: false
     },callback);
   }
 
-  T.testCRUD("participant", keys, createParticipant, true);
+  T.testCRUD("participant", keys, createParticipant);
+
+  
 
 })();

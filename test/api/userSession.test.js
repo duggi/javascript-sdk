@@ -28,7 +28,7 @@
 
   asyncTest("Create new user session", function(){
 
-    T.createUser(function(user){
+    T.getTestUser(function(user){
       G.userSession.create({password: "password", login:"test"}, function (userSession){
 
         //Expected nonnull keys for new users

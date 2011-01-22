@@ -33,13 +33,11 @@
       user_id: 123,
       groupit_id: 123,
       message: "test",
-      app_key : "060f13390ecab0dd28dc6faf684632fe",
       is_public: false
     },callback);
   }
 
 
-
-  T.testCRUD("feedPost", keys, createFeedPost, true);
+  T.testCRUD("feedPost", keys, createFeedPost);
 
 })();
