@@ -21,22 +21,26 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
+
 (function(){
-  module("Authentication");
-  //Keys that should be included in every response from the server
-  var keys =["id", "user_id", "provider", "uid", "user_id", "app_key",
-  "is_public"];
+  module("User Session");
+  var keys =["token"];
 
-  function createAuthentication(callback){
-    G.authentication.create({
-      user_id: 34,
-      provider: "facebook",
-      uid: '1232d',
-      user_id: 341,
-      is_public: true
-    }, callback);
-  }
+  asyncTest("Create new user session", function(){
 
-  T.testCRUD("authentication", keys, createAuthentication);
+    T.getTestUser(function(user){
+      G.userSession.create({password: "password", login:"test"}, function (userSession){
+
+        //Expected nonnull keys for new users
+        for(var i=0, len=keys.length; i < len; ++i){
+          var key = keys[i];
+          ok(key in userSession, key + " is a key in user hash");
+        }
+
+        start();
+      });
+    })
+
+  });
 
 })();

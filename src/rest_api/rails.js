@@ -48,7 +48,7 @@ G.provide("RestObject",{
      * Base Create call for all RestObject Objects.
      * Automatically pulls out a singular object from the json response
      */
-    this.create = function(params, callback){
+    this.create = function(params, callback){     
       var path = root_path + request_type;
       params = railify(params,object_name);
       params = injectRailsParams(params);
@@ -61,29 +61,31 @@ G.provide("RestObject",{
 
     /**
      * Base Read call for all RestObject Objects
+     * Automatically pulls out a singular object from the json response
      */
     this.read = function(params, callback){
       var path = root_path+"/"+params.id+ request_type;
       params = injectRailsParams(params);
-      G.api(path, "get", params, callback);
+      G.api(path, "get", params, function(json, xhr){
+        if(callback){
+          callback(json[object_name], xhr);
+        }
+      });
     }
 
     /**
      * Base Update call for all RestObject Objects.
-     * Automatically pulls out a singular object from the json response
+     * Per rails convention this call updates and doesn't return the updated model
      */
     this.update = function(params, callback){
+      
       var path = root_path +"/"+params.id+ request_type,
       params_cp = {};
       G.copy(params_cp, params); //Make a copy so we don't modify the orginal
       delete params_cp.id; //remove id so we don't try to modify it
       params_cp = railify(params_cp,object_name);
       params_cp = injectRailsParams(params_cp);
-      G.api(path, "put", params_cp, function(json, xhr){
-        if(callback){
-          callback(json[object_name], xhr);
-        }
-      });
+      G.api(path, "put", params_cp, callback);
     }
     /**
      * Base Destroy call for all RestObject Objects

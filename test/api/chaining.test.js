@@ -23,20 +23,34 @@
  */
 
 (function(){
-  module("User");
-  //Keys that should be included in every response from the server
-  var keys =["id", "name", "login"];
+  module("Chaining");
 
-  function createUser(callback){
-    G.user.create({
-      name:"Tim Test2",
-      login:"test2",
-      password:"password",
-      password_confirmation: "password",
-    }, callback)
-  }
+  asyncTest("Chaining two methods sequentially", function(){
+    expect(1);
+    var val = 1;
+    var chain = G.newFnChain();
+    chain.push(slowFirst)
+    .push(fastSecond)
+    .push(assert55)
+    .fire();
 
- 
-  T.testCRUD("user", keys, createUser);
+    function slowFirst(callback){
+      setTimeout(function(){
+        val += 10;
+        callback();
+      },300);
+    }
+
+    function fastSecond(callback){
+      val *= 5;
+      callback();
+    }
+
+    function assert55(callback){
+      equal(val, 55, "(1+10)*5 should be 55 if executed in that order");
+      callback();
+      start();
+    }
+  });
   
 })();

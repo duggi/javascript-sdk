@@ -142,8 +142,6 @@ G.provide('ApiClient', {
       }
     }
 
-
-
     if(isGet){
       xhr.send();
     }else{

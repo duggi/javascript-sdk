@@ -22,21 +22,20 @@
  *
  */
 (function(){
-  module("Groupit");
+  module("App");
   //Keys that should be included in every response from the server
-  var keys =["id"];
+  var keys =["id", "name", "user_id", "is_public"];
 
 
-  function createGroupit(callback){
-    G.groupit.create({
-      product: "Ipod",
-      price: 234,
-      surprise: true,
-      quantity: 1,
-      app_key : "060f13390ecab0dd28dc6faf684632fe"
-    },callback);
+  function createApp(callback){
+    G.app.create({
+      name: "some app",
+      user_id: 341,
+      is_public: true
+    }, callback);
   }
 
-  T.testCRUD("groupit", keys, createGroupit);
-  
+
+  T.testCRUD("app", keys, createApp, true);
+
 })();

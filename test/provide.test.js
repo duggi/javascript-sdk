@@ -1,4 +1,5 @@
 (function(){
+  module("Provider");
 
   test("Provider functions", function(){
     ok(G, "Assert that G exists");
@@ -49,9 +50,11 @@
   }
 
   function testProvide(){
-    G.provide("someNamedspacedObject", {test: true}, false);
+    G.provide("someNamedspacedObject", {
+      test: true
+    }, false);
     ok(G.someNamedspacedObject, "provide: should create a namespaced object in G");
     ok(G.someNamedspacedObject.test, "provide: should copy implementation into object");
   }
-  
+
 })();

@@ -22,22 +22,28 @@
  *
  */
 (function(){
-  module("Participant");
+  module("Contribution");
   //Keys that should be included in every response from the server
-  var keys =["id", "user_id","groupit_id", "contacted", "is_public", "app_key"];
+  var keys =["id", "groupit_id", "address_id", "amount", "user_id",
+  "transaction_id", "surcharge", "tax", "payment_response_id", "app_key",
+  "is_public"];
 
-  function createParticipant(callback){
-    G.participant.create({
-      user_id: 123,
-      groupit_id: 123,
-      contacted: false,
-      deleted: false,
-      is_public: false
-    },callback);
+
+  function createContribution(callback){
+    G.contribution.create({
+      groupit_id: 34,
+      address_id: 1263,
+      amount: 123.40,
+      user_id: 341,
+      transaction_id: "234dfs32",
+      surcharge: 0,
+      tax: 12.43,
+      payment_response_id: 123,
+      is_public: true
+    }, callback);
   }
 
-  T.testCRUD("participant", keys, createParticipant);
 
-  
+  T.testCRUD("contribution", keys, createContribution, true);
 
 })();

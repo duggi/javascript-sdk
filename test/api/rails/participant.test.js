@@ -22,22 +22,21 @@
  *
  */
 (function(){
-  module("Email");
+  module("Participant");
   //Keys that should be included in every response from the server
-  var keys =["id", "address", "primary", "user_id", "retail_contact",
-  "app_key"];
+  var keys =["id", "user_id","groupit_id", "contacted", "is_public", "app_key"];
 
-
-  function createEmail(callback){
-    G.email.create({
-      address: "1sdfsdf23",
-      primary: true,
+  function createParticipant(callback){
+    G.participant.create({
       user_id: 123,
-      retail_contact: true,
-      app_key: "060f13390ecab0dd28dc6faf684632fe"
-    }, callback);
+      groupit_id: 123,
+      contacted: false,
+      deleted: false,
+      is_public: false
+    },callback);
   }
 
-  T.testCRUD("email", keys, createEmail);
+  T.testCRUD("participant", keys, createParticipant, true);
+  
 
 })();

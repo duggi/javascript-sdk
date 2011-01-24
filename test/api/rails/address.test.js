@@ -22,22 +22,30 @@
  *
  */
 (function(){
-  module("FeedPost");
+  module("Address");
   //Keys that should be included in every response from the server
-  var keys =["id","user_id", "groupit_id", "message",
-  "app_key", "is_public"];
+  var keys =["id", "fullname", "line1", "line2", "city", "state",
+  "zip", "country", "phone_number", "address_type", "user_id", "app_key",
+  "is_public"];
 
-
-  function createFeedPost(callback){
-    G.feedPost.create({
-      user_id: 123,
-      groupit_id: 123,
-      message: "test",
-      is_public: false
-    },callback);
+  function createAddress(callback){
+    G.address.create({
+      fullname: "Timothy Cardenas",
+      line1: "23148 S. Austin Road",
+      line2: 'Apt 1',
+      city: "Manteca",
+      state: "Ca",
+      zip: 95366,
+      country: "USA",
+      phone_number: '209-968-1342',
+      user_id: 341,
+      address_type: "test",
+      is_public: true
+    }, callback);
   }
 
 
-  T.testCRUD("feedPost", keys, createFeedPost);
+  //Need to see how to chain my tests together
+  T.testCRUD("address", keys, createAddress, true);
 
 })();

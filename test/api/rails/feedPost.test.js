@@ -22,22 +22,21 @@
  *
  */
 (function(){
-  module("PaymentReponse");
+  module("FeedPost");
   //Keys that should be included in every response from the server
-  var keys =["id", "user_id", "groupit_id", "ip_address", "success", "deleted", "response",
-  "app_key"];
+  var keys =["id","user_id", "groupit_id", "message", "is_public"];
 
-  function createPaymentResponse(callback){
-    G.paymentResponse.create({
-      groupit_id: 123,
+
+  function createFeedPost(callback){
+    G.feedPost.create({
       user_id: 123,
-      ip_address: "192.168.1.1",
-      success: true,
-      deleted: false,
-      response: "BIG OL response"
-    }, callback);
+      groupit_id: 123,
+      message: "test",
+      is_public: false
+    },callback);
   }
 
-  T.testCRUD("paymentResponse", keys, createPaymentResponse);
+
+  T.testCRUD("feedPost", keys, createFeedPost, true);
 
 })();

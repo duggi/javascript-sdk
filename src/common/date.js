@@ -21,21 +21,29 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
-  module("App");
-  //Keys that should be included in every response from the server
-  var keys =["id", "name", "user_id", "is_public"];
 
+G.provide("date",{
+  /**
+   * I hate those lazy javascript core developers that didn't bake this in.
+   */
 
-  function createApp(callback){
-    G.app.create({
-      name: "some app",
-      user_id: 341,
-      is_public: true
-    }, callback);
+  //Taken from here: http://www.pelagodesign.com/blog/2009/05/20/iso-8601-date-validation-that-doesnt-suck/
+  isIso8601Date:function(string){
+    if(!string) return false;
+    return string.match(/^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/);
+  },
+
+  //Taken from last example on: https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference:Global_Objects:Date
+  iso8601DateString:function(date){
+    function pad(n){
+      return n<10 ? '0'+n : n
+    }
+    return date.getUTCFullYear()+'-'
+    + pad(date.getUTCMonth()+1)+'-'
+    + pad(date.getUTCDate())+'T'
+    + pad(date.getUTCHours())+':'
+    + pad(date.getUTCMinutes())+':'
+    + pad(date.getUTCSeconds())+'Z'
   }
 
-
-  T.testCRUD("app", keys, createApp);
-
-})();
+})

@@ -21,30 +21,25 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
+
 (function(){
-  module("Contribution");
-  //Keys that should be included in every response from the server
-  var keys =["id", "groupit_id", "address_id", "amount", "user_id",
-  "transaction_id", "surcharge", "tax", "payment_response_id", "app_key",
-  "is_public"];
+  module("User");
+  //Keys that should be included in every response from the server when a user is logged in
+  var userAuthKeys =["id", "name", "login", "organized_before", "is_public",
+    "created_at", "updated_at"];
+  var publicKeys = [];
 
-
-  function createContribution(callback){
-    G.contribution.create({
-      groupit_id: 34,
-      address_id: 1263,
-      amount: 123.40,
-      user_id: 341,
-      transaction_id: "234dfs32",
-      surcharge: 0,
-      tax: 12.43,
-      payment_response_id: 123,
-      is_public: true
-    }, callback);
+  function createUser(callback){
+    G.user.create({
+      name:"Tim Test2",
+      login:"test2",
+      password:"password"
+    }, callback)
   }
 
+ 
+  T.testCRUD("user", userAuthKeys, createUser, true);
+//  T.testCreate("user", keys, createFn, false)
 
-  T.testCRUD("contribution", keys, createContribution);
-  
 
 })();

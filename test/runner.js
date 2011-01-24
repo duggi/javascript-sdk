@@ -27,17 +27,17 @@
  */
 
 (function(){
-
+  
   //Nice hacky way to get global tooling
   window.T ={
-    assert_success: function (xhr){
+    assertSuccess: function (xhr){
       ok(xhr.status.toString().match(/^2../), "Response was successful");
     },
-    assert_failure: function (xhr){
+    
+    assertFailure: function (xhr){
       ok(xhr.status.toString().match(/^[4,5]../), "Response was a failure");
     }
   }
-
 
   function loadTest(src){
     var s = document.createElement('script');
@@ -47,30 +47,37 @@
     x.parentNode.insertBefore(s, x);
   }
 
-  G.init("5619f7ca7b9050eb2926cb2d1717f510", "http://localhost:3000/");
+  G.init("1df8fd3edfb5964fa4ee994a6535c0f2", "http://localhost:3000/");
 
   //Long list of all the tests files we load for testing
-  loadTest("api/api.test.js");
-  loadTest("common/common.test.js");
-  loadTest("provide.test.js");
+//  loadTest("api/api.test.js");
+//  loadTest("api/chaining.test.js");
+//  loadTest("common/common.test.js");
+//  loadTest("provide.test.js");
 
-  //Base must be loaded before rails objects
-  loadTest("api/restObject.test.js");
-  loadTest("api/user.test.js");
-  loadTest("api/groupit.test.js");
-  loadTest("api/participant.test.js");
-  loadTest("api/paymentResponse.test.js");
-  loadTest("api/note.test.js");
-  loadTest("api/feedPost.test.js");
-  loadTest("api/email.test.js");
-  loadTest("api/contribution.test.js");
-  loadTest("api/authentication.test.js");
-  loadTest("api/app.test.js");
-  loadTest("api/address.test.js");
-  loadTest("api/userSession.test.js");
 
-//Cleanup
-//  T.destroyTestUser();
+  //restObject must be loaded before all other rails objects
+  loadTest("api/rails/restObject.test.js");
+  loadTest("api/rails/user.test.js");
+  loadTest("api/rails/groupit.test.js");
+  loadTest("api/rails/participant.test.js");
+  loadTest("api/rails/paymentResponse.test.js");
+  loadTest("api/rails/note.test.js");
+  loadTest("api/rails/feedPost.test.js");
+  loadTest("api/rails/email.test.js");
+  loadTest("api/rails/contribution.test.js");
+  loadTest("api/rails/authentication.test.js");
+  loadTest("api/rails/app.test.js");
+  loadTest("api/rails/address.test.js");
+  loadTest("api/rails/userSession.test.js");
+
+//TODO Need To called DestroyTestUser down here somewhere after
+//all the tests have been run
+//MAKE sure to reenable the unique constraint in the users table
+
+
+
+
 
 })();
 
