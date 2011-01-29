@@ -30,13 +30,53 @@
   
   //Nice hacky way to get global tooling
   window.T ={
-    assertSuccess: function (xhr){
-      ok(xhr.status.toString().match(/^2../), "Response was successful");
+    assertSuccess: function (xhr, message){
+      if(!message){
+        message = "Response was successful"
+      }
+
+      ok(xhr.status.toString().match(/^2../), message);
     },
     
-    assertFailure: function (xhr){
-      ok(xhr.status.toString().match(/^[4,5]../), "Response was a failure");
-    }
+    assertFailure: function (xhr, message){
+      if(!message){
+        message = "Response was a failure"
+      }
+      ok(xhr.status.toString().match(/^[4,5]../), message);
+    },
+    
+    appLogin:function(callback){
+      G.RestObject.appSecret = T.appSecret;
+      if(callback){
+        callback();
+      }
+    },
+
+    appLogout:function(callback){
+      G.RestObject.appSecret = null;
+      if(callback){
+        callback();
+      }
+    },
+
+    isAppLoggedIn:function(){
+      return !!G.RestObject.appSecret;
+    },
+
+    debug:function(data, callback){
+      G.log(data);
+      if(callback)
+        callback();
+    },
+
+    defaultTestValues: {
+      testString: "someString84759",
+      testNum:87499203,
+      testDate:new Date()
+    },
+
+    appSecret: "628b9ac5b59849cef1fba6ab146a43fcdb8bcf35936fcb52ab1b18c6cb0f678fd068aa3bb6fb29baf537057c5d1f0bdebeddbd738d44eddce9ff2a5714a90f6c"
+
   }
 
   function loadTest(src){
@@ -47,25 +87,26 @@
     x.parentNode.insertBefore(s, x);
   }
 
-  G.init("1df8fd3edfb5964fa4ee994a6535c0f2", "http://localhost:3000/");
+  G.init("245dfcf6b3dae9e237865bb12c3060c8", "http://localhost:3000/");
+
 
   //Long list of all the tests files we load for testing
-//  loadTest("api/api.test.js");
-//  loadTest("api/chaining.test.js");
-//  loadTest("common/common.test.js");
-//  loadTest("provide.test.js");
+  loadTest("api/api.test.js");
+  loadTest("api/chaining.test.js");
+  loadTest("common/common.test.js");
+  loadTest("provide.test.js");
 
 
   //restObject must be loaded before all other rails objects
   loadTest("api/rails/restObject.test.js");
-  loadTest("api/rails/user.test.js");
+  loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
   loadTest("api/rails/groupit.test.js");
+  //  loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
   loadTest("api/rails/participant.test.js");
   loadTest("api/rails/paymentResponse.test.js");
   loadTest("api/rails/note.test.js");
   loadTest("api/rails/feedPost.test.js");
   loadTest("api/rails/email.test.js");
-  loadTest("api/rails/contribution.test.js");
   loadTest("api/rails/authentication.test.js");
   loadTest("api/rails/app.test.js");
   loadTest("api/rails/address.test.js");

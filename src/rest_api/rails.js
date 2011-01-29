@@ -27,6 +27,7 @@ G.provide("RestObject",{
 
   sessionToken: null,
   appKey:null,
+  appSecret:null,
 
   init:function(appKey){
     G.RestObject.appKey = appKey;
@@ -40,6 +41,7 @@ G.provide("RestObject",{
      */
     this.index = function(params, callback){
       var path = root_path + request_type;
+      params = railify(params,object_name);
       params = injectRailsParams(params);
       G.api(path , "get", params, callback);
     }
@@ -65,6 +67,7 @@ G.provide("RestObject",{
      */
     this.read = function(params, callback){
       var path = root_path+"/"+params.id+ request_type;
+      params = railify(params,object_name);
       params = injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr){
         if(callback){
@@ -77,21 +80,18 @@ G.provide("RestObject",{
      * Base Update call for all RestObject Objects.
      * Per rails convention this call updates and doesn't return the updated model
      */
-    this.update = function(params, callback){
-      
-      var path = root_path +"/"+params.id+ request_type,
-      params_cp = {};
-      G.copy(params_cp, params); //Make a copy so we don't modify the orginal
-      delete params_cp.id; //remove id so we don't try to modify it
-      params_cp = railify(params_cp,object_name);
-      params_cp = injectRailsParams(params_cp);
-      G.api(path, "put", params_cp, callback);
+    this.update = function(params, callback){ 
+      var path = root_path +"/"+params.id+ request_type;
+      params = railify(params, object_name);
+      params = injectRailsParams(params);
+      G.api(path, "put", params, callback);
     }
     /**
      * Base Destroy call for all RestObject Objects
      */
     this.destroy = function(params, callback){
       var path = root_path +"/"+params.id+ request_type;
+      params = railify(params,object_name);
       params = injectRailsParams(params);
       G.api(path, "delete", params, callback);
     }
@@ -104,6 +104,7 @@ G.provide("RestObject",{
     function railify(params, object_name){
       var rails_params = {};
       for(var key in params){
+        if(key == "id") continue;
         rails_params[object_name+"["+key+"]"] = params[key];
       }
       return rails_params;
@@ -112,6 +113,14 @@ G.provide("RestObject",{
     function injectRailsParams(params){
       params['session_token'] = G.RestObject.sessionToken;
       params['app_key'] = G.RestObject.appKey;
+
+      //Should only be used while testing
+      if(G.RestObject.appSecret) 
+        params['app_secret'] = G.RestObject.appSecret
+
+      if(params['app_secret'] && !G.RestObject.appSecret)
+        throw "App secret not set using G.RestObject.appSecret"
+      
       return params;
     }
 
@@ -134,8 +143,12 @@ G.provide("",{
         G.userSession.create(params, callback);
       }
 
-      this.logout = function(params, callback){
-        G.userSession.destroy(params, callback);
+      this.logout = function(callback){
+        G.userSession.destroy({}, callback);
+      }
+
+      this.isLoggedIn = function(){
+        return !!G.RestObject.sessionToken
       }
       
     }

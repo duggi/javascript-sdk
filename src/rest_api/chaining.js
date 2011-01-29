@@ -52,14 +52,15 @@ G.provide("FnChain",{
      * @param params   {Array}[Optional]    Array of params
      *                                        for the chainable function
      * @param callback {Function}[Optional] Callback called after this link
-     *                                        in the chain is completed
+     *
      */
     this.push = function(){
       var args = Array.prototype.slice.call(arguments),
       fn = args.shift(),
       next = args.shift(),
       params = null,
-      callback = null;
+      callback = null,
+      cbParams = null;
 
       while(next){
         var type = typeof next;
@@ -67,6 +68,8 @@ G.provide("FnChain",{
           callback = next;
         } else if (next instanceof Array && !params) {
           params = next;
+        } else if (next instanceof Array && !cbParams) {
+          cbParams = next;
         } else {
           throw('Invalid argument passed to FnChain.push(): ' + next);
           return this;
@@ -77,7 +80,7 @@ G.provide("FnChain",{
       var link = {
         fn:fn,
         params:params,
-        callback:callback    
+        callback:callback
       }
 
       chain.push(link);
@@ -92,7 +95,6 @@ G.provide("FnChain",{
       if(chain.length <= 0) return;
 
       var link = chain.shift(), callee = arguments.callee;
-
       if(link.params){
         //Copying the params allows the chain to be fired again without side effects
         var tempParams = [];
