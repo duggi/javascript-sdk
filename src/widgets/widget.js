@@ -103,12 +103,6 @@ G.provide("widget", {
     (function(realG) { //could limit access to G if needed
       var fn, pids = {}, base, self;
 
-      function S(selector) {
-        if (jQuery) {
-          return jQuery(this.rootNode).find(selector);
-        }
-      }
-
       //Forces pageconstructor to be lexicaly bound to our current context
       //instead of iframe (current context should be current closure and
       //then main page closure)
@@ -124,6 +118,12 @@ G.provide("widget", {
 
       instance = new fn();
       self = instance;
+
+      function S(selector) {
+        if (jQuery) {
+          return jQuery(base.rootNode).find(selector);
+        }
+      }
 
     })(G);
 
