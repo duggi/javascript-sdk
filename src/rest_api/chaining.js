@@ -31,16 +31,16 @@
  *   That callback function must be called for the chain to continue firing
  */
 
-G.provide("",{
+G.provide("", {
 
-  newFnChain:function(){
+  newFnChain:function() {
     return new G.FnChain.Base();
   }
 });
 
-G.provide("FnChain",{
+G.provide("FnChain", {
 
-  Base:function(){
+  Base:function() {
     var chain = [];
 
 
@@ -54,15 +54,15 @@ G.provide("FnChain",{
      * @param callback {Function}[Optional] Callback called after this link
      *
      */
-    this.push = function(){
+    this.push = function() {
       var args = Array.prototype.slice.call(arguments),
-      fn = args.shift(),
-      next = args.shift(),
-      params = null,
-      callback = null,
-      cbParams = null;
+        fn = args.shift(),
+        next = args.shift(),
+        params = null,
+        callback = null,
+        cbParams = null;
 
-      while(next){
+      while (next) {
         var type = typeof next;
         if (type === 'function' && !callback) {
           callback = next;
@@ -81,40 +81,56 @@ G.provide("FnChain",{
         fn:fn,
         params:params,
         callback:callback
-      }
+      };
 
       chain.push(link);
-      
-      return this; //Makes push chainable (in the jquery sense)
-    }
 
+      return this; //Makes push chainable (in the jquery sense)
+    };
+
+    /**
+     * Pushes a function that isn't a "chainable function" by wrapping it
+     * in a generic chainable function.
+     * 
+     * @param fn
+     */
+    this.pushNc = function(fn){
+
+      function correctedFn(params, callback){
+        fn.apply(this, params);
+        callback();
+      }
+
+      this.push(correctedFn);
+    };
+    
     /**
      * Sequentially fire the functions and callbacks in the chain FIFO.
      */
-    this.fire = function(){
-      if(chain.length <= 0) return;
+    this.fire = function() {
+      if (chain.length <= 0) return;
 
       var link = chain.shift(), callee = arguments.callee;
-      if(link.params){
+      if (link.params) {
         //Copying the params allows the chain to be fired again without side effects
         var tempParams = [];
         G.copy(tempParams, link.params);
         tempParams.push(modifiedCallback);
         link.fn.apply(this, tempParams);
       }
-      else{
+      else {
         link.fn(modifiedCallback);
       }
 
-      function modifiedCallback(){
-        if(link.callback){
+      function modifiedCallback() {
+        if (link.callback) {
           link.callback.apply(this, arguments);
         }
         callee();
       }
     }
-    
-    this.clear = function(){
+
+    this.clear = function() {
       chain = [];
     }
   }

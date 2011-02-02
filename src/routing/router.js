@@ -22,27 +22,32 @@
  *
  */
 
-G.provide("",{
-  route:function(hash, callback){
+G.provide("", {
+  route:function(hash, callback) {
     G.router.route.call(G.router, hash, callback);
   }
 });
 
 G.provide("router", {
-  
+
   routes: [],
 
-  route:function(hash, callback){
+  init:function() {
+    G.addEvent(window, 'load', G.router.execRoute);
+    G.addEvent(window, 'hashchange', G.router.execRoute);
+  },
+
+  route:function(hash, callback) {
     var route = {};
     route.hash = hash;
     route.callback = callback;
     G.router.routes.push(route);
   },
 
-  execRoute:function(){
-    for(var i in G.router.routes){
+  execRoute:function() {
+    for (var i in G.router.routes) {
       var route = G.router.routes[i];
-      if(window.location.hash == route.hash){
+      if (window.location.hash == route.hash) {
         route.callback();
         return;
       }
@@ -51,11 +56,8 @@ G.provide("router", {
 
 });
 
-//TODO need to add dependencies on common so they are loaded first
 //Gets called at framework runtime
-(function(){
-  G.addEvent(window, 'load', G.router.execRoute);
-  G.addEvent(window, 'hashchange', G.router.execRoute);
+//(function() {
 
 //  backup if hashchange event is not supported for ie7 (bah! FUCKING IE)
 //  if(G.browser.ieVersion() < 8){
@@ -69,4 +71,4 @@ G.provide("router", {
 //    }, 150);
 //  }
 
-})();
+//})();

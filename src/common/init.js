@@ -32,6 +32,9 @@ G.provide("", {
     //Construct our rails models and api objects
     G.RestObject.init();
 
+    //Begin routing observation of the window bar
+    G.router.init();
+
     //Setup our tokens and keys for this G instance
     G.init(appKey, callback);
   }
