@@ -29,23 +29,23 @@
 
 /**
  * widget.js
- * Exposes api for manipulating 
+ * Exposes api for manipulating
  *
  */
 
 G.provide("", {
-  require: function(){
+  require: function() {
     return G.widget.require.apply(G.widget, arguments);
   },
 
-  newWidget:function(){
+  newWidget:function() {
     return G.widget.instance.apply(G.widget, arguments);
   },
 
-  register:function(){
+  register:function() {
     return G.widget.register.apply(G.widget, arguments);
   }
-  
+
 });
 
 G.provide("widget", {
@@ -56,58 +56,57 @@ G.provide("widget", {
   /**
    * Base constructor for all Widget instances
    */
-  Base: function(pageName){
+  Base: function(pageName) {
 
     this._html = G.widget.html[pageName];
     this.rootNode = initRootNode();
-    
-    function initRootNode(){
+
+    function initRootNode() {
       var div = document.createElement("div"); //garbage collected automatically
       div.innerHTML = G.widget.html[pageName];
       return div;
     }
 
-    this.hashOnAttribute = function(hash, attr){
+    this.hashOnAttribute = function(hash, attr) {
       var elems = this.rootNode.getElementsByTagName("*");
-      for(var i in elems){
+      for (var i in elems) {
         var elem = elems[i], pid;
-        if(!!elem.getAttribute && !!(pid = elem.getAttribute(attr)) ){
+        if (!!elem.getAttribute && !!(pid = elem.getAttribute(attr))) {
           hash[pid] = elem;
         }
       }
-    }
+    };
 
-    this.preventDefault = function(e){
-      if(!e){
+    this.preventDefault = function(e) {
+      if (!e) {
         return;
       }
 
       //Everyone else support for canceling events
-      if(e.preventDefault){
+      if (e.preventDefault) {
         e.preventDefault();
       }
 
       //IE support for canceling events
       e.returnValue = false;
-    }
+    };
 
   },
 
-  instance:function(pageName){
+  instance:function(pageName) {
 
-    if(!G.widget.constructors[pageName]){
-      throw("G.widget.instance called on null constructor. ("+pageName+")");
-      return;
+    if (!G.widget.constructors[pageName]) {
+      throw("G.widget.instance called on null constructor. (" + pageName + ")");
     }
 
     var instance;
-    (function(realG){ //could limit access to G if needed
-      var fn, pids ={}, base, self;
+    (function(realG) { //could limit access to G if needed
+      var fn, pids = {}, base, self;
 
       //Forces pageconstructor to be lexicaly bound to our current context
       //instead of iframe (current context should be current closure and
       //then main page closure)
-      eval("fn = "+G.widget.constructors[pageName].toString()+";");
+      eval("fn = " + G.widget.constructors[pageName].toString() + ";");
 
       //By default hash all elems with a pid for quick lookup later
       //pids hash avail in page (looks like global) but is just bound
@@ -125,50 +124,49 @@ G.provide("widget", {
     return instance;
   },
 
-  register: function(pageName, pageConstructor){
-    
-    if(typeof pageConstructor != "function"){
+  register: function(pageName, pageConstructor) {
+
+    if (typeof pageConstructor != "function") {
       throw("Fatal: G.widget.register only takes a constructor function as a argument");
-      return;
     }
-          
+
     G.widget.constructors[pageName] = pageConstructor;
   },
 
-  require:function(path, pageName){
+  require:function(path, pageName) {
     G.widget.require.pages = G.Page.require.pages || {};
 
     pageName = pageName || G.widget.pathToName(path);
-    
+
     //No Op when the page has already been required
-    if(G.widget.require.pages[pageName]){
+    if (G.widget.require.pages[pageName]) {
       return;
     }
 
     G.widget.require.pages[pageName] = pageName;
 
-    
-    if(!G.widget.constructors[pageName]){
+
+    if (!G.widget.constructors[pageName]) {
       G.widget.fetch(path, pageName);
     }
 
   },
 
-  ready:function(pageNames, callback){
+  ready:function(pageNames, callback) {
     var intervalId,
-    timeWaiting = 0,
-    interval = 50;
+      timeWaiting = 0,
+      interval = 50;
 
-    intervalId = setInterval(function(){
+    intervalId = setInterval(function() {
       timeWaiting += interval
-      if(timeWaiting > 1000){
+      if (timeWaiting > 1000) {
         G.log("G.widget.ready waiting over a second for ready state.");
         timeWaiting = 0;
       }
 
-      for(var i in pageNames){
+      for (var i in pageNames) {
         var pageName = pageNames[i];
-        if(!G.widget.constructors[pageName]){
+        if (!G.widget.constructors[pageName]) {
           return;
         }
       }
@@ -178,15 +176,15 @@ G.provide("widget", {
 
     }, interval);
   },
-  
-  fetch: function(){
-    var args = Array.prototype.slice.call(arguments),
-    path = args.shift(),
-    next = args.shift(),
-    pageName,
-    callback;
 
-    while(next){
+  fetch: function() {
+    var args = Array.prototype.slice.call(arguments),
+      path = args.shift(),
+      next = args.shift(),
+      pageName,
+      callback;
+
+    while (next) {
       var type = typeof next;
 
       if (type === 'string' && !pageName) {
@@ -194,7 +192,7 @@ G.provide("widget", {
       } else if (type === 'function' && !callback) {
         callback = next;
       }
-      else{
+      else {
         G.log('Invalid argument passed to G.widget.fetch(): ' + next);
         return;
       }
@@ -208,7 +206,7 @@ G.provide("widget", {
     G.widget.fetchRequest(path, pageName, callback);
   },
 
-  pathToName:function(path){
+  pathToName:function(path) {
     return path.replace(/\//g, "_");
   },
 
@@ -217,19 +215,19 @@ G.provide("widget", {
    *
    */
 
-  fetchRequest: function(path, pageName, callback ){
+  fetchRequest: function(path, pageName, callback) {
 
     //Preamble = dirty magic to pull references into iframe,
     //couples js with controller :(
-    var preamble = "<script>window.G = top."+ globalName +";</script>";
+    var preamble = "<script>window.G = top." + globalName + ";</script>";
 
-    G.ApiClient.rest('widgets/show','get', {
+    G.ApiClient.rest('widgets/show', 'get', {
       path: path,
       preamble: preamble,
       page_name: pageName
-    }, function(html){
+    }, function(html) {
 
-      if(!!callback){
+      if (!!callback) {
         callback(G.widget.constructors[pageName]);
       }
     });

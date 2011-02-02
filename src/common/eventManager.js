@@ -30,12 +30,12 @@ G.provide("", {
    *
    * Adds a eventhandler to the specified event without overriding previously
    * defined eventhanders.
-   * 
+   *
    * @param object      {Object}         object to watch for the event
    * @param eventType   {String}         event type (eg click, load, blur)
    * @param eventHandler {Function}       function to handle the event
    */
-  addEvent:function(object, eventType, eventHandler){
+  addEvent:function(object, eventType, eventHandler) {
     G.eventManager.addEvent.call(G.eventManager, object, eventType, eventHandler);
   },
 
@@ -50,7 +50,7 @@ G.provide("", {
    * @param eventHandler {Function}       function to handle the event
    */
 
-  removeEvent:function(object, eventType, eventHandler){
+  removeEvent:function(object, eventType, eventHandler) {
     G.eventManager.removeEvent.call(G.eventManager, object, eventType, eventHandler);
   }
 
@@ -58,26 +58,26 @@ G.provide("", {
 
 // AddEvent and removeEvent Taken from his excellency John Resig
 G.provide("eventManager", {
-  addEvent:function( obj, type, fn ) {
-    if ( obj.attachEvent ) {
-      obj['e'+type+fn] = fn;
-      obj[type+fn] = function(){
-        obj['e'+type+fn]( window.event );
+  addEvent:function(obj, type, fn) {
+    if (obj.attachEvent) {
+      obj['e' + type + fn] = fn;
+      obj[type + fn] = function() {
+        obj['e' + type + fn](window.event);
       };
-      obj.attachEvent( 'on'+type, obj[type+fn] );
+      obj.attachEvent('on' + type, obj[type + fn]);
     }
-    else{
-      obj.addEventListener( type, fn, false );
+    else {
+      obj.addEventListener(type, fn, false);
     }
   },
 
-  removeEvent: function( obj, type, fn ) {
-    if ( obj.detachEvent ) {
-      obj.detachEvent( 'on'+type, obj[type+fn] );
-      obj[type+fn] = null;
+  removeEvent: function(obj, type, fn) {
+    if (obj.detachEvent) {
+      obj.detachEvent('on' + type, obj[type + fn]);
+      obj[type + fn] = null;
     }
-    else{
-      obj.removeEventListener( type, fn, false );
+    else {
+      obj.removeEventListener(type, fn, false);
     }
   }
 

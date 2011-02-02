@@ -113,8 +113,7 @@ G.provide('ApiClient', {
     //    var form = G.ApiClient.createForm(path, method, params);
 
     //    G.ApiClient.iframeRequest(form, cb);
-  }
-  ,
+  },
 
   corsRequest:function(path, method, params, cb) {
     var isGet = method.toLowerCase() == "get";
@@ -157,17 +156,14 @@ G.provide('ApiClient', {
       xhr.send(queryString);
     }
 
-  }
-  ,
+  },
 
   nonCorsDispatch:function(path, method, params, cb) {
     if (method === 'post') {
       var form = G.ApiClient.createForm(path, method, params);
     }
 
-
-  }
-  ,
+  },
 
   /**
    *  createForm: Creates a form to submit as a substitute for XHRs.
@@ -200,8 +196,7 @@ G.provide('ApiClient', {
     }
 
     return form;
-  }
-  ,
+  },
 
   /**
    * iframeRequest: Submits a form using a spawned Iframe.
