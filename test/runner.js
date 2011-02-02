@@ -26,46 +26,46 @@
  * Primary entry point for running all the tests.
  */
 
-(function(){
-  
+(function() {
+
   //Nice hacky way to get global tooling
-  window.T ={
-    assertSuccess: function (xhr, message){
-      if(!message){
+  window.T = {
+    assertSuccess: function (xhr, message) {
+      if (!message) {
         message = "Response was successful"
       }
 
       ok(xhr.status.toString().match(/^2../), message);
     },
-    
-    assertFailure: function (xhr, message){
-      if(!message){
+
+    assertFailure: function (xhr, message) {
+      if (!message) {
         message = "Response was a failure"
       }
       ok(xhr.status.toString().match(/^[4,5]../), message);
     },
-    
-    appLogin:function(callback){
+
+    appLogin:function(callback) {
       G.RestObject.appSecret = T.appSecret;
-      if(callback){
+      if (callback) {
         callback();
       }
     },
 
-    appLogout:function(callback){
+    appLogout:function(callback) {
       G.RestObject.appSecret = null;
-      if(callback){
+      if (callback) {
         callback();
       }
     },
 
-    isAppLoggedIn:function(){
+    isAppLoggedIn:function() {
       return !!G.RestObject.appSecret;
     },
 
-    debug:function(data, callback){
+    debug:function(data, callback) {
       G.log(data);
-      if(callback)
+      if (callback)
         callback();
     },
 
@@ -75,11 +75,11 @@
       testDate:new Date()
     },
 
-    appSecret: "628b9ac5b59849cef1fba6ab146a43fcdb8bcf35936fcb52ab1b18c6cb0f678fd068aa3bb6fb29baf537057c5d1f0bdebeddbd738d44eddce9ff2a5714a90f6c"
+    appSecret: "c78dae169ed35dc1620aff6e43e2157ed70f2fbdc666970d3f6086975d1a1e58be42ae717b6ab074fef3049b297686701e88a220e35c4176e75c09896f570dc2"
 
-  }
+  };
 
-  function loadTest(src){
+  function loadTest(src) {
     var s = document.createElement('script');
     s.type = 'text/javascript';
     s.src = src;
@@ -87,37 +87,38 @@
     x.parentNode.insertBefore(s, x);
   }
 
-  G.init("245dfcf6b3dae9e237865bb12c3060c8", "http://localhost:3000/");
+  stop();
+  G.initialize("8b28847e26a1fa2057ffc061b2e310d9", "http://localhost:3000/", loadTests);
+
+  function loadTests() {
+    //Long list of all the tests files we load for testing
+//  loadTest("api/api.test.js");
+//  loadTest("api/chaining.test.js");
+//  loadTest("common/common.test.js");
+//  loadTest("provide.test.js");
 
 
-  //Long list of all the tests files we load for testing
-  loadTest("api/api.test.js");
-  loadTest("api/chaining.test.js");
-  loadTest("common/common.test.js");
-  loadTest("provide.test.js");
-
-
-  //restObject must be loaded before all other rails objects
-  loadTest("api/rails/restObject.test.js");
-  loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
-  loadTest("api/rails/groupit.test.js");
-  //  loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
-  loadTest("api/rails/participant.test.js");
-  loadTest("api/rails/paymentResponse.test.js");
-  loadTest("api/rails/note.test.js");
-  loadTest("api/rails/feedPost.test.js");
-  loadTest("api/rails/email.test.js");
-  loadTest("api/rails/authentication.test.js");
-  loadTest("api/rails/app.test.js");
-  loadTest("api/rails/address.test.js");
-  loadTest("api/rails/userSession.test.js");
+    //restObject must be loaded before all other rails objects
+    loadTest("api/rails/restObject.test.js");
+//  loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
+//  loadTest("api/rails/groupit.test.js");
+    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
+//  loadTest("api/rails/participant.test.js");
+//  loadTest("api/rails/paymentResponse.test.js");
+//  loadTest("api/rails/note.test.js");
+//  loadTest("api/rails/feedPost.test.js");
+//  loadTest("api/rails/email.test.js");
+//  loadTest("api/rails/authentication.test.js");
+//  loadTest("api/rails/app.test.js");
+//  loadTest("api/rails/address.test.js");
+//  loadTest("api/rails/userSession.test.js");
 
 //TODO Need To called DestroyTestUser down here somewhere after
 //all the tests have been run
 //MAKE sure to reenable the unique constraint in the users table
 
 
-
+  }
 
 
 })();

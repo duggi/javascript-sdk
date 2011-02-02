@@ -33,7 +33,7 @@ G.provide("", {
    * 
    * @param object      {Object}         object to watch for the event
    * @param eventType   {String}         event type (eg click, load, blur)
-   * @param eventHander {Function}       function to handle the event
+   * @param eventHandler {Function}       function to handle the event
    */
   addEvent:function(object, eventType, eventHandler){
     G.eventManager.addEvent.call(G.eventManager, object, eventType, eventHandler);
@@ -47,7 +47,7 @@ G.provide("", {
    *
    * @param object      {Object}         object to attach the event to
    * @param eventType   {String}         event type (eg click, load, blur)
-   * @param eventHander {Function}       function to handle the event
+   * @param eventHandler {Function}       function to handle the event
    */
 
   removeEvent:function(object, eventType, eventHandler){
@@ -63,7 +63,7 @@ G.provide("eventManager", {
       obj['e'+type+fn] = fn;
       obj[type+fn] = function(){
         obj['e'+type+fn]( window.event );
-      }
+      };
       obj.attachEvent( 'on'+type, obj[type+fn] );
     }
     else{
@@ -81,5 +81,5 @@ G.provide("eventManager", {
     }
   }
 
-})
+});
 

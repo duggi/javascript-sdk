@@ -21,29 +21,251 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
+(function() {
   module("Contribution");
   //Keys that should be included in every response from the server
-  var keys =["id", "groupit_id", "address_id", "amount", "user_id",
-  "transaction_id", "surcharge", "tax", "payment_response_id", "app_key",
-  "is_public"];
+  var publicKeys = [];
+  var userKeys = publicKeys.concat(["groupit_id", "address_id", "amount", "user_id",
+    "transaction_id", "surcharge", "tax", "payment_response_id", "app_key",
+    "is_public"]);
+  var appKeys = userKeys;
+
+  var R_PublicKeys = [];
+  var R_UserKeys = R_PublicKeys.concat(["id", "created_at", "updated_at"]);
+  var R_AppKeys = R_UserKeys;
+
+  var readablePublicKeys = publicKeys.concat(R_PublicKeys);
+  var readableUserKeys = userKeys.concat(R_UserKeys);
+  var readableAppKeys = appKeys.concat(R_AppKeys);
 
 
-  function createContribution(callback){
+  //---HELPERS---------------------------------------------------
+  function createContribution(callback) {
     G.contribution.create({
-      groupit_id: 34,
-      address_id: 1263,
-      amount: 123.40,
-      user_id: 341,
-      transaction_id: "234dfs32",
-      surcharge: 0,
-      tax: 12.43,
-      payment_response_id: 123,
-      is_public: true
+      groupitId: 123,
+      amount: 50,
+      customer:{
+        firstName: "Timothy",
+        lastName: "Cardenas",
+        email: "something@somewhere.com"
+      },
+      cc:{
+        cardholderName: "Timothy Cardenas",
+        number: 4111111111111111,
+        cvv:411,
+        month:11,
+        year:2015
+      },
+      billing:{
+        firstName:"Timothy",
+        lastName: "Cardenas",
+        address1: "1436 Club House Drive",
+        locality: "manteca",
+        region: "CA",
+        postalCode: 95336,
+        countryCode: "US",
+        phone: "111-111-1111"
+      }
     }, callback);
   }
 
+  createContribution(function(json, xhr){
+    G.log(json);
+    G.log(xhr);
+  });
 
-  T.testCRUD("contribution", keys, createContribution, true);
+//      groupit_id: 34,
+//      address_id: 1263,
+//      amount: 123.40,
+//      user_id: 341,
+//      transaction_id: "234dfs32",
+//      surcharge: 0,
+//      tax: 12.43,
+//      payment_response_id: 123,
+//      is_public: true
+
+
+  //---INDEX TESTS---------------------------------------------
+//  var appIndex = {
+//    keys: readableAppKeys,
+//    succeed : true
+//  };
+//  var userIndex = {
+//    keys: readableUserKeys,
+//    succeed : true
+//  };
+//  var publicIndex = {
+//    keys: readablePublicKeys,
+//    succeed : false
+//  };
+//
+//  T.coreTest("Index", "app", index, appIndex);
+//  T.coreTest("Index", "user", index, userIndex);
+//  T.coreTest("Index", "public", index, publicIndex);
+//
+//
+//  function index(chain, temp, data) {
+//    var keys = data.keys,
+//      succeed = data.succeed;
+//
+//    temp.params = {};
+//
+//    chain
+//      .push(createContribution, successAndParams)
+//      .push(G.contribution.index, [
+//      {}
+//    ], indexCheck)
+//      .appPush(G.contribution.destroy, [temp.params], T.succeed);
+//
+//    function successAndParams(model, xhr) {
+//      T.baseSuccessAndParams(temp.params, model, xhr);
+//    }
+//
+//    //Branch structure for the indexCheck
+//    function indexCheck(models, xhr) {
+//      if (succeed)
+//        T.baseCheckAllModels("contribution", keys, models, xhr);
+//      else
+//        T.assertFailure(xhr, "Index operation should fail");
+//    }
+//  }
+
+
+//  //---CREATE TESTS--------------------------------------------
+//
+//  T.coreTest("Create", "app", createSucceed, readableAppKeys);
+//  T.coreTest("Create", "user", createSucceed, readableUserKeys);
+//  //On public create we boost the read access to USER instead of PUBLIC
+//  T.coreTest("Create", "public", createSucceed, readableUserKeys);
+//
+//  function createSucceed(chain, temp, keys){
+//    temp.params = {};
+//    chain
+//    .push(createContribution, function(model, xhr){
+//      T.baseParamsAndAssert(keys, temp.params, model, xhr);
+//    })
+//    .appPush(G.contribution.destroy, [temp.params], T.succeed)
+//  }
+//
+//
+//  //---READ TESTS-----------------------------------------------
+//  var appRead = {
+//    keys: readableAppKeys,
+//    succeed : true
+//  }
+//  var userRead = {
+//    keys: readableUserKeys,
+//    succeed : true
+//  }
+//  var publicRead = {
+//    keys: readablePublicKeys,
+//    succeed : false
+//  }
+//
+//  T.coreTest("Read", "app", read, appRead);
+//  T.coreTest("Read", "user", read, userRead);
+//  T.coreTest("Read", "public",read, publicRead);
+//
+//  function read(chain, temp, data){
+//    var succeed = data.succeed,
+//    keys = data.keys;
+//    temp.params = {};
+//
+//    chain
+//    .push(createContribution, successAndParams)
+//    .push(G.contribution.read, [temp.params], readCheck)
+//    .appPush(G.contribution.destroy, [temp.params], T.succeed)
+//
+//
+//    function successAndParams(model, xhr){
+//      T.baseSuccessAndParams(temp.params, model, xhr);
+//    }
+//
+//    function readCheck(model, xhr){
+//      if(succeed)
+//        T.baseReadSuccessful(keys, model, xhr)
+//      else
+//        T.assertFailure(xhr, "Read should have failed");
+//    }
+//
+//  }
+//
+//
+//  //---UPDATE TESTS---------------------------------------------
+//
+//  var appUpdate = {
+//    readOnlyKeys: R_AppKeys,
+//    readableKeys: readableAppKeys,
+//    succeed:true
+//  }
+//  var userUpdate = {
+//    //Changing the user_id is allowed but it changes ownership, preventing
+//    //the user from reading it again. So we don't test the setting user_id here
+//    readOnlyKeys: R_UserKeys.concat(["user_id"]),
+//    readableKeys: readableUserKeys,
+//    succeed:true
+//  }
+//  var publicUpdate = {
+//    readOnlyKeys: R_AppKeys,
+//    readableKeys: readableAppKeys,
+//    succeed:false
+//  }
+//
+//  T.coreTest("Update", "app", update, appUpdate);
+//  T.coreTest("Update", "user", update, userUpdate);
+//  T.coreTest("Update", "public", update, publicUpdate);
+//
+//
+//  function update(chain, temp, data){
+//    var readOnlyKeys = data.readOnlyKeys,
+//    readableKeys = data.readableKeys;
+//
+//    temp.params = {};
+//    temp.updateParams = {};
+//    temp.originalModel = null;
+//
+//    chain
+//    .push(createContribution, setUpdateParams)
+//    .push(G.contribution.update, [temp.updateParams], data.succeed? T.succeed : T.fail)
+//    .push(G.contribution.read, [temp.params], checkUpdate)
+//    .appPush(G.contribution.destroy, [temp.params], T.succeed)
+//
+//
+//    function setUpdateParams(model, xhr){
+//      temp.originalModel = model;
+//      T.setUpdateParams(readOnlyKeys, readableKeys, temp.updateParams, T.defaultTestValues, model, xhr);
+//      T.baseSuccessAndParams(temp.params, model, xhr);
+//    }
+//
+//    function checkUpdate(model, xhr){
+//      if(data.succeed){
+//        T.checkUpdate(readOnlyKeys, readableKeys, temp.originalModel, T.defaultTestValues, model, xhr);
+//      }
+//      else{
+//        //TODO might want to check that the result didn't change but not now
+//        T.assertFailure(xhr, "Update should fail");
+//      }
+//    }
+//  }
+//
+//  //---DESTROY TESTS---------------------------------------------------
+//
+//  T.coreTest("Destroy", "app", destroy, true);
+//  T.coreTest("Destroy", "user", destroy, true);
+//  T.coreTest("Destroy", "public", destroy, false);
+//
+//  function destroy(chain, temp, succcess){
+//    temp.params = {};
+//
+//    chain
+//    .push(createContribution, successAndParams)
+//    .push(G.contribution.destroy, [temp.params], succcess ? T.succeed : T.fail)
+//    .appPush(G.contribution.read, [temp.params], succcess ? T.fail : T.succeed)
+//
+//    function successAndParams(model, xhr){
+//      T.baseSuccessAndParams(temp.params, model, xhr);
+//    }
+//  }
+
 
 })();

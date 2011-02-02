@@ -33,9 +33,22 @@
 //Save references in case of overwrite/no conflict mode
 var _G = window.G;
 var _isLogging = true;
-window.A = "Primary window"; //DEBUG
 
 var G = G || {
+  instanceId:null, //(AKA instance-private key)
+  appKey:null, //(AKA App Identifier)
+
+  init:function(appKey, callback) {
+    G.appKey = appKey;
+
+    //Needs the app key before call
+    G.api("/misc/random_hash", function(json) {
+      G.instanceId = json.hash_digest;
+      callback();
+    });
+  }
+  ,
+
   /**
    * Copy from one object to the specified namespace that is G.<target>.
    * If the namespace target doesn't exist, it will be created automatically.
@@ -45,13 +58,14 @@ var G = G || {
    * @param overwrite {Boolean}        indicate if we should overwrite
    * @return {Object} the *same* target object back
    */
-  provide: function(target, source, overwrite){
+  provide: function(target, source, overwrite) {
     return this.copy(
       typeof target == 'string' ? this.create(target) : target,
       source,
       overwrite
       );
-  },
+  }
+  ,
   /**
    * Create a namespaced object.
    *
@@ -61,8 +75,8 @@ var G = G || {
    */
   create: function(name, value) {
     var node = G,
-    nameParts = name ? name.split('.') : [],
-    len = nameParts.length;
+      nameParts = name ? name.split('.') : [],
+      len = nameParts.length;
     for (var i = 0; i < len; i++) {
       var part = nameParts[i];
       var nso = node[part]; //nso = namespaced object
@@ -73,7 +87,8 @@ var G = G || {
       node = nso;
     }
     return node;
-  },
+  }
+  ,
   /**
    * Copies things from source into target.
    *
@@ -86,24 +101,26 @@ var G = G || {
   copy: function(target, source, overwrite, transform) {
     for (var key in source) {
       if (overwrite || typeof target[key] === 'undefined') {
-        target[key] = transform ? transform(source[key]) :  source[key];
+        target[key] = transform ? transform(source[key]) : source[key];
       }
     }
     return target;
-  },
+  }
+  ,
+
   /**
    * Removes standard groupit bindings from global namespace and
    *   replaces with user supplied alternative.
    *
    * @param altName {String} alternative global reference name
    */
-  noConflict: function(altName){
+  noConflict: function(altName) {
     //noConflicting with G sets to default
-    if(altName == "G"){
+    if (altName == "G") {
       window.G = G;
-      
+
     }
-    else if (altName){
+    else if (altName) {
       window[altName] = G;
       window.G = _G; //replace G with what was G before
     }
@@ -111,7 +128,8 @@ var G = G || {
     globalName = altName;
     return G;
   }
-};
+}
+  ;
 
 //Do the proper bindings for the window.
 window.G = G;

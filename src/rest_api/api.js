@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010 Timothy Cardenas
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -8,10 +8,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -24,13 +24,19 @@
  * @requires G.provide G.Array
  *
  */
- 
+
 G.provide('', {
 
   //Indirection method for the api calls. Can expand out
   //for richer debuging support, etc
-  api: function(){
-    G.ApiClient.rest.apply(G.ApiClient, arguments);    
+  api: function() {
+    G.ApiClient.rest.apply(G.ApiClient, arguments);
+  },
+
+  //Allows for posting of forms to remote destinations
+  postForm:function(path, method, params, fullPath) {
+    var form = G.ApiClient.createForm(path, method, params, fullPath);
+    G.ApiClient.iframeRequest(form);
   }
 
 });
@@ -39,14 +45,14 @@ G.provide('ApiClient', {
   REST_METHODS: ['get', 'post','delete', 'put'],
   REST_BASE_URL: "http://localhost:3000/",
 
-  init:function(endpoint){
-    REST_BASE_URL = endpoint;
+  init:function(endpoint) {
+    G.ApiClient.REST_BASE_URL = endpoint;
   },
 
   /**
    *   rest: REST access to our server with various calling options.
-   *    
-   *   Except for the path all the arguments to this function are 
+   *
+   *   Except for the path all the arguments to this function are
    *   optional. Below are examples of valid invocations.
    *
    *  G.api('gift/delete'); // throw away the response
@@ -63,19 +69,17 @@ G.provide('ApiClient', {
    * @param path      {String}   the url path
    * @param method    {String}   the http method
    * @param params    {Object}   the parameters for the query
-   * @param cb        {Function} the callback function for the response 
+   * @param cb        {Function} the callback function for the response
    */
 
-  rest: function(){
-    var 
-    args = Array.prototype.slice.call(arguments),
-    path = args.shift(),
-    next = args.shift(),
-    method,
-    params,
-    cb;
-     
-    while(next){
+  rest: function() {
+    var
+      args = Array.prototype.slice.call(arguments),
+      path = args.shift(),
+      next = args.shift(),
+      method, params, cb, doCors;
+
+    while (next) {
       var type = typeof next;
       if (type === 'string' && !method) {
         method = next.toLowerCase();
@@ -93,100 +97,119 @@ G.provide('ApiClient', {
     method = method || 'get';
     params = params || {};
 
+
     // remove prefix slash if one is given, as it's already in the base url
     if (path[0] === '/') {
       path = path.substr(1);
     }
 
-    if (G.Array.indexOf(G.ApiClient.REST_METHODS, method) < 0){
+    if (G.Array.indexOf(G.ApiClient.REST_METHODS, method) < 0) {
       G.log('failed on rest methods');
       return; //Need to create a logging mech
     }
 
     G.ApiClient.corsRequest(path, method, params, cb);
 
-  //    var form = G.ApiClient.createForm(path, method, params);
+    //    var form = G.ApiClient.createForm(path, method, params);
 
-  //    G.ApiClient.iframeRequest(form, cb);
-  },
+    //    G.ApiClient.iframeRequest(form, cb);
+  }
+  ,
 
-  corsRequest:function(path, method, params, cb){
-    var isGet = method.toLowerCase() == "get"
+  corsRequest:function(path, method, params, cb) {
+    var isGet = method.toLowerCase() == "get";
     var queryString = G.QS.encode(params);
 
     var url = this.REST_BASE_URL + path;
-    if(isGet){
+    if (isGet) {
       url += "?" + queryString;
     }
-    
+
 
     var xhr = new XMLHttpRequest();
-    if ("withCredentials" in xhr){
+    if ("withCredentials" in xhr) {
       xhr.open(method, url, true);
-    } else if (typeof XDomainRequest != "undefined"){
+    } else if (typeof XDomainRequest != "undefined") {
       xhr = new XDomainRequest();
       xhr.open(method, url);
     } else {
       throw("corsRequest: cross site xhr not available");
-      return;
     }
 
-    if(cb){
-      xhr.onload = function(){
-        var response = xhr.responseText
-        var contentType = xhr.getResponseHeader("Content-Type").toLowerCase()
-        if(contentType.indexOf("application/json") != -1 && response.replace(/\s*/, "")){
-          eval('var response = '+response);
+    if (cb) {
+      xhr.onload = function() {
+        var response = xhr.responseText;
+        //TODO need to parse the json better than with evals.
+        if (xhr.getResponseHeader("Content-Type")) {
+          var contentType = xhr.getResponseHeader("Content-Type").toLowerCase();
+          if (contentType.indexOf("application/json") != -1 && response.replace(/\s*/, "")) {
+            eval('var response = ' + response);
+          }
         }
         cb(response, xhr);
       }
     }
 
-    if(isGet){
+    if (isGet) {
       xhr.send();
-    }else{
+    } else {
       xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       xhr.send(queryString);
     }
 
-  },
+  }
+  ,
+
+  nonCorsDispatch:function(path, method, params, cb) {
+    if (method === 'post') {
+      var form = G.ApiClient.createForm(path, method, params);
+    }
+
+
+  }
+  ,
 
   /**
    *  createForm: Creates a form to submit as a substitute for XHRs.
-   *
    *
    * @access private
    * @param path      {String}   the url path
    * @param method    {String}   the http method
    * @param params    {Object}   the parameters for the query
+   * @param fullPath  {Boolean}  If the path is a fullpath to a resource
    *
    */
 
-  createForm:function(path, method, params){
+  createForm:function(path, method, params, fullPath) {
     var form = document.createElement('form');
-    form.action = this.REST_BASE_URL + path;
+
+    if (fullPath) {
+      form.action = path;
+    } else {
+      form.action = this.REST_BASE_URL + path;
+    }
+
     form.method = method;
 
-    for(var key in params){
+    for (var key in params) {
       var input = document.createElement('input');
-      input.type ='text'; //DEBUG text
+      input.type = 'hidden'; //DEBUG text
       input.name = key;
       input.value = params[key];
       form.appendChild(input);
     }
 
     return form;
-  },
+  }
+  ,
 
   /**
    * iframeRequest: Submits a form using a spawned Iframe.
    *
-   *
    * @access private
    * @param form      {object}   Dom node representing a form for submission
-   * @param cb        {Function} the callback function for the response
    */
-  iframeRequest: function(form, cb){
+  iframeRequest: function(form) {
 
     //Prevents form passed in from being destroyed in call.
     form = form.cloneNode(true);
@@ -196,37 +219,9 @@ G.provide('ApiClient', {
     iframe.style.top = "-10000px";
     iframe.style.height = "0px";
     iframe.style.width = "0px";
-    
+
     document.body.appendChild(iframe); //initializes iframe
-    
 
-    //Load the content after submission to the callback
-    if(false){
-      iframe.onload = function(){
-
-        var content;
-        //the callback() method is inserted into our frame as a JSONP method
-        if(!!iframe.contentWindow.callback){
-          content= iframe.contentWindow.callback();
-        }else{
-          //Not a JSONP response, assume html/js is response and pass back
-          content = iframe.contentWindow.document.body.innerHTML;
-        }
-
-        //Remember javascript uses static scoping (this callback will run
-        //in the context of its definition and not where its being called--iframe)
-        cb(content);
-        
-        //We have to set a timeout to kill the parent and let the onload
-        //finish otherwise we get errors in browsers thinking that the response
-        //never arrived. Functions like a 'after_load' event
-        setTimeout(function(){
-          //document.body.removeChild(iframe);
-          }, 1); //IE doesn't accept 0 and all browsers round up to min delay ~10ms
-
-      }
-    }
-      
     iframe.contentWindow.document.body.appendChild(form);
     form.submit();
   }

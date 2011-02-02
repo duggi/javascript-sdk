@@ -22,17 +22,15 @@
  *
  */
 
-G.provide("", {
+G.provide("polling", {
 
-  initialize:function(appKey, endpoint, callback) {
+  /**
+   * Creates a unique ticket across all instances of our framework for polling
+   */
 
-    //Sets our endpoint (ie where we send api requests)
-    G.ApiClient.init(endpoint);
-    
-    //Construct our rails models and api objects
-    G.RestObject.init();
-
-    //Setup our tokens and keys for this G instance
-    G.init(appKey, callback);
+  randomTicket:function() {
+    var date = new Date();
+    return G.appKey + "" + G.instanceId + "" + date.getTime();
   }
+
 });

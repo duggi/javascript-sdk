@@ -24,7 +24,6 @@
 (function(){
   module("Email");
   //Keys that should be included in every response from the server
-
   var publicKeys = [];
   var userKeys = publicKeys.concat(["address", "primary", "user_id", "retail_contact"]);
   var appKeys = userKeys
