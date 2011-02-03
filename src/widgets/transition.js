@@ -17,52 +17,44 @@
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING fromWidget, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
+/**
+ * Provides basic support for transitioning between components.
+ */
 G.provide("", {
-  route:function(hash, callback) {
-    G.router.route.call(G.router, hash, callback);
+  newTransitionMap:function() {
+    return new G.transition.Base();
   }
 });
 
-G.provide("router", {
 
-  routes: {},
+G.provide("transition", {
 
-  init:function() {
-//    G.addEvent(window, 'load', G.router.execRoute);
-    G.addEvent(window, 'hashchange', G.router.execRoute);
-    G.router.execRoute();
-  },
+  Base:function() {
+    var transitions = {};
 
-  route:function(hash, callback) {
-    G.router.routes[hash] = callback;
-  },
+    this.addTransitions = function(transObj) {
+      G.copy(transitions, transObj, true);
+    };
 
-  execRoute:function() {
-    var hash = window.location.hash.slice(1),
-      callback = G.router.routes[hash];
-    if (callback) callback();
+    this.trigger = function(fromWidget, toWidget) {
+      var fromName = fromWidget.name, toName, fn;
+      if (!fromWidget) return;
+      if (!toWidget) {
+        fn = transitions[fromName];
+      } else {
+        toName = toWidget.name;
+        fn = transitions[fromName + "_" + toName];
+      }
+      if (fn) {
+        fn(fromWidget, toWidget);
+      }
+    };
   }
 
+
 });
-
-//Gets called at framework runtime
-//(function() {
-
-//  backup if hashchange event is not supported for ie7 (bah! FUCKING IE)
-//  if(G.browser.ieVersion() < 8){
-//    var ieFrame = document.createElement("iframe");
-//    var prevHash = null;
-//    setInterval(function(){
-//      if(window.location.hash != prevHash){
-//        G.router.execRoute();
-//        prevHash = window.location.hash;
-//      }
-//    }, 150);
-//  }
-
-//})();

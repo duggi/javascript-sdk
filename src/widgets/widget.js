@@ -56,14 +56,15 @@ G.provide("widget", {
   /**
    * Base constructor for all Widget instances
    */
-  Base: function(pageName) {
+  Base: function(name, widgetType) {
 
-    this._html = G.widget.html[pageName];
+    this.name = name;
+    this._html = G.widget.html[widgetType];
     this.rootNode = initRootNode();
 
     function initRootNode() {
       var div = document.createElement("div"); //garbage collected automatically
-      div.innerHTML = G.widget.html[pageName];
+      div.innerHTML = G.widget.html[widgetType];
       return div;
     }
 
@@ -91,33 +92,52 @@ G.provide("widget", {
       e.returnValue = false;
     };
 
+  
+    this.detach = function() {
+      var parent = this.rootNode.parentNode;
+      if (parent) parent.removeChild(this.rootNode);
+    };
+
   },
 
-  instance:function(pageName) {
+  /**
+   * Creates a instance of our widget
+   * @param name {String} The name of the instance, used for transitions etc
+   * @param widgetType {String} The widget type declared with register
+   * @param instanceObject {Object}[Optional] Extends instance with this obj
+   */
+  instance:function(name, widgetType, instanceObject) {
 
-    if (!G.widget.constructors[pageName]) {
-      throw("G.widget.instance called on null constructor. (" + pageName + ")");
+    if (!G.widget.constructors[widgetType]) {
+      throw("G.widget.instance called on null constructor. (" + widgetType + ")");
+    }
+    if (!name) {
+      throw("G.widget.instance called without a instance name");
     }
 
     var instance;
     (function(realG) { //could limit access to G if needed
-      var fn, pids = {}, base, self;
+      var fn, pids = {}, base;
 
-      //Forces pageconstructor to be lexicaly bound to our current context
+      //Forces page constructor to be lexicaly bound to our current context
       //instead of iframe (current context should be current closure and
       //then main page closure)
-      eval("fn = " + G.widget.constructors[pageName].toString() + ";");
+      eval("fn = " + G.widget.constructors[widgetType].toString() + ";");
 
       //By default hash all elems with a pid for quick lookup later
       //pids hash avail in page (looks like global) but is just bound
       //in that page. (<3 closures). Do before instance is created so
-      //pids hash can be referenced during instansiation.
-      base = new realG.widget.Base(pageName);
+      //pids hash can be referenced during instantiation.
+      base = new realG.widget.Base(name, widgetType);
       fn.prototype = base;
       base.hashOnAttribute(pids, "pid");
 
       instance = new fn();
-      self = instance;
+
+      //Adds the instance data into the instance overwriting if necessary
+      if (instanceObject) {
+        G.copy(instance, instanceObject, true);
+      }
 
       function S(selector) {
         if (jQuery) {
@@ -130,35 +150,35 @@ G.provide("widget", {
     return instance;
   },
 
-  register: function(pageName, pageConstructor) {
+  register: function(widgetType, pageConstructor) {
 
     if (typeof pageConstructor != "function") {
       throw("Fatal: G.widget.register only takes a constructor function as a argument");
     }
 
-    G.widget.constructors[pageName] = pageConstructor;
+    G.widget.constructors[widgetType] = pageConstructor;
   },
 
-  require:function(path, pageName) {
+  require:function(path, widgetType) {
     G.widget.require.pages = G.Page.require.pages || {};
 
-    pageName = pageName || G.widget.pathToName(path);
+    widgetType = widgetType || G.widget.pathToName(path);
 
     //No Op when the page has already been required
-    if (G.widget.require.pages[pageName]) {
+    if (G.widget.require.pages[widgetType]) {
       return;
     }
 
-    G.widget.require.pages[pageName] = pageName;
+    G.widget.require.pages[widgetType] = widgetType;
 
 
-    if (!G.widget.constructors[pageName]) {
-      G.widget.fetch(path, pageName);
+    if (!G.widget.constructors[widgetType]) {
+      G.widget.fetch(path, widgetType);
     }
 
   },
 
-  ready:function(pageNames, callback) {
+  ready:function(widgetTypes, callback) {
     var intervalId,
       timeWaiting = 0,
       interval = 50;
@@ -170,9 +190,9 @@ G.provide("widget", {
         timeWaiting = 0;
       }
 
-      for (var i in pageNames) {
-        var pageName = pageNames[i];
-        if (!G.widget.constructors[pageName]) {
+      for (var i in widgetTypes) {
+        var widgetType = widgetTypes[i];
+        if (!G.widget.constructors[widgetType]) {
           return;
         }
       }
@@ -187,14 +207,14 @@ G.provide("widget", {
     var args = Array.prototype.slice.call(arguments),
       path = args.shift(),
       next = args.shift(),
-      pageName,
+      widgetType,
       callback;
 
     while (next) {
       var type = typeof next;
 
-      if (type === 'string' && !pageName) {
-        pageName = next;
+      if (type === 'string' && !widgetType) {
+        widgetType = next;
       } else if (type === 'function' && !callback) {
         callback = next;
       }
@@ -206,10 +226,10 @@ G.provide("widget", {
     }
 
 
-    //Default pageName will be the route to it with / replaced with undescores
-    pageName = pageName || G.widget.pathToName(path);
+    //Default widgetType will be the route to it with / replaced with undescores
+    widgetType = widgetType || G.widget.pathToName(path);
 
-    G.widget.fetchRequest(path, pageName, callback);
+    G.widget.fetchRequest(path, widgetType, callback);
   },
 
   pathToName:function(path) {
@@ -221,7 +241,7 @@ G.provide("widget", {
    *
    */
 
-  fetchRequest: function(path, pageName, callback) {
+  fetchRequest: function(path, widgetType, callback) {
 
     //Preamble = dirty magic to pull references into iframe,
     //couples js with controller :(
@@ -230,11 +250,11 @@ G.provide("widget", {
     G.ApiClient.rest('widgets/show', 'get', {
       path: path,
       preamble: preamble,
-      page_name: pageName
+      page_name: widgetType
     }, function(html) {
 
       if (!!callback) {
-        callback(G.widget.constructors[pageName]);
+        callback(G.widget.constructors[widgetType]);
       }
     });
   }
