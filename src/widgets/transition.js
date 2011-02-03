@@ -42,14 +42,13 @@ G.provide("transition", {
     };
 
     this.trigger = function(fromWidget, toWidget) {
-      var fromName, toName, fn;
+      var fn;
       if (!toWidget) throw("G.transition.trigger: Must go somewhere with toWidget");
       if (!fromWidget) {
-        fn = transitions[toName];
+        fn = transitions[toWidget.name];
         if (fn) fn(toWidget);
       } else {
-        fromName = fromWidget.name;
-        fn = transitions[fromName + "_" + toName];
+        fn = transitions[fromWidget.name + "_" + toWidget.name];
         if (fn) fn(fromWidget, toWidget);
       }
     };
