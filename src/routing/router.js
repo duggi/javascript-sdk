@@ -33,7 +33,6 @@ G.provide("router", {
   routes: {},
 
   init:function() {
-//    G.addEvent(window, 'load', G.router.execRoute);
     G.addEvent(window, 'hashchange', G.router.execRoute);
   },
 

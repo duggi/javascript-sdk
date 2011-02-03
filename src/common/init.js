@@ -36,6 +36,10 @@ G.provide("", {
     G.router.init();
 
     //Setup our tokens and keys for this G instance
-    G.init(appKey, callback);
+    G.init(appKey, function(){
+      callback();
+      //After the callback for the program to initalize we execute a route lookup
+      G.router.execRoute();
+    });
   }
 });
