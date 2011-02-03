@@ -26,16 +26,16 @@
   //Keys that should be included in every response from the server
 
   var publicKeys = ["product_image", "product_url", "product", "price", "message",
-  "surprise", "quantity","user_id","options","active"];
-  var userkeys = publicKeys
-  var appKeys = userkeys.concat(["purchased", "groupit_type"]);
+  "surprise", "quantity","user_id","recipient", "options","active"];
+  var userKeys = publicKeys;
+  var appKeys = userKeys.concat(["purchased", "groupit_type"]);
 
   var R_PublicKeys = ["id", "created_at", "updated_at"];
   var R_UserKeys = R_PublicKeys.concat(["hash_digest"]);
   var R_AppKeys = R_UserKeys;
 
   var readablePublicKeys = publicKeys.concat(R_PublicKeys);
-  var readableUserKeys = userkeys.concat(R_UserKeys);
+  var readableUserKeys = userKeys.concat(R_UserKeys);
   var readableAppKeys = appKeys.concat(R_AppKeys);
 
  
@@ -46,7 +46,7 @@
       price: 234,
       surprise: true,
       quantity: 1
-    },callback);
+    }, callback);
   }
 
   //---INDEX TESTS---------------------------------------------
@@ -74,17 +74,17 @@
   var appCreate = {
     keys: readableAppKeys,
     addGroupitHash: false
-  }
+  };
   var userCreate = {
     keys: readableUserKeys,
     addGroupitHash: false
-  }
+  };
   //Groupits on create return a higher level (USER) on create rather than public
   //for anon groupits
   var publicCreate = {
     keys: readableUserKeys,
     addGroupitHash: true
-  }
+  };
 
 
   T.coreTest("Create", "app", createSucceed, appCreate);
@@ -115,15 +115,15 @@
   var appRead = {
     keys: readableAppKeys,
     addGroupitHash: false
-  }
+  };
   var userRead = {
     keys: readableUserKeys,
     addGroupitHash: false
-  }
+  };
   var publicRead = {
     keys: readablePublicKeys,
     addGroupitHash: true
-  }
+  };
 
 
   T.coreTest("Read", "app", readSucceed, appRead);
@@ -160,7 +160,7 @@
     readableKeys: readableAppKeys,
     succeed:true,
     addGroupitHash:false
-  }
+  };
   var userUpdate = {
     //Changing the user_id is allowed but it changes ownership, preventing
     //the user from reading it again. So we don't test the setting user_id here
@@ -168,19 +168,19 @@
     readableKeys: readableUserKeys,
     succeed:true,
     addGroupitHash:false
-  }
+  };
   var publicUpdate = {
     readOnlyKeys: R_UserKeys.concat(["user_id"]),
     readableKeys: readableUserKeys,
     succeed:true,
     addGroupitHash:true
-  }
+  };
   var publicFailUpdate = {
     readOnlyKeys: R_UserKeys.concat(["user_id"]),
     readableKeys: readableUserKeys,
     succeed:false,
     addGroupitHash:false
-  }
+  };
 
 
   T.coreTest("Update", "app", update, appUpdate);
@@ -241,19 +241,19 @@
   var appDestroy = {
     succeed:true,
     addGroupitHash: false
-  }
+  };
   var userDestroy = {
     succeed:true,
     addGroupitHash: false
-  }
+  };
   var publicDestroy = {
     succeed:true,
     addGroupitHash: true
-  }
+  };
   var publicDestroyFail = {
     succeed:false,
     addGroupitHash: false
-  }
+  };
 
   T.coreTest("Destroy", "app", destroy, appDestroy);
   T.coreTest("Destroy", "user", destroy, userDestroy);

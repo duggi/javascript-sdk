@@ -75,22 +75,26 @@
       testDate:new Date()
     },
 
-    appSecret: "c78dae169ed35dc1620aff6e43e2157ed70f2fbdc666970d3f6086975d1a1e58be42ae717b6ab074fef3049b297686701e88a220e35c4176e75c09896f570dc2"
+    appSecret: "e3a7cd3f4dec6a7b6d68aec71d14881fdc7a4167d50286c7115c4e9ce10059c033ad53892f8fb44ce6d041c44e947737ea794206ee3369f21fb81bc67d059f52"
 
   };
 
   function loadTest(src) {
     var s = document.createElement('script');
     s.type = 'text/javascript';
-    s.src = src;
+    s.src = src + "?" + (new Date().getTime()); //Cache buster
     var x = document.getElementsByTagName('script')[0];
     x.parentNode.insertBefore(s, x);
   }
 
-  stop();
-  G.initialize("8b28847e26a1fa2057ffc061b2e310d9", "http://localhost:3000/", loadTests);
+  test("Placeholder", function() {
+    stop();
+    G.initialize("e2c25ca3b0c3fdc37095d87192aca4ea", "http://localhost:3000/", loadTests);
+  });
+
 
   function loadTests() {
+    start();
     //Long list of all the tests files we load for testing
 //  loadTest("api/api.test.js");
 //  loadTest("api/chaining.test.js");
@@ -100,18 +104,18 @@
 
     //restObject must be loaded before all other rails objects
     loadTest("api/rails/restObject.test.js");
-//  loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
-//  loadTest("api/rails/groupit.test.js");
-    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
-//  loadTest("api/rails/participant.test.js");
-//  loadTest("api/rails/paymentResponse.test.js");
-//  loadTest("api/rails/note.test.js");
-//  loadTest("api/rails/feedPost.test.js");
-//  loadTest("api/rails/email.test.js");
-//  loadTest("api/rails/authentication.test.js");
-//  loadTest("api/rails/app.test.js");
-//  loadTest("api/rails/address.test.js");
-//  loadTest("api/rails/userSession.test.js");
+//    loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
+    loadTest("api/rails/groupit.test.js");
+//    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
+//    loadTest("api/rails/participant.test.js");
+//    loadTest("api/rails/paymentResponse.test.js");
+//    loadTest("api/rails/note.test.js");
+//    loadTest("api/rails/feedPost.test.js");
+//    loadTest("api/rails/email.test.js");
+//    loadTest("api/rails/authentication.test.js");
+//    loadTest("api/rails/app.test.js");
+//    loadTest("api/rails/address.test.js");
+//    loadTest("api/rails/userSession.test.js");
 
 //TODO Need To called DestroyTestUser down here somewhere after
 //all the tests have been run

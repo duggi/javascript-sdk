@@ -59,8 +59,7 @@ G.provide("FnChain", {
         fn = args.shift(),
         next = args.shift(),
         params = null,
-        callback = null,
-        cbParams = null;
+        callback = null;
 
       while (next) {
         var type = typeof next;
@@ -68,11 +67,8 @@ G.provide("FnChain", {
           callback = next;
         } else if (next instanceof Array && !params) {
           params = next;
-        } else if (next instanceof Array && !cbParams) {
-          cbParams = next;
         } else {
           throw('Invalid argument passed to FnChain.push(): ' + next);
-          return this;
         }
         next = args.shift();
       }
@@ -91,19 +87,24 @@ G.provide("FnChain", {
     /**
      * Pushes a function that isn't a "chainable function" by wrapping it
      * in a generic chainable function.
-     * 
+     *
      * @param fn
      */
-    this.pushNc = function(fn){
+    this.pushNc = function(fn, params) {
 
-      function correctedFn(params, callback){
-        fn.apply(this, params);
+      function correctedFn(callback) {
+        if (params) {
+          fn.apply(this, params);
+        } else {
+          fn();
+        }
         callback();
       }
 
       this.push(correctedFn);
+      return this;
     };
-    
+
     /**
      * Sequentially fire the functions and callbacks in the chain FIFO.
      */
