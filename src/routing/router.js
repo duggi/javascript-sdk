@@ -35,7 +35,6 @@ G.provide("router", {
   init:function() {
 //    G.addEvent(window, 'load', G.router.execRoute);
     G.addEvent(window, 'hashchange', G.router.execRoute);
-    G.router.execRoute();
   },
 
   route:function(hash, callback) {
