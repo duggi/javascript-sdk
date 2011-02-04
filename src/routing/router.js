@@ -41,9 +41,10 @@ G.provide("router", {
   },
 
   execRoute:function() {
-    var hash = window.location.hash.slice(1),
-      callback = G.router.routes[hash];
-    if (callback) callback();
+    var hash = window.location.hash.slice(1);
+    var urlParams = hash.split("/");
+    var callback = G.router.routes[urlParams.shift()];
+    if (callback) callback(urlParams);
   }
 
 });

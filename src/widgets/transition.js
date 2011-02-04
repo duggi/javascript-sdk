@@ -41,15 +41,15 @@ G.provide("transition", {
       G.copy(transitions, transObj, true);
     };
 
-    this.trigger = function(fromWidget, toWidget) {
+    this.trigger = function(fromWidget, toWidget, urlParams) {
       var fn;
       if (!toWidget) throw("G.transition.trigger: Must go somewhere with toWidget");
-      if (!fromWidget) {
+      if (!fromWidget || fromWidget == toWidget) { //Treating refresh as same as initial load
         fn = transitions[toWidget.name];
-        if (fn) fn(toWidget);
+        if (fn) fn(toWidget, urlParams);
       } else {
         fn = transitions[fromWidget.name + "_" + toWidget.name];
-        if (fn) fn(fromWidget, toWidget);
+        if (fn) fn(fromWidget, toWidget, urlParams);
       }
     };
   }

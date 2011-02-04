@@ -27,10 +27,10 @@
 
   var publicKeys = [];
   var userKeys = publicKeys.concat(["groupit_id", "contacted", "is_public", "user_id"]);
-  var appKeys = userKeys
+  var appKeys = userKeys;
 
   var R_PublicKeys = [];
-  var R_UserKeys = R_PublicKeys.concat(["id", "created_at", "updated_at"]);
+  var R_UserKeys = R_PublicKeys.concat(["id", "created_at", "updated_at", "invited"]);
   var R_AppKeys = R_UserKeys;
 
   var readablePublicKeys = publicKeys.concat(R_PublicKeys);
@@ -43,7 +43,7 @@
     G.participant.create({
       user_id: 123,
       groupit_id: 123,
-      contacted: false,
+      invited: true,
       is_public: false
     },callback);
   }
