@@ -75,7 +75,7 @@
       testDate:new Date()
     },
 
-    appSecret: "e3a7cd3f4dec6a7b6d68aec71d14881fdc7a4167d50286c7115c4e9ce10059c033ad53892f8fb44ce6d041c44e947737ea794206ee3369f21fb81bc67d059f52"
+    appSecret: "232b2153ca8d7f916f593cd31a42a00bae714f18141791ba680851089b36c5b325f9eeda18e5f16ebe4eff996e0e17588a0279f402f6b11d9d08f4856431aa58"
 
   };
 
@@ -89,7 +89,7 @@
 
   test("Placeholder", function() {
     stop();
-    G.initialize("e2c25ca3b0c3fdc37095d87192aca4ea", "http://localhost:3000/", loadTests);
+    G.initialize("eebd71d2cc7968fa770321f7020aa4de", "http://localhost:3000/", loadTests);
   });
 
 

@@ -42,7 +42,7 @@ var G = G || {
     G.appKey = appKey;
 
     //Needs the app key before call
-    G.api("/misc/random_hash", function(json) {
+    G.api("/misc/random_hash.json", function(json) {
       G.instanceId = json.hash_digest;
       callback();
     });
