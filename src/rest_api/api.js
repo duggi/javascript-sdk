@@ -34,9 +34,13 @@ G.provide('', {
   },
 
   //Allows for posting of forms to remote destinations
-  postForm:function(path, method, params, fullPath) {
+  postViaForm:function(path, method, params, fullPath) {
     var form = G.ApiClient.createForm(path, method, params, fullPath);
     G.ApiClient.iframeRequest(form);
+  },
+
+  postForm: function(form) {
+    G.ApiClient.iframeRequest.call(G.ApiClient, form);
   }
 
 });
@@ -145,7 +149,7 @@ G.provide('ApiClient', {
             eval('var response = ' + response);
           }
         }
-        
+
         //Set flags in xhr denoting success and errors
         xhr.success = !!xhr.status.toString().match(/^2../);
         xhr.clientError = !!xhr.status.toString().match(/^4../);
@@ -185,12 +189,9 @@ G.provide('ApiClient', {
   createForm:function(path, method, params, fullPath) {
     var form = document.createElement('form');
 
-    if (fullPath) {
-      form.action = path;
-    } else {
-      form.action = this.REST_BASE_URL + path;
-    }
+    form.action = (fullPath) ? path : this.REST_BASE_URL + path;
 
+    form.enctype = "multipart/form-data";
     form.method = method;
 
     for (var key in params) {
@@ -210,10 +211,9 @@ G.provide('ApiClient', {
    * @access private
    * @param form      {object}   Dom node representing a form for submission
    */
-  iframeRequest: function(form) {
-
+  iframeRequest: function(form, clone) {
     //Prevents form passed in from being destroyed in call.
-    form = form.cloneNode(true);
+    if (clone) form = form.cloneNode(true);
 
     var iframe = document.createElement('iframe');
     iframe.style.display = "absolute";
@@ -225,6 +225,12 @@ G.provide('ApiClient', {
 
     iframe.contentWindow.document.body.appendChild(form);
     form.submit();
+
+    //30 seconds from now clean out that iframe
+    setTimeout(function() {
+      if (iframe.parentNode)
+        iframe.parentNode.removeChild(iframe)
+    }, 30000);
   }
 
 

@@ -30,8 +30,8 @@
   var userKeys = publicKeys;
   var appKeys = userKeys.concat(["purchased", "groupit_type"]);
 
-  var R_PublicKeys = ["id", "created_at", "updated_at"];
-  var R_UserKeys = R_PublicKeys.concat(["hash_digest"]);
+  var R_PublicKeys = ["id", "created_at", "updated_at", "hash_digest"];
+  var R_UserKeys = R_PublicKeys;
   var R_AppKeys = R_UserKeys;
 
   var readablePublicKeys = publicKeys.concat(R_PublicKeys);
