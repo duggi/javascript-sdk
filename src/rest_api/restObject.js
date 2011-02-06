@@ -33,15 +33,17 @@ G.provide("RestObject", {
 
   },
 
-  Base:function(root_path, object_name) {
-    var request_type = ".json";
+  Base:function(rootPath, objectName) {
+    var requestType = ".json";
+    this.rootPath = rootPath;
+    this.objectName = objectName;
 
     /**
      * Base Index call for all RestObject Objects
      */
     this.index = function(params, callback) {
-      var path = root_path + request_type;
-      params = railify(params, object_name);
+      var path = rootPath + requestType;
+      params = railify(params, objectName);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "get", params, callback);
     };
@@ -51,13 +53,11 @@ G.provide("RestObject", {
      * Automatically pulls out a singular object from the json response
      */
     this.create = function(params, callback) {
-      var path = root_path + request_type;
-      params = railify(params, object_name);
+      var path = rootPath + requestType;
+      params = railify(params, objectName);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
-        if (callback) {
-          callback(json[object_name], xhr);
-        }
+        callback(stripNamespace(json, xhr), xhr);
       });
     };
 
@@ -66,13 +66,11 @@ G.provide("RestObject", {
      * Automatically pulls out a singular object from the json response
      */
     this.read = function(params, callback) {
-      var path = root_path + "/" + params.id + request_type;
-      params = railify(params, object_name);
+      var path = rootPath + "/" + params.id + requestType;
+      params = railify(params, objectName);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr) {
-        if (callback) {
-          callback(json[object_name], xhr);
-        }
+        callback(stripNamespace(json, xhr), xhr);
       });
     };
 
@@ -81,8 +79,8 @@ G.provide("RestObject", {
      * Per rails convention this call updates and doesn't return the updated model
      */
     this.update = function(params, callback) {
-      var path = root_path + "/" + params.id + request_type;
-      params = railify(params, object_name);
+      var path = rootPath + "/" + params.id + requestType;
+      params = railify(params, objectName);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "put", params, callback);
     };
@@ -90,18 +88,20 @@ G.provide("RestObject", {
      * Base Destroy call for all RestObject Objects
      */
     this.destroy = function(params, callback) {
-      var path = root_path + "/" + params.id + request_type;
-      params = railify(params, object_name);
+      var path = rootPath + "/" + params.id + requestType;
+      params = railify(params, objectName);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "delete", params, callback);
     };
 
     //Is intended only for framework polling
     this.pollOnce = function(params, callback) {
-      var path = root_path + "/poll";
-      params = railify(params, object_name);
+      var path = rootPath + "/poll";
+      params = railify(params, objectName);
       params = G.RestObject.injectRailsParams(params);
-      G.api(path, "get", params, callback);
+      G.api(path, "get", params, function(json, xhr){
+         callback(stripNamespace(json, xhr), xhr);
+      });
     };
 
     /**
@@ -109,7 +109,7 @@ G.provide("RestObject", {
      * to a model. Example : user[:id] where user is the model name and id is
      * the attribute to be sent to the server.
      */
-    function railify(params, object_name) {
+    function railify(params, objectName) {
       var rails_params = {};
       for (var key in params) {
         if (key == "id") continue;
@@ -117,9 +117,13 @@ G.provide("RestObject", {
           rails_params[key] = params[key];
           continue;// Need to do a better job here
         }
-        rails_params[object_name + "[" + key + "]"] = params[key];
+        rails_params[objectName + "[" + key + "]"] = params[key];
       }
       return rails_params;
+    }
+
+    function stripNamespace(json, xhr) {
+      return (xhr.success) ? json[objectName] : json;
     }
 
 
@@ -260,7 +264,7 @@ G.provide("", {
       delete this.index;
       delete this.destroy;
     }
-    
+
     Override.prototype = base;
     return new Override();
   }()

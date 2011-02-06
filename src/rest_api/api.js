@@ -145,6 +145,12 @@ G.provide('ApiClient', {
             eval('var response = ' + response);
           }
         }
+        
+        //Set flags in xhr denoting success and errors
+        xhr.success = !!xhr.status.toString().match(/^2../);
+        xhr.clientError = !!xhr.status.toString().match(/^4../);
+        xhr.serverError = !!xhr.status.toString().match(/^5../);
+
         cb(response, xhr);
       }
     }

@@ -26,7 +26,7 @@
   //Keys that should be included in every response from the server
   var publicKeys = [];
   var userKeys = publicKeys.concat(["groupit_id", "address_id", "amount", "user_id",
-    "transaction_id", "surcharge", "tax", "payment_response_id", "app_key",
+    "transaction_id", "surcharge", "payment_response_id", "app_key",
     "is_public"]);
   var appKeys = userKeys;
 
@@ -41,13 +41,13 @@
 
   //---HELPERS---------------------------------------------------
   function createContribution(callback) {
-    G.contribution.create({
+    var params = {
       groupitId: 123,
       amount: 50,
       customer:{
         firstName: "Timothy",
         lastName: "Cardenas",
-        email: "something@somewhere.com"
+        email:"greah@wee.com"
       },
       cc:{
         cardholderName: "Timothy Cardenas",
@@ -66,69 +66,69 @@
         countryCode: "US",
         phone: "111-111-1111"
       }
-    }, callback);
+    };
+    G.contribution.create(params, callback);
   }
 
-  createContribution(function(json, xhr){
-    G.log(json);
-    G.log(xhr);
-  });
-
-//      groupit_id: 34,
-//      address_id: 1263,
-//      amount: 123.40,
-//      user_id: 341,
-//      transaction_id: "234dfs32",
-//      surcharge: 0,
-//      tax: 12.43,
-//      payment_response_id: 123,
-//      is_public: true
+//  createContribution(function(json, xhr){
+//    G.log(json);
+//    G.log(xhr);
+//  });
 
 
   //---INDEX TESTS---------------------------------------------
-//  var appIndex = {
-//    keys: readableAppKeys,
-//    succeed : true
-//  };
-//  var userIndex = {
-//    keys: readableUserKeys,
-//    succeed : true
-//  };
-//  var publicIndex = {
-//    keys: readablePublicKeys,
-//    succeed : false
-//  };
-//
-//  T.coreTest("Index", "app", index, appIndex);
-//  T.coreTest("Index", "user", index, userIndex);
-//  T.coreTest("Index", "public", index, publicIndex);
-//
-//
-//  function index(chain, temp, data) {
-//    var keys = data.keys,
-//      succeed = data.succeed;
-//
-//    temp.params = {};
-//
-//    chain
-//      .push(createContribution, successAndParams)
-//      .push(G.contribution.index, [
-//      {}
-//    ], indexCheck)
-//      .appPush(G.contribution.destroy, [temp.params], T.succeed);
-//
-//    function successAndParams(model, xhr) {
-//      T.baseSuccessAndParams(temp.params, model, xhr);
-//    }
-//
-//    //Branch structure for the indexCheck
-//    function indexCheck(models, xhr) {
-//      if (succeed)
-//        T.baseCheckAllModels("contribution", keys, models, xhr);
-//      else
-//        T.assertFailure(xhr, "Index operation should fail");
-//    }
-//  }
+  var appIndex = {
+    keys: readableAppKeys,
+    succeed : true
+  };
+  var userIndex = {
+    keys: readableUserKeys,
+    succeed : true,
+    logout: true
+  };
+  var publicIndex = {
+    keys: readablePublicKeys,
+    succeed : false
+  };
+
+  T.coreTest("Index", "app", index, appIndex);
+  T.coreTest("Index", "user", index, userIndex);
+  T.coreTest("Index", "public", index, publicIndex);
+
+
+  function index(chain, temp, data) {
+    var keys = data.keys,
+      succeed = data.succeed,
+      logout = data.logout,
+      emptyParams = {};
+
+    temp.params = {};
+
+    /**
+     * Since our contribution is sensitive to the email.user relation
+     * we must make sure that the user is logged out at creation time
+     * or that the email on the contribution exactly matches the user
+     * that is currently logged in.
+     */
+    if (logout) chain.push(T.logoutTestUser);
+    chain.push(createContribution, successAndParams);
+    if (logout) chain.push(T.loginTestUser);
+    chain
+      .push(G.contribution.index, [ emptyParams ], indexCheck)
+      .appPush(G.contribution.destroy, [temp.params], T.succeed);
+
+    function successAndParams(model, xhr) {
+      T.baseSuccessAndParams(temp.params, model, xhr);
+    }
+
+    //Branch structure for the indexCheck
+    function indexCheck(models, xhr) {
+      if (succeed)
+        T.baseCheckAllModels("contribution", keys, models, xhr);
+      else
+        T.assertFailure(xhr, "Index operation should fail");
+    }
+  }
 
 
 //  //---CREATE TESTS--------------------------------------------

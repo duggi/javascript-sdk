@@ -75,7 +75,7 @@
       testDate:new Date()
     },
 
-    appSecret: "232b2153ca8d7f916f593cd31a42a00bae714f18141791ba680851089b36c5b325f9eeda18e5f16ebe4eff996e0e17588a0279f402f6b11d9d08f4856431aa58"
+    appSecret: "db050fd23a6160eb506c8e848ac7719923382b216b6c0f6357325d2c4747c9a82c992572a1e49cc31c321e89209427a17ab1b28eca52546a94010671fe7ec96b"
 
   };
 
@@ -89,7 +89,7 @@
 
   test("Placeholder", function() {
     stop();
-    G.initialize("eebd71d2cc7968fa770321f7020aa4de", "http://localhost:3000/", loadTests);
+    G.initialize("10c28bc3b8ec839fdb63fce7e64f667a", "http://localhost:3000/", loadTests);
   });
 
 
@@ -105,8 +105,8 @@
     //restObject must be loaded before all other rails objects
     loadTest("api/rails/restObject.test.js");
 //    loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
-    loadTest("api/rails/groupit.test.js");
-//    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
+//    loadTest("api/rails/groupit.test.js");
+    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
 //    loadTest("api/rails/participant.test.js");
 //    loadTest("api/rails/paymentResponse.test.js");
 //    loadTest("api/rails/note.test.js");

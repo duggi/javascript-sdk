@@ -74,7 +74,7 @@ G.provide("models.contribution", {
             };
             if (callback) callback(hash, xhr);
           } else if (xhr.status == "204") {//No content means still looking
-            continuePolling(1000);
+            continuePolling(1500);
           } else if (xhr.status == "200") { //JSON should be loaded
             if (callback) callback(json, xhr);
           } else {
@@ -136,33 +136,37 @@ G.provide("models.contribution", {
    *
    */
   braintreeParams:function(tr_data, pollTicket, params) {
-    return {
-      "tr_data":tr_data,
-      "transaction[custom_fields][poll_ticket]": pollTicket,
-      "transaction[custom_fields][groupit_id]":params.groupitId,
-      "transaction[custom_fields][user_id]":params.userId,
-      "transaction[custom_fields][app_key]":params.app_key,
-      "transaction[custom_fields][session_token]":params.session_token,
-      "transaction[amount]" : params.amount,
-      "transaction[customer][first_name]": params.customer.firstName,
-      "transaction[customer][last_name]": params.customer.lastName,
-      "transaction[customer][email]":params.customer.email,
-      "transaction[credit_card][cardholder_name]":params.cc.cardholderName,
-      "transaction[credit_card][number]":params.cc.number,
-      "transaction[credit_card][cvv]":params.cc.cvv,
-      "transaction[credit_card][expiration_month]":params.cc.month,
-      "transaction[credit_card][expiration_year]":params.cc.year,
-      "transaction[billing][first_name]":params.billing.firstName,
-      "transaction[billing][last_name]":params.billing.lastName,
-      "transaction[billing][street_address]":params.billing.address1,
-      "transaction[billing][extended_address]":params.billing.address2,
-      "transaction[billing][locality]":params.billing.locality,
-      "transaction[billing][region]":params.billing.region,
-      "transaction[billing][postal_code]":params.billing.postalCode,
-      "transaction[billing][country_code_alpha2]":params.billing.countryCode,
-      "transaction[customer][phone]":params.billing.phone
+    var map = {};
+
+    function mapIfDefined(key, value) {
+      if (!value && value != 0) return;
+      map[key] = value
+
     }
+    mapIfDefined("tr_data", tr_data);
+    mapIfDefined("transaction[custom_fields][poll_ticket]", pollTicket);
+    mapIfDefined("transaction[custom_fields][groupit_id]", params.groupitId);
+    mapIfDefined("transaction[custom_fields][user_id]", params.userId);
+    mapIfDefined("transaction[custom_fields][app_key]", params.app_key);
+    mapIfDefined("transaction[custom_fields][session_token]", params.session_token);
+    mapIfDefined("transaction[amount]", params.amount);
+    mapIfDefined("transaction[customer][first_name]", params.customer.firstName);
+    mapIfDefined("transaction[customer][last_name]", params.customer.lastName);
+    mapIfDefined("transaction[customer][email]", params.customer.email);
+    mapIfDefined("transaction[credit_card][cardholder_name]", params.cc.cardholderName);
+    mapIfDefined("transaction[credit_card][number]", params.cc.number);
+    mapIfDefined("transaction[credit_card][cvv]", params.cc.cvv);
+    mapIfDefined("transaction[credit_card][expiration_month]", params.cc.month);
+    mapIfDefined("transaction[credit_card][expiration_year]", params.cc.year);
+    mapIfDefined("transaction[billing][first_name]", params.billing.firstName);
+    mapIfDefined("transaction[billing][last_name]", params.billing.lastName);
+    mapIfDefined("transaction[billing][street_address]", params.billing.address1);
+    mapIfDefined("transaction[billing][extended_address]", params.billing.address2);
+    mapIfDefined("transaction[billing][locality]", params.billing.locality);
+    mapIfDefined("transaction[billing][region]", params.billing.region);
+    mapIfDefined("transaction[billing][postal_code]", params.billing.postalCode);
+    mapIfDefined("transaction[billing][country_code_alpha2]", params.billing.countryCode);
+    mapIfDefined("transaction[customer][phone]", params.billing.phone);
+    return map;
   }
-
-
 });
