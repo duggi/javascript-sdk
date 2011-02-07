@@ -57,7 +57,7 @@ G.provide("models.contribution", {
         var braintreeFormParams = c.braintreeParams(tr_data, pollTicket, params);
 
         //Post the contribution to braintree
-        G.postForm(brainTreeUrl, "post", braintreeFormParams, true);
+        G.postViaForm(brainTreeUrl, "post", braintreeFormParams, true);
 
         //Initialize the polling mechanism to look for the response on the server
         var pollingParams = G.RestObject.injectPollTicket({}, pollTicket);

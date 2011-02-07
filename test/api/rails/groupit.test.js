@@ -26,7 +26,7 @@
   //Keys that should be included in every response from the server
 
   var publicKeys = ["product_image", "product_url", "product", "price", "message",
-  "surprise", "quantity","user_id","recipient", "options","active"];
+  "surprise", "quantity","user_id","recipient", "options","active", "lead_url", "support_url"];
   var userKeys = publicKeys;
   var appKeys = userKeys.concat(["purchased", "groupit_type"]);
 

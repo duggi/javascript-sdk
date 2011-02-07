@@ -22,48 +22,21 @@
  *
  */
 
-G.provide("", {
-  route:function(hash, callback) {
-    G.router.route.call(G.router, hash, callback);
+G.provide("args", {
+  parse: function(_arguments, mapObject){
+    var parsedArgs = {},
+    next = _arguments.shift();
+
+    while(next){
+      var type = typeof(next),
+      name = mapObject[type];
+      if(!name || parsedArgs[name]){
+        throw("Parsing came across a type: "+ type+" that it wasn't expecting");
+      }
+      parsedArgs[name] = next;
+      next = _arguments.shift();
+    }
+    return parsedArgs;
   }
 });
 
-G.provide("router", {
-
-  routes: {},
-
-  init:function() {
-    G.addEvent(window, 'hashchange', G.router.execRoute);
-  },
-
-  route:function(hashName, callback) {
-    G.router.routes[hashName] = callback;
-  },
-
-  execRoute:function() {
-    var hash = window.location.hash.slice(1),
-    urlParams = hash.split("/"),
-    name = urlParams.shift();
-    var callback = G.router.routes[name];
-    if(!callback) callback = G.router.routes["*"];
-    if (callback) callback(name, urlParams);
-  }
-
-});
-
-//Gets called at framework runtime
-//(function() {
-
-//  backup if hashchange event is not supported for ie7 (bah! FUCKING IE)
-//  if(G.browser.ieVersion() < 8){
-//    var ieFrame = document.createElement("iframe");
-//    var prevHash = null;
-//    setInterval(function(){
-//      if(window.location.hash != prevHash){
-//        G.router.execRoute();
-//        prevHash = window.location.hash;
-//      }
-//    }, 150);
-//  }
-
-//})();
