@@ -37,7 +37,7 @@ G.provide("", {
 
 G.provide("ViewModel", {
 
-  Base:function() {
+  Base: function() {
 
     var data = {};
     var listeners = {};
@@ -65,8 +65,8 @@ G.provide("ViewModel", {
     this.bind = function(key, context, fn) {
       listeners[key] = listeners[key] || [];
       var listener = {
-        fn:fn,
-        context:context
+        fn: fn,
+        context: context
       };
       //Ensure no duplicates are created on accident
       this.unbind(key, context, fn);
@@ -82,12 +82,12 @@ G.provide("ViewModel", {
         }
       }
     };
-    
+
     this.debug = function(){
       G.log(data);
       G.log(listeners);
     }
 
-  }
+  };
 
 });
