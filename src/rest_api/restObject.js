@@ -126,6 +126,29 @@ G.provide("RestObject", {
       return (xhr.success) ? json[objectName] : json;
     }
 
+    //TODO might be nice to have the underscores go to camelcase
+//    function railsNamesToJsNames(json){
+//      var newJson = {};
+//      for(var key in json){
+//        var value = json[key];
+//        var newKey = toCamelCase(key);
+//        newJson[newKey] = value;
+//      }
+//      return newJson;
+//    }
+//
+//    function toCamelCase(string) {
+//      var newString = "",
+//        re = /(_)([a-z])/gi,
+//        matchResult = re.exec(string);
+//      while (matchResult) {
+//        if (matchResult[2]) {
+//          newString += matchResult[2].toUpperCase();
+//        }
+//        matchResult = re.exec();
+//      }
+//      return newString
+//    }
 
   },
 
@@ -188,14 +211,14 @@ G.provide("", {
 
   userSession:function() {
 
-    var base = new G.RestObject.Base("/user_sessions", "user_session");
+    var base = new G.RestObject.Base("/user_sessions", "user");
 
     function Override() {
       this.create = function(params, callback) {
-        base.create(params, function(userSession, xhr) {
-          G.RestObject.sessionToken = userSession.token;
+        base.create(params, function(user, xhr) {
+          G.RestObject.sessionToken = user.persistence_token;
           if (callback) {
-            callback(userSession, xhr);
+            callback(user, xhr);
           }
         });
       };

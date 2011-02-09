@@ -39,6 +39,7 @@ G.provide("ViewModel", {
 
   Base:function() {
 
+    var self = this;
     var data = {};
     var listeners = {};
 
@@ -47,19 +48,7 @@ G.provide("ViewModel", {
     };
 
     this.set = function(key, value) {
-      listeners[key] = listeners[key] || [];
-      if (arguments.length == 1 && typeof key === 'object') {
-        var obj = key;
-        for (var k in obj) {
-          this.set(k, obj[k]);
-        }
-      } else {
-        data[key] = value;
-        for (var i in listeners[key]) {
-          var listener = listeners[key][i];
-          listener.fn.apply(listener.context, [value]);
-        }
-      }
+      _set(key,value, true);
     };
 
     this.bind = function(key, context, fn) {
@@ -82,10 +71,44 @@ G.provide("ViewModel", {
         }
       }
     };
+
+    this.updateOnly = function(key,value){
+      _set(key, value, false);
+    };
     
     this.debug = function(){
       G.log(data);
       G.log(listeners);
+    };
+
+    /**
+     *  Copies key value pairs into data. If a object is provided as a key
+     *  then we disregard the value and recursively call _set until all the
+     *  keys have been transversed.
+     *
+     * @param key
+     * @param value 
+     * @param create {Boolean} If false setting will not create records (only update)
+     */
+    function _set(key, value, create) {
+      listeners[key] = listeners[key] || [];
+      if (typeof key === 'object') {
+        var obj = key;
+        for (var k in obj) {
+          self.set(k, obj[k], create);
+        }
+      } else {
+        //Need to think about cycles where the data is incremented on each touch
+        var prev = data[key]; //doesn't solve the cycle issue completely
+        if(prev == value) return; //don't trigger callbacks on no change
+        if ((!create && key in data) || create) {
+          data[key] = value;
+        }
+        for (var i in listeners[key]) {
+          var listener = listeners[key][i];
+          listener.fn.apply(listener.context, [value]);
+        }
+      }
     }
 
   }
