@@ -37,7 +37,7 @@ G.provide("", {
 
 G.provide("ViewModel", {
 
-  Base: function() {
+  Base:function() {
 
     var self = this;
     var data = {};
@@ -54,8 +54,8 @@ G.provide("ViewModel", {
     this.bind = function(key, context, fn) {
       listeners[key] = listeners[key] || [];
       var listener = {
-        fn: fn,
-        context: context
+        fn:fn,
+        context:context
       };
       //Ensure no duplicates are created on accident
       this.unbind(key, context, fn);
@@ -75,7 +75,7 @@ G.provide("ViewModel", {
     this.updateOnly = function(key,value){
       _set(key, value, false);
     };
-    
+
     this.debug = function(){
       G.log(data);
       G.log(listeners);
@@ -87,7 +87,7 @@ G.provide("ViewModel", {
      *  keys have been transversed.
      *
      * @param key
-     * @param value 
+     * @param value
      * @param create {Boolean} If false setting will not create records (only update)
      */
     function _set(key, value, create) {
@@ -99,18 +99,18 @@ G.provide("ViewModel", {
         }
       } else {
         //Need to think about cycles where the data is incremented on each touch
-        var prev = data[key]; //doesn't solve the cycle issue completely
-        if(prev == value) return; //don't trigger callbacks on no change
         if ((!create && key in data) || create) {
           data[key] = value;
         }
         for (var i in listeners[key]) {
           var listener = listeners[key][i];
+//          G.log("--Event Listener on key: "+key+" Fired--");
+//          G.log(listener.context);
           listener.fn.apply(listener.context, [value]);
         }
       }
     }
 
-  };
+  }
 
 });

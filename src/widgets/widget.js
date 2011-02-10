@@ -117,23 +117,25 @@ G.provide("widget", {
 
     var instance;
     (function(realG) { //could limit access to G if needed
-      var fn, pids = {}, base;
+      var pids = {}, base;
 
       //Forces page constructor to be lexicaly bound to our current context
       //instead of iframe (current context should be current closure and
       //then main page closure)
-      eval("fn = " + G.widget.constructors[widgetType].toString() + ";");
-
+      eval("var "+widgetType+" = " + G.widget.constructors[widgetType].toString() + ";");
+//    eval("fn = " + G.widget.constructors[widgetType].toString() + ";");
+      
       //By default hash all elems with a pid for quick lookup later
       //pids hash avail in page (looks like global) but is just bound
       //in that page. (<3 closures). Do before instance is created so
       //pids hash can be referenced during instantiation.
       base = new realG.widget.Base(name, widgetType);
-      fn.prototype = base;
+      eval(widgetType+".prototype = base");
+//      fn.prototype = base;
       base.hashOnAttribute(pids, "pid");
 
-      instance = new fn();
-
+      eval("instance = new "+widgetType+"()");
+//      instance = new fn();
       //Adds the instance data into the instance overwriting if necessary
       if (instanceObject) {
         G.copy(instance, instanceObject, true);
