@@ -27,7 +27,7 @@
   //Keys that should be included in every response from the server
   var publicKeys = ["message"];
   var userKeys = publicKeys.concat(["groupit_id", "is_public", "user_id"]);
-  var appKeys = userKeys
+  var appKeys = userKeys;
 
   var R_PublicKeys = [];
   var R_UserKeys = R_PublicKeys.concat(["id", "created_at", "updated_at"]);

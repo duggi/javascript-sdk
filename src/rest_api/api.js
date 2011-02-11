@@ -189,7 +189,7 @@ G.provide('ApiClient', {
   createForm:function(path, method, params, fullPath) {
     var form = document.createElement('form');
 
-    form.action = (fullPath) ? path : this.REST_BASE_URL + path;
+    form.action = (fullPath) ? path : G.ApiClient.REST_BASE_URL + path;
 
     form.enctype = "multipart/form-data";
     form.method = method;
