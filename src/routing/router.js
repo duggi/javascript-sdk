@@ -42,10 +42,10 @@ G.provide("router", {
 
   execRoute:function() {
     var hash = window.location.hash.slice(1),
-    urlParams = hash.split("/"),
-    name = urlParams.shift();
+      urlParams = hash.split("/"),
+      name = urlParams.shift();
     var callback = G.router.routes[name];
-    if(!callback) callback = G.router.routes["*"];
+    if (!callback) callback = G.router.routes["*"];
     if (callback) callback(name, urlParams);
   }
 

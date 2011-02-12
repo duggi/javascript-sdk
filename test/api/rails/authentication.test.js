@@ -21,9 +21,9 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
+(function() {
   module("Authentication");
- //Keys that should be included in every response from the server
+  //Keys that should be included in every response from the server
   var publicKeys = [];
   var userKeys = publicKeys.concat(["user_id", "provider", "uid", "is_public"]);
   var appKeys = userKeys
@@ -38,7 +38,7 @@
 
   //---HELPERS---------------------------------------------------
 
-  function createAuthentication(callback){
+  function createAuthentication(callback) {
     G.authentication.create({
       user_id: 34,
       provider: "facebook",
@@ -67,24 +67,26 @@
   T.coreTest("Index", "public", index, publicIndex);
 
 
-  function index(chain, temp, data){
+  function index(chain, temp, data) {
     var keys = data.keys,
-    succeed = data.succeed;
+      succeed = data.succeed;
 
     temp.params = {};
 
     chain
-    .userPush(createAuthentication, successAndParams) //Must be a user created note to test all cases
-    .push(G.authentication.index, [{}], indexCheck)
-    .appPush(G.authentication.destroy, [temp.params], T.succeed)
+      .userPush(createAuthentication, successAndParams)//Must be a user created note to test all cases
+      .push(G.authentication.index, [
+      {}
+    ], indexCheck)
+      .appPush(G.authentication.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
     //Branch structure for the indexCheck
-    function indexCheck(models, xhr){
-      if(succeed)
+    function indexCheck(models, xhr) {
+      if (succeed)
         T.baseCheckAllModels("authentication", keys, models, xhr);
       else
         T.assertFailure(xhr, "Index operation should fail");
@@ -98,16 +100,16 @@
   T.coreTest("Create", "user", createSucceed, readableUserKeys);
   T.coreTest("Create", "public", createFail);
 
-  function createSucceed(chain, temp, keys){
+  function createSucceed(chain, temp, keys) {
     temp.params = {};
     chain
-    .push(createAuthentication, function(model, xhr){
+      .push(createAuthentication, function(model, xhr) {
       T.baseParamsAndAssert(keys, temp.params, model, xhr);
     })
-    .appPush(G.authentication.destroy, [temp.params], T.succeed)
+      .appPush(G.authentication.destroy, [temp.params], T.succeed)
   }
 
-  function createFail(chain){
+  function createFail(chain) {
     chain.push(createAuthentication, T.fail)
   }
 
@@ -128,25 +130,25 @@
 
   T.coreTest("Read", "app", read, appRead);
   T.coreTest("Read", "user", read, userRead);
-  T.coreTest("Read", "public",read, publicRead);
+  T.coreTest("Read", "public", read, publicRead);
 
-  function read(chain, temp, data){
+  function read(chain, temp, data) {
     var succeed = data.succeed,
-    keys = data.keys;
+      keys = data.keys;
     temp.params = {};
 
     chain
-    .userPush(createAuthentication, successAndParams)
-    .push(G.authentication.read, [temp.params], readCheck)
-    .appPush(G.authentication.destroy, [temp.params], T.succeed)
+      .userPush(createAuthentication, successAndParams)
+      .push(G.authentication.read, [temp.params], readCheck)
+      .appPush(G.authentication.destroy, [temp.params], T.succeed)
 
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function readCheck(model, xhr){
-      if(succeed)
+    function readCheck(model, xhr) {
+      if (succeed)
         T.baseReadSuccessful(keys, model, xhr)
       else
         T.assertFailure(xhr, "Read should have failed");
@@ -180,32 +182,32 @@
   T.coreTest("Update", "public", update, publicUpdate);
 
 
-  function update(chain, temp, data){
+  function update(chain, temp, data) {
     var readOnlyKeys = data.readOnlyKeys,
-    readableKeys = data.readableKeys;
+      readableKeys = data.readableKeys;
 
     temp.params = {};
     temp.updateParams = {};
     temp.originalModel = null;
 
     chain
-    .userPush(createAuthentication, setUpdateParams)
-    .push(G.authentication.update, [temp.updateParams], data.succeed? T.succeed : T.fail)
-    .push(G.authentication.read, [temp.params], checkUpdate)
-    .appPush(G.authentication.destroy, [temp.params], T.succeed)
+      .userPush(createAuthentication, setUpdateParams)
+      .push(G.authentication.update, [temp.updateParams], data.succeed ? T.succeed : T.fail)
+      .push(G.authentication.read, [temp.params], checkUpdate)
+      .appPush(G.authentication.destroy, [temp.params], T.succeed)
 
 
-    function setUpdateParams(model, xhr){
+    function setUpdateParams(model, xhr) {
       temp.originalModel = model;
       T.setUpdateParams(readOnlyKeys, readableKeys, temp.updateParams, T.defaultTestValues, model, xhr);
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function checkUpdate(model, xhr){
-      if(data.succeed){
+    function checkUpdate(model, xhr) {
+      if (data.succeed) {
         T.checkUpdate(readOnlyKeys, readableKeys, temp.originalModel, T.defaultTestValues, model, xhr);
       }
-      else{
+      else {
         //TODO might want to check that the result didn't change but not now
         T.assertFailure(xhr, "Update should fail");
       }
@@ -218,15 +220,15 @@
   T.coreTest("Destroy", "user", destroy, true);
   T.coreTest("Destroy", "public", destroy, false);
 
-  function destroy(chain, temp, succcess){
+  function destroy(chain, temp, succcess) {
     temp.params = {};
 
     chain
-    .userPush(createAuthentication, successAndParams)
-    .push(G.authentication.destroy, [temp.params], succcess ? T.succeed : T.fail)
-    .appPush(G.authentication.read, [temp.params], succcess ? T.fail : T.succeed)
+      .userPush(createAuthentication, successAndParams)
+      .push(G.authentication.destroy, [temp.params], succcess ? T.succeed : T.fail)
+      .appPush(G.authentication.read, [temp.params], succcess ? T.fail : T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
   }

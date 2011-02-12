@@ -21,10 +21,10 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
+(function() {
   module("App");
   //Keys that should be included in every response from the server
-  var keys =[];
+  var keys = [];
 
 
 //Keys that should be included in every response from the server
@@ -42,7 +42,7 @@
 
   //---HELPERS---------------------------------------------------
 
-  function createApp(callback){
+  function createApp(callback) {
     G.app.create({
       name: "some app",
       user_id: 341,
@@ -56,8 +56,10 @@
   T.coreTest("Index", "user", indexFail);
   T.coreTest("Index", "public", indexFail);
 
-  function indexFail(chain){
-     chain.push(G.app.index, [{}], T.fail)
+  function indexFail(chain) {
+    chain.push(G.app.index, [
+      {}
+    ], T.fail)
   }
 
   //---CREATE TESTS--------------------------------------------
@@ -66,16 +68,16 @@
   T.coreTest("Create", "user", createSucceed, readableUserKeys);
   T.coreTest("Create", "public", createFail);
 
-  function createSucceed(chain, temp, keys){
+  function createSucceed(chain, temp, keys) {
     temp.params = {};
     chain
-    .push(createApp, function(model, xhr){
+      .push(createApp, function(model, xhr) {
       T.baseParamsAndAssert(keys, temp.params, model, xhr);
     })
-    .appPush(G.app.destroy, [temp.params], T.succeed)
+      .appPush(G.app.destroy, [temp.params], T.succeed)
   }
 
-  function createFail(chain){
+  function createFail(chain) {
     chain.push(createApp, T.fail)
   }
 
@@ -96,25 +98,25 @@
 
   T.coreTest("Read", "app", read, appRead);
   T.coreTest("Read", "user", read, userRead);
-  T.coreTest("Read", "public",read, publicRead);
+  T.coreTest("Read", "public", read, publicRead);
 
-  function read(chain, temp, data){
+  function read(chain, temp, data) {
     var succeed = data.succeed,
-    keys = data.keys;
+      keys = data.keys;
     temp.params = {};
 
     chain
-    .userPush(createApp, successAndParams)
-    .push(G.app.read, [temp.params], readCheck)
-    .appPush(G.app.destroy, [temp.params], T.succeed)
+      .userPush(createApp, successAndParams)
+      .push(G.app.read, [temp.params], readCheck)
+      .appPush(G.app.destroy, [temp.params], T.succeed)
 
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function readCheck(model, xhr){
-      if(succeed)
+    function readCheck(model, xhr) {
+      if (succeed)
         T.baseReadSuccessful(keys, model, xhr)
       else
         T.assertFailure(xhr, "Read should have failed");
@@ -148,32 +150,32 @@
   T.coreTest("Update", "public", update, publicUpdate);
 
 
-  function update(chain, temp, data){
+  function update(chain, temp, data) {
     var readOnlyKeys = data.readOnlyKeys,
-    readableKeys = data.readableKeys;
+      readableKeys = data.readableKeys;
 
     temp.params = {};
     temp.updateParams = {};
     temp.originalModel = null;
 
     chain
-    .userPush(createApp, setUpdateParams)
-    .push(G.app.update, [temp.updateParams], data.succeed? T.succeed : T.fail)
-    .push(G.app.read, [temp.params], checkUpdate)
-    .appPush(G.app.destroy, [temp.params], T.succeed)
+      .userPush(createApp, setUpdateParams)
+      .push(G.app.update, [temp.updateParams], data.succeed ? T.succeed : T.fail)
+      .push(G.app.read, [temp.params], checkUpdate)
+      .appPush(G.app.destroy, [temp.params], T.succeed)
 
 
-    function setUpdateParams(model, xhr){
+    function setUpdateParams(model, xhr) {
       temp.originalModel = model;
       T.setUpdateParams(readOnlyKeys, readableKeys, temp.updateParams, T.defaultTestValues, model, xhr);
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function checkUpdate(model, xhr){
-      if(data.succeed){
+    function checkUpdate(model, xhr) {
+      if (data.succeed) {
         T.checkUpdate(readOnlyKeys, readableKeys, temp.originalModel, T.defaultTestValues, model, xhr);
       }
-      else{
+      else {
         //TODO might want to check that the result didn't change but not now
         T.assertFailure(xhr, "Update should fail");
       }
@@ -186,15 +188,15 @@
   T.coreTest("Destroy", "user", destroy, true);
   T.coreTest("Destroy", "public", destroy, false);
 
-  function destroy(chain, temp, succcess){
+  function destroy(chain, temp, succcess) {
     temp.params = {};
 
     chain
-    .userPush(createApp, successAndParams)
-    .push(G.app.destroy, [temp.params], succcess ? T.succeed : T.fail)
-    .appPush(G.app.read, [temp.params], succcess ? T.fail : T.succeed)
+      .userPush(createApp, successAndParams)
+      .push(G.app.destroy, [temp.params], succcess ? T.succeed : T.fail)
+      .appPush(G.app.read, [temp.params], succcess ? T.fail : T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
   }

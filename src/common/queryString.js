@@ -42,7 +42,7 @@ G.provide("QS", {
     } : encodeURIComponent;
 
     var kvPairs = [];
-    for(var key in params){
+    for (var key in params) {
       var val = params[key];
       if (val !== null && typeof val != 'undefined') {
         kvPairs.push(encode(key) + '=' + encode(val));
@@ -51,5 +51,5 @@ G.provide("QS", {
     kvPairs.sort();
     return kvPairs.join(seperator);
   }
-  
+
 });

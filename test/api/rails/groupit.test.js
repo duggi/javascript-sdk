@@ -21,12 +21,12 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
+(function() {
   module("Groupit");
   //Keys that should be included in every response from the server
 
   var publicKeys = ["product_image", "product_url", "product", "price", "message",
-  "surprise", "quantity","user_id","recipient", "options","active", "lead_url", "support_url"];
+    "surprise", "quantity","user_id","recipient", "options","active", "lead_url", "support_url"];
   var userKeys = publicKeys;
   var appKeys = userKeys.concat(["purchased", "groupit_type"]);
 
@@ -38,9 +38,9 @@
   var readableUserKeys = userKeys.concat(R_UserKeys);
   var readableAppKeys = appKeys.concat(R_AppKeys);
 
- 
+
   //---HELPERS---------------------------------------------------
-  function createGroupit(callback){
+  function createGroupit(callback) {
     G.groupit.create({
       product: "Ipod",
       price: 234,
@@ -54,16 +54,18 @@
   T.coreTest("Index", "user", indexSucceed, false);
   T.coreTest("Index", "public", indexSucceed, true);
 
-  function indexSucceed(chain, temp, addGroupitHash){
+  function indexSucceed(chain, temp, addGroupitHash) {
     temp.params = {};
     chain
-    .push(createGroupit, successAndParams)
-    .push(G.groupit.index, [{}], T.succeed) //I think this should fail under user.
-    .appPush(G.groupit.destroy, [temp.params], T.succeed)
+      .push(createGroupit, successAndParams)
+      .push(G.groupit.index, [
+      {}
+    ], T.succeed)//I think this should fail under user.
+      .appPush(G.groupit.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr)
-      if(addGroupitHash){
+      if (addGroupitHash) {
         temp.params.hash_digest = model.hash_digest
       }
     }
@@ -91,23 +93,22 @@
   T.coreTest("Create", "user", createSucceed, userCreate);
   T.coreTest("Create", "public", createSucceed, publicCreate);
 
-  function createSucceed(chain, temp, data){
+  function createSucceed(chain, temp, data) {
     var keys = data.keys,
-    addGroupitHash = data.addGroupitHash;
-    
+      addGroupitHash = data.addGroupitHash;
+
     temp.params = {};
     chain
-    .push(createGroupit, paramsAndAssert)
-    .appPush(G.groupit.destroy, [temp.params], T.succeed);
+      .push(createGroupit, paramsAndAssert)
+      .appPush(G.groupit.destroy, [temp.params], T.succeed);
 
-    function paramsAndAssert(model, xhr){
-      T.baseParamsAndAssert(keys,temp.params, model, xhr);
-      if(addGroupitHash){
+    function paramsAndAssert(model, xhr) {
+      T.baseParamsAndAssert(keys, temp.params, model, xhr);
+      if (addGroupitHash) {
         temp.params.hash_digest = model.hash_digest;
       }
     }
   }
-
 
 
   //---READ TESTS-----------------------------------------------
@@ -130,24 +131,24 @@
   T.coreTest("Read", "user", readSucceed, userRead);
   T.coreTest("Read", "public", readSucceed, publicRead);
 
-  function readSucceed(chain, temp, data){
+  function readSucceed(chain, temp, data) {
     temp.params = {}
     var keys = data.keys,
-    addGroupitHash = data.addGroupitHash;
+      addGroupitHash = data.addGroupitHash;
 
     chain
-    .push(createGroupit, successAndParams)
-    .push(G.groupit.read, [temp.params], readSuccessful)
-    .appPush(G.groupit.destroy, [temp.params], T.succeed)
+      .push(createGroupit, successAndParams)
+      .push(G.groupit.read, [temp.params], readSuccessful)
+      .appPush(G.groupit.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
-      if(addGroupitHash){
+      if (addGroupitHash) {
         temp.params.hash_digest = model.hash_digest
       }
     }
 
-    function readSuccessful(model, xhr){
+    function readSuccessful(model, xhr) {
       T.baseReadSuccessful(keys, model, xhr);
     }
   }
@@ -198,37 +199,37 @@
   T.coreTest("Update Fail", "public", update, publicFailUpdate);
 
 
-  function update(chain, temp, data){
+  function update(chain, temp, data) {
     var readOnlyKeys = data.readOnlyKeys,
-    readableKeys = data.readableKeys,
-    addGroupitHash = data.addGroupitHash,
-    succeed = data.succeed;
+      readableKeys = data.readableKeys,
+      addGroupitHash = data.addGroupitHash,
+      succeed = data.succeed;
 
     temp.params = {};
     temp.updateParams = {};
 
     chain
-    .userPush(createGroupit, setUpdateParams)
-    .push(G.groupit.update, [temp.updateParams],succeed ? T.succeed : T.fail)
-    .push(G.groupit.read, [temp.params], checkUpdate)
-    .appPush(G.groupit.destroy, [temp.params], T.succeed )
+      .userPush(createGroupit, setUpdateParams)
+      .push(G.groupit.update, [temp.updateParams], succeed ? T.succeed : T.fail)
+      .push(G.groupit.read, [temp.params], checkUpdate)
+      .appPush(G.groupit.destroy, [temp.params], T.succeed)
 
 
-    function setUpdateParams(model, xhr){
+    function setUpdateParams(model, xhr) {
       temp.originalModel = model;
       T.setUpdateParams(readOnlyKeys, readableKeys, temp.updateParams, T.defaultTestValues, model, xhr);
       T.baseSuccessAndParams(temp.params, model, xhr);
-      if(addGroupitHash){
+      if (addGroupitHash) {
         temp.params.hash_digest = model.hash_digest;
         temp.updateParams.hash_digest = model.hash_digest;
       }
     }
 
-    function checkUpdate(model, xhr){
-      if(succeed){
+    function checkUpdate(model, xhr) {
+      if (succeed) {
         T.checkUpdate(readOnlyKeys, readableKeys, temp.originalModel, T.defaultTestValues, model, xhr);
       }
-      else{
+      else {
         //TODO might want to check that the result didn't change but not now
         T.assertSuccess(xhr, "Read after update should succeed");
       }
@@ -260,22 +261,22 @@
   T.coreTest("Destroy", "public", destroy, publicDestroy);
   T.coreTest("Destroy", "public", destroy, publicDestroyFail);
 
-  function destroy(chain, temp, data){
+  function destroy(chain, temp, data) {
     var succeed = data.succeed,
-    addGroupitHash = data.addGroupitHash;
-    
+      addGroupitHash = data.addGroupitHash;
+
     temp.params = {};
     chain
-    .push(createGroupit, successAndParams)
-    .push(G.groupit.destroy, [temp.params], succeed ? T.succeed: T.fail)
-    .push(G.groupit.read, [temp.params], succeed ? T.fail: T.succeed)
-    if(!succeed){
+      .push(createGroupit, successAndParams)
+      .push(G.groupit.destroy, [temp.params], succeed ? T.succeed : T.fail)
+      .push(G.groupit.read, [temp.params], succeed ? T.fail : T.succeed)
+    if (!succeed) {
       chain.appPush(G.groupit.destroy, [temp.params], T.succeed);
     }
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
-      if(addGroupitHash){
+      if (addGroupitHash) {
         temp.params.hash_digest = model.hash_digest;
       }
     }

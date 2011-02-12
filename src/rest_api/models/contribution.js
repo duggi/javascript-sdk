@@ -142,6 +142,7 @@ G.provide("models.contribution", {
       if (!value && value != 0) return;
       map[key] = value
     }
+
     mapIfDefined("tr_data", tr_data);
     mapIfDefined("transaction[custom_fields][poll_ticket]", pollTicket);
     mapIfDefined("transaction[custom_fields][groupit_id]", params.groupitId);

@@ -22,35 +22,35 @@
  *
  */
 
-(function(){
+(function() {
   module("Chaining");
 
-  asyncTest("Chaining two methods sequentially", function(){
+  asyncTest("Chaining two methods sequentially", function() {
     expect(1);
     var val = 1;
     var chain = G.newFnChain();
     chain.push(slowFirst)
-    .push(fastSecond)
-    .push(assert55)
-    .fire();
+      .push(fastSecond)
+      .push(assert55)
+      .fire();
 
-    function slowFirst(callback){
-      setTimeout(function(){
+    function slowFirst(callback) {
+      setTimeout(function() {
         val += 10;
         callback();
-      },300);
+      }, 300);
     }
 
-    function fastSecond(callback){
+    function fastSecond(callback) {
       val *= 5;
       callback();
     }
 
-    function assert55(callback){
+    function assert55(callback) {
       equal(val, 55, "(1+10)*5 should be 55 if executed in that order");
       callback();
       start();
     }
   });
-  
+
 })();

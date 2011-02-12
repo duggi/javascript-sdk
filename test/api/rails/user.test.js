@@ -22,7 +22,7 @@
  *
  */
 
-(function(){
+(function() {
   module("User");
   //Keys that should be included in every response from the server
   var publicKeys = [];
@@ -36,11 +36,10 @@
   var readablePublicKeys = publicKeys.concat(R_PublicKeys);
   var readableUserKeys = userKeys.concat(R_UserKeys);
   var readableAppKeys = appKeys.concat(R_AppKeys);
-  
 
 
   //---HELPERS------------------------------------------------
-  function createUser(callback){
+  function createUser(callback) {
     G.user.create({
       name:"Tim Test2",
       login:"test2",
@@ -48,13 +47,13 @@
     }, callback)
   }
 
-  function login(callback){
+  function login(callback) {
     G.user.login({
       login:"test2",
       password:"password"
     }, callback);
   }
-  
+
 
   //---INDEX TESTS---------------------------------------------
 
@@ -78,25 +77,27 @@
   T.coreTest("Index", "user", index, userLogin);
   T.coreTest("Index", "public", index, publicIndex);
 
-  function index(chain, temp, data){
+  function index(chain, temp, data) {
     var keys = data.keys,
-    loginNewUser = data.loginNewUser,
-    succeed = data.succeed;
-    
+      loginNewUser = data.loginNewUser,
+      succeed = data.succeed;
+
     temp.params = {};
     chain.push(createUser, successAndParams)
-    if(loginNewUser){
+    if (loginNewUser) {
       chain.push(login);
     }
     chain
-    .push(G.user.index, [{}], succeed ? checkAllModels: T.fail )
-    .appPush(G.user.destroy, [temp.params], T.succeed)
+      .push(G.user.index, [
+      {}
+    ], succeed ? checkAllModels : T.fail)
+      .appPush(G.user.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr)
     }
 
-    function checkAllModels(models, xhr){
+    function checkAllModels(models, xhr) {
       T.baseCheckAllModels('user', keys, models, xhr)
     }
   }
@@ -109,13 +110,13 @@
   T.coreTest("Create", "public", create, readableUserKeys);
 
 
-  function create(chain, temp, keys){
+  function create(chain, temp, keys) {
     temp.params = {}
     chain
-    .push(createUser, paramsAndAssert)
-    .appPush(G.user.destroy, [temp.params], T.succeed)
+      .push(createUser, paramsAndAssert)
+      .appPush(G.user.destroy, [temp.params], T.succeed)
 
-    function paramsAndAssert(model, xhr){
+    function paramsAndAssert(model, xhr) {
       T.baseParamsAndAssert(keys, temp.params, model, xhr)
     }
   }
@@ -126,19 +127,19 @@
   T.coreTest("Read", "app", read, readableAppKeys);
   T.coreTest("Read", "user", read, readableUserKeys);
   T.coreTest("Read", "public", read, readablePublicKeys);
-  
-  function read(chain, temp, keys){
+
+  function read(chain, temp, keys) {
     temp.params = {};
     chain
-    .push(createUser, successAndParams)
-    .push(G.user.read, [temp.params], readSuccessful)
-    .appPush(G.user.destroy, [temp.params], T.succeed)
+      .push(createUser, successAndParams)
+      .push(G.user.read, [temp.params], readSuccessful)
+      .appPush(G.user.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function readSuccessful(model, xhr){
+    function readSuccessful(model, xhr) {
       T.baseReadSuccessful(keys, model, xhr);
     }
   }
@@ -170,36 +171,36 @@
   T.coreTest("Update", "user", update, userUpdate);
   T.coreTest("Update", "public", update, publicUpdate);
 
-  function update(chain, temp, data){
+  function update(chain, temp, data) {
     var readOnlyKeys = data.readOnlyKeys,
-    readableKeys = data.readableKeys,
-    succeed = data.succeed,
-    loginNewUser = data.loginNewUser;
-    
+      readableKeys = data.readableKeys,
+      succeed = data.succeed,
+      loginNewUser = data.loginNewUser;
+
     temp.params = {};
     temp.updateParams = {};
     temp.originalModel = null;
 
     chain.push(createUser, successAndParams)
-    if(loginNewUser){
+    if (loginNewUser) {
       chain.push(login);
     }
     chain
-    .push(G.user.read,[temp.params], setUpdateParams)
-    .push(G.user.update, [temp.updateParams], succeed? T.succeed : T.fail)
-    .push(G.user.read, [temp.params], succeed ? checkUpdate : T.succeed)
-    .appPush(G.user.destroy, [temp.params], T.succeed )
+      .push(G.user.read, [temp.params], setUpdateParams)
+      .push(G.user.update, [temp.updateParams], succeed ? T.succeed : T.fail)
+      .push(G.user.read, [temp.params], succeed ? checkUpdate : T.succeed)
+      .appPush(G.user.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function setUpdateParams(model, xhr){
+    function setUpdateParams(model, xhr) {
       temp.originalModel = model;
       T.setUpdateParams(readOnlyKeys, readableKeys, temp.updateParams, T.defaultTestValues, model, xhr);
     }
 
-    function checkUpdate(model, xhr){
+    function checkUpdate(model, xhr) {
       T.checkUpdate(readOnlyKeys, readableKeys, temp.originalModel, T.defaultTestValues, model, xhr);
     }
   }
@@ -223,20 +224,20 @@
   T.coreTest("Destroy", "user", destroy, userDestroy);
   T.coreTest("Destroy", "public", destroy, publicDestroy);
 
-  function destroy(chain, temp, data){
+  function destroy(chain, temp, data) {
     var succeed = data.succeed,
-    loginNewUser = data.loginNewUser;
+      loginNewUser = data.loginNewUser;
 
     temp.params = {};
 
     chain.push(createUser, successAndParams)
-    if(loginNewUser){
+    if (loginNewUser) {
       chain.push(login);
     }
-    chain.push(G.user.destroy, [temp.params], succeed? T.succeed: T.fail)
-    
+    chain.push(G.user.destroy, [temp.params], succeed ? T.succeed : T.fail)
 
-    function successAndParams(model ,xhr){
+
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 

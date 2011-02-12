@@ -37,9 +37,12 @@ var _isLogging = true;
 var G = G || {
   instanceId:null, //(AKA instance-private key)
   appKey:null, //(AKA App Identifier)
+  endPoint:null, //AKA Server protocol and hostname
 
-  init:function(appKey, callback) {
+  init:function(appKey, endPoint, callback) {
     G.appKey = appKey;
+    G.endPoint = endPoint;
+
 
     //Needs the app key before call
     G.api("/misc/random_hash.json", function(json) {

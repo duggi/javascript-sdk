@@ -273,7 +273,7 @@
   T.fail = function(json, xhr) {
     T.assertFailure(xhr);
   };
-  
+
   T.succeed = function(json, xhr) {
     T.assertSuccess(xhr);
   };

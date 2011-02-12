@@ -24,19 +24,16 @@
 
 G.provide("", {
 
-  initialize:function(appKey, endpoint, callback) {
-
-    //Sets our endpoint (ie where we send api requests)
-    G.ApiClient.init(endpoint);
-    
+  initialize:function(appKey, endPoint, callback) {
     //Construct our rails models and api objects
     G.RestObject.init();
 
     //Begin routing observation of the window bar
     G.router.init();
 
+    //Sets our endpoint (ie where we send api requests)
     //Setup our tokens and keys for this G instance
-    G.init(appKey, function(){
+    G.init(appKey, endPoint, function() {
       callback();
       //After the callback for the program to initialize we execute a route lookup
       G.router.execRoute();

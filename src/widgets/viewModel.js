@@ -48,7 +48,7 @@ G.provide("ViewModel", {
     };
 
     this.set = function(key, value) {
-      _set(key,value, true);
+      _set(key, value, true);
     };
 
     this.bind = function(key, context, fn) {
@@ -72,11 +72,11 @@ G.provide("ViewModel", {
       }
     };
 
-    this.updateOnly = function(key,value){
+    this.updateOnly = function(key, value) {
       _set(key, value, false);
     };
 
-    this.debug = function(){
+    this.debug = function() {
       G.log(data);
       G.log(listeners);
     };

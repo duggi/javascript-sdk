@@ -22,19 +22,20 @@
  *
  */
 
-(function(){
+(function() {
   module("User Session");
-  var keys =["token"];
+  var keys = ["persistence_token"];
 
-  asyncTest("Create new user session", function(){
+  //Really just make sure that the persistence token is available
+  asyncTest("Create new user session", function() {
 
-    T.getTestUser(function(user){
-      G.userSession.create({password: "password", login:"test"}, function (userSession){
+    T.getTestUser(function(user) {
+      G.userSession.create({password: "password", login:"test"}, function (user) {
 
         //Expected nonnull keys for new users
-        for(var i=0, len=keys.length; i < len; ++i){
+        for (var i = 0, len = keys.length; i < len; ++i) {
           var key = keys[i];
-          ok(key in userSession, key + " is a key in user hash");
+          ok(key in user, key + " is a key in user hash");
         }
 
         start();

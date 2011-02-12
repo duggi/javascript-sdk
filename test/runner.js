@@ -75,7 +75,7 @@
       testDate:new Date()
     },
 
-    appSecret: "db050fd23a6160eb506c8e848ac7719923382b216b6c0f6357325d2c4747c9a82c992572a1e49cc31c321e89209427a17ab1b28eca52546a94010671fe7ec96b"
+    appSecret: "341403ce21f51819eabd5fa13738b5edcf8436d8b8b0ce5a5733fe8bcdd219a802d5129284d22679643cf33b351f59c87d722f5d702631cb9463186b27052637"
 
   };
 
@@ -89,7 +89,7 @@
 
   test("Placeholder", function() {
     stop();
-    G.initialize("10c28bc3b8ec839fdb63fce7e64f667a", "http://localhost:3000/", loadTests);
+    G.initialize("69a0dd420c6eb5b7922bbd2275321a88", "http://localhost:3000/", loadTests);
   });
 
 
@@ -106,7 +106,7 @@
     loadTest("api/rails/restObject.test.js");
 //    loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
 //    loadTest("api/rails/groupit.test.js");
-    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
+//    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
 //    loadTest("api/rails/participant.test.js");
 //    loadTest("api/rails/paymentResponse.test.js");
 //    loadTest("api/rails/note.test.js");
@@ -114,7 +114,7 @@
 //    loadTest("api/rails/email.test.js");
 //    loadTest("api/rails/authentication.test.js");
 //    loadTest("api/rails/app.test.js");
-//    loadTest("api/rails/address.test.js");
+    loadTest("api/rails/address.test.js");
 //    loadTest("api/rails/userSession.test.js");
 
 //TODO Need To called DestroyTestUser down here somewhere after

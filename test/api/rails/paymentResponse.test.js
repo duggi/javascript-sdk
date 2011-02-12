@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
+(function() {
   module("PaymentReponse");
   //Keys that should be included in every response from the server 
   var publicKeys = [];
@@ -37,9 +37,8 @@
   var readableAppKeys = appKeys.concat(R_AppKeys);
 
 
-
   //---HELPERS---------------------------------------------------
-  function createPaymentResponse(callback){
+  function createPaymentResponse(callback) {
     G.paymentResponse.create({
       groupit_id: 123,
       user_id: 123,
@@ -55,25 +54,29 @@
   T.coreTest("Index", "user", indexFail);
   T.coreTest("Index", "public", indexFail);
 
-  function indexSucceed(chain, temp, keys){
+  function indexSucceed(chain, temp, keys) {
     temp.params = {};
     chain
-    .push(createPaymentResponse, successAndParams)
-    .push(G.paymentResponse.index, [{}], checkAllModels)
-    .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
+      .push(createPaymentResponse, successAndParams)
+      .push(G.paymentResponse.index, [
+      {}
+    ], checkAllModels)
+      .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
-      T.baseSuccessAndParams(temp.params , model, xhr)
+    function successAndParams(model, xhr) {
+      T.baseSuccessAndParams(temp.params, model, xhr)
     }
 
-    function checkAllModels(models, xhr){
+    function checkAllModels(models, xhr) {
       T.baseCheckAllModels("payment_response", keys, models, xhr)
     }
   }
 
-  function indexFail(chain){
+  function indexFail(chain) {
     chain
-    .push(G.paymentResponse.index, [{}], T.fail)
+      .push(G.paymentResponse.index, [
+      {}
+    ], T.fail)
   }
 
   //---CREATE TESTS--------------------------------------------
@@ -82,21 +85,21 @@
   T.coreTest("Create", "user", createFail);
   T.coreTest("Create", "public", createFail);
 
-  function createSucceed(chain, temp, keys){
+  function createSucceed(chain, temp, keys) {
     temp.params = {};
-    
-    chain
-    .push(createPaymentResponse, paramsAndAssert)
-    .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
 
-    function paramsAndAssert(model, xhr){
+    chain
+      .push(createPaymentResponse, paramsAndAssert)
+      .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
+
+    function paramsAndAssert(model, xhr) {
       T.baseParamsAndAssert(keys, temp.params, model, xhr)
     }
   }
 
-  function createFail(chain){
+  function createFail(chain) {
     chain
-    .push(createPaymentResponse, T.fail)
+      .push(createPaymentResponse, T.fail)
   }
 
 
@@ -106,27 +109,31 @@
   T.coreTest("Read", "user", readFail);
   T.coreTest("Read", "public", readFail);
 
-  function readSucceed(chain, temp, data){
-    temp.params ={};
+  function readSucceed(chain, temp, data) {
+    temp.params = {};
     chain
-    .push(createPaymentResponse, successAndParams)
-    .push(G.paymentResponse.read, [temp.params], readSuccessful)
-    .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
+      .push(createPaymentResponse, successAndParams)
+      .push(G.paymentResponse.read, [temp.params], readSuccessful)
+      .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
-    
-    function readSuccessful (model, xhr){
+
+    function readSuccessful(model, xhr) {
       T.baseReadSuccessful(readableAppKeys, model, xhr);
     }
   }
 
-  function readFail(chain, temp, data){
+  function readFail(chain, temp, data) {
     chain
-    .push(createPaymentResponse, T.fail)
-    .push(G.paymentResponse.read, [{}], T.fail)
-    .push(G.paymentResponse.destroy, [{}], T.fail)
+      .push(createPaymentResponse, T.fail)
+      .push(G.paymentResponse.read, [
+      {}
+    ], T.fail)
+      .push(G.paymentResponse.destroy, [
+      {}
+    ], T.fail)
   }
 
   //---UPDATE TESTS---------------------------------------------
@@ -152,35 +159,35 @@
   T.coreTest("Update", "public", update, publicUpdate);
 
 
-  function update(chain, temp, data){
+  function update(chain, temp, data) {
     var readOnlyKeys = data.readOnlyKeys,
-    readableKeys = data.readableKeys,
-    succeed = data.succeed;
+      readableKeys = data.readableKeys,
+      succeed = data.succeed;
 
     temp.params = {};
     temp.updateParams = {};
     temp.originalModel = null;
 
     chain
-    .push(createPaymentResponse, succeed ? setUpdateParams : T.fail )
-    .push(G.paymentResponse.update, [temp.updateParams], succeed ? T.succeed : T.fail)
-    .push(G.paymentResponse.read, [temp.params], checkUpdate)
-    if(succeed){
+      .push(createPaymentResponse, succeed ? setUpdateParams : T.fail)
+      .push(G.paymentResponse.update, [temp.updateParams], succeed ? T.succeed : T.fail)
+      .push(G.paymentResponse.read, [temp.params], checkUpdate)
+    if (succeed) {
       chain.appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
     }
 
 
-    function setUpdateParams(model, xhr){
+    function setUpdateParams(model, xhr) {
       temp.originalModel = model;
       T.setUpdateParams(readOnlyKeys, readableKeys, temp.updateParams, T.defaultTestValues, model, xhr);
       T.baseSuccessAndParams(temp.params, model, xhr)
     }
 
-    function checkUpdate(model, xhr){
-      if(succeed){
+    function checkUpdate(model, xhr) {
+      if (succeed) {
         T.checkUpdate(readOnlyKeys, readableKeys, temp.originalModel, T.defaultTestValues, model, xhr);
       }
-      else{
+      else {
         //TODO might want to check that the result didn't change but not now
         T.assertFailure(xhr, "Update should fail");
       }
@@ -193,27 +200,27 @@
   T.coreTest("Destroy", "user", destroyFail);
   T.coreTest("Destroy", "public", destroyFail);
 
-  function destroySucceed(chain, temp){
-    temp.params={};
-    
-    chain
-    .push(createPaymentResponse, successAndParams)
-    .push(G.paymentResponse.destroy, [temp.params], T.succeed)
-    .push(G.paymentResponse.read, [temp.params], T.fail)
+  function destroySucceed(chain, temp) {
+    temp.params = {};
 
-    function successAndParams(model, xhr){
+    chain
+      .push(createPaymentResponse, successAndParams)
+      .push(G.paymentResponse.destroy, [temp.params], T.succeed)
+      .push(G.paymentResponse.read, [temp.params], T.fail)
+
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
   }
 
-  function destroyFail(chain, temp){
-    temp.params={};
+  function destroyFail(chain, temp) {
+    temp.params = {};
     chain
-    .appPush(createPaymentResponse, successAndParams)
-    .push(G.paymentResponse.destroy, [temp.params], T.fail)
-    .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
+      .appPush(createPaymentResponse, successAndParams)
+      .push(G.paymentResponse.destroy, [temp.params], T.fail)
+      .appPush(G.paymentResponse.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
   }

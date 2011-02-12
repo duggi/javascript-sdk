@@ -45,8 +45,8 @@
  * a compiler script don't edit this file unless you know what you are doing.
  */
 
-(function(window, undefined){
+(function(window, undefined) {
 
   //INSERT_JAVASCRIPT_CODE_HERE
 
-  })(window);
+})(window);

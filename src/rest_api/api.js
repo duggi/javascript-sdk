@@ -47,11 +47,6 @@ G.provide('', {
 
 G.provide('ApiClient', {
   REST_METHODS: ['get', 'post','delete', 'put'],
-  REST_BASE_URL: "http://localhost:3000/",
-
-  init:function(endpoint) {
-    G.ApiClient.REST_BASE_URL = endpoint;
-  },
 
   /**
    *   rest: REST access to our server with various calling options.
@@ -123,13 +118,14 @@ G.provide('ApiClient', {
     var isGet = method.toLowerCase() == "get";
     var queryString = G.QS.encode(params);
 
-    var url = this.REST_BASE_URL + path;
+    var url = G.endPoint + path;
     if (isGet) {
       url += "?" + queryString;
     }
 
 
     var xhr = new XMLHttpRequest();
+
     if ("withCredentials" in xhr) {
       xhr.open(method, url, true);
     } else if (typeof XDomainRequest != "undefined") {
@@ -139,21 +135,36 @@ G.provide('ApiClient', {
       throw("corsRequest: cross site xhr not available");
     }
 
+
     if (cb) {
       xhr.onload = function() {
-        var response = xhr.responseText;
-        //TODO need to parse the json better than with evals.
-        if (xhr.getResponseHeader("Content-Type")) {
-          var contentType = xhr.getResponseHeader("Content-Type").toLowerCase();
-          if (contentType.indexOf("application/json") != -1 && response.replace(/\s*/, "")) {
-            eval('var response = ' + response);
-          }
+
+        //Custom contentType and standardization of response
+        //TODO this goes into our custom XHR object
+        if (!xhr.contentType) {
+          if (xhr.getResponseHeader)
+            xhr.contentType = xhr.getResponseHeader("Content-Type");
         }
 
-        //Set flags in xhr denoting success and errors
-        xhr.success = !!xhr.status.toString().match(/^2../);
-        xhr.clientError = !!xhr.status.toString().match(/^4../);
-        xhr.serverError = !!xhr.status.toString().match(/^5../);
+        var contentType = xhr.contentType.toLowerCase();
+        var response = xhr.responseText;
+
+        //TODO need to parse the json better than with evals.
+        //TODO response replace /*s/ is just to fail here if head was called in rails...
+        if (contentType.indexOf("application/json") != -1 && response.replace(/\s*/, "")) {
+          eval('response = ' + "(" + response + ")"); //ie needs braces
+        }
+
+        //For cool kids
+        if (xhr.status) {
+          //Set flags in xhr denoting success and errors
+          xhr.success = !!xhr.status.toString().match(/^2../);
+          xhr.clientError = !!xhr.status.toString().match(/^4../);
+          xhr.serverError = !!xhr.status.toString().match(/^5../);
+        } else { //FUCK YOU IE!!! TODO move to custom xhr object
+          xhr.success = !!xhr.responseText;
+          xhr.clientError = xhr.serverError = !xhr.responseText;
+        }
 
         cb(response, xhr);
       }
@@ -162,7 +173,10 @@ G.provide('ApiClient', {
     if (isGet) {
       xhr.send();
     } else {
-      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      //IE 8 doesn't support header
+      if (xhr.setRequestHeader) {
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      }
       xhr.send(queryString);
     }
 
@@ -189,7 +203,7 @@ G.provide('ApiClient', {
   createForm:function(path, method, params, fullPath) {
     var form = document.createElement('form');
 
-    form.action = (fullPath) ? path : G.ApiClient.REST_BASE_URL + path;
+    form.action = (fullPath) ? path : G.endPoint + path;
 
     form.enctype = "multipart/form-data";
     form.method = method;
@@ -216,14 +230,18 @@ G.provide('ApiClient', {
     if (clone) form = form.cloneNode(true);
 
     var iframe = document.createElement('iframe');
-    iframe.style.display = "absolute";
+    iframe.style.display = "none";
+    iframe.style.position = "absolute";
     iframe.style.top = "-10000px";
     iframe.style.height = "0px";
     iframe.style.width = "0px";
 
     document.body.appendChild(iframe); //initializes iframe
 
-    iframe.contentWindow.document.body.appendChild(form);
+    G.iframe = iframe;
+    //ie 8 needs document.body everyone else uses contentWindow
+    var body = iframe.contentWindow.document.body || iframe.document.body;
+    body.appendChild(form);
     form.submit();
 
     //30 seconds from now clean out that iframe

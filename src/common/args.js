@@ -23,15 +23,15 @@
  */
 
 G.provide("args", {
-  parse: function(_arguments, mapObject){
+  parse: function(_arguments, mapObject) {
     var parsedArgs = {},
-    next = _arguments.shift();
+      next = _arguments.shift();
 
-    while(next){
+    while (next) {
       var type = typeof(next),
-      name = mapObject[type];
-      if(!name || parsedArgs[name]){
-        throw("Parsing came across a type: "+ type+" that it wasn't expecting");
+        name = mapObject[type];
+      if (!name || parsedArgs[name]) {
+        throw("Parsing came across a type: " + type + " that it wasn't expecting");
       }
       parsedArgs[name] = next;
       next = _arguments.shift();

@@ -99,8 +99,8 @@ G.provide("RestObject", {
       var path = rootPath + "/poll";
       params = railify(params, objectName);
       params = G.RestObject.injectRailsParams(params);
-      G.api(path, "get", params, function(json, xhr){
-         callback(stripNamespace(json, xhr), xhr);
+      G.api(path, "get", params, function(json, xhr) {
+        callback(stripNamespace(json, xhr), xhr);
       });
     };
 

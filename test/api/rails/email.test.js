@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-(function(){
+(function() {
   module("Email");
   //Keys that should be included in every response from the server
   var publicKeys = [];
@@ -38,7 +38,7 @@
 
 
   //---HELPERS---------------------------------------------------
-  function createEmail(callback){
+  function createEmail(callback) {
     G.email.create({
       address: "1sdfsdf23",
       primary: true,
@@ -66,24 +66,26 @@
   T.coreTest("Index", "public", index, publicIndex);
 
 
-  function index(chain, temp, data){
+  function index(chain, temp, data) {
     var keys = data.keys,
-    succeed = data.succeed;
+      succeed = data.succeed;
 
     temp.params = {};
 
     chain
-    .push(createEmail, successAndParams)
-    .push(G.email.index, [{}], indexCheck)
-    .appPush(G.email.destroy, [temp.params], T.succeed)
+      .push(createEmail, successAndParams)
+      .push(G.email.index, [
+      {}
+    ], indexCheck)
+      .appPush(G.email.destroy, [temp.params], T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
     //Branch structure for the indexCheck
-    function indexCheck(models, xhr){
-      if(succeed)
+    function indexCheck(models, xhr) {
+      if (succeed)
         T.baseCheckAllModels("email", keys, models, xhr);
       else
         T.assertFailure(xhr, "Index operation should fail");
@@ -98,13 +100,13 @@
   //On public create we boost the read access to USER instead of PUBLIC
   T.coreTest("Create", "public", createSucceed, readableUserKeys);
 
-  function createSucceed(chain, temp, keys){
+  function createSucceed(chain, temp, keys) {
     temp.params = {};
     chain
-    .push(createEmail, function(model, xhr){
+      .push(createEmail, function(model, xhr) {
       T.baseParamsAndAssert(keys, temp.params, model, xhr);
     })
-    .appPush(G.email.destroy, [temp.params], T.succeed)
+      .appPush(G.email.destroy, [temp.params], T.succeed)
   }
 
 
@@ -124,25 +126,25 @@
 
   T.coreTest("Read", "app", read, appRead);
   T.coreTest("Read", "user", read, userRead);
-  T.coreTest("Read", "public",read, publicRead);
+  T.coreTest("Read", "public", read, publicRead);
 
-  function read(chain, temp, data){
+  function read(chain, temp, data) {
     var succeed = data.succeed,
-    keys = data.keys;
+      keys = data.keys;
     temp.params = {};
 
     chain
-    .push(createEmail, successAndParams)
-    .push(G.email.read, [temp.params], readCheck)
-    .appPush(G.email.destroy, [temp.params], T.succeed)
+      .push(createEmail, successAndParams)
+      .push(G.email.read, [temp.params], readCheck)
+      .appPush(G.email.destroy, [temp.params], T.succeed)
 
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function readCheck(model, xhr){
-      if(succeed)
+    function readCheck(model, xhr) {
+      if (succeed)
         T.baseReadSuccessful(keys, model, xhr)
       else
         T.assertFailure(xhr, "Read should have failed");
@@ -176,32 +178,32 @@
   T.coreTest("Update", "public", update, publicUpdate);
 
 
-  function update(chain, temp, data){
+  function update(chain, temp, data) {
     var readOnlyKeys = data.readOnlyKeys,
-    readableKeys = data.readableKeys;
+      readableKeys = data.readableKeys;
 
     temp.params = {};
     temp.updateParams = {};
     temp.originalModel = null;
 
     chain
-    .push(createEmail, setUpdateParams)
-    .push(G.email.update, [temp.updateParams], data.succeed? T.succeed : T.fail)
-    .push(G.email.read, [temp.params], checkUpdate)
-    .appPush(G.email.destroy, [temp.params], T.succeed)
+      .push(createEmail, setUpdateParams)
+      .push(G.email.update, [temp.updateParams], data.succeed ? T.succeed : T.fail)
+      .push(G.email.read, [temp.params], checkUpdate)
+      .appPush(G.email.destroy, [temp.params], T.succeed)
 
 
-    function setUpdateParams(model, xhr){
+    function setUpdateParams(model, xhr) {
       temp.originalModel = model;
       T.setUpdateParams(readOnlyKeys, readableKeys, temp.updateParams, T.defaultTestValues, model, xhr);
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
 
-    function checkUpdate(model, xhr){
-      if(data.succeed){
+    function checkUpdate(model, xhr) {
+      if (data.succeed) {
         T.checkUpdate(readOnlyKeys, readableKeys, temp.originalModel, T.defaultTestValues, model, xhr);
       }
-      else{
+      else {
         //TODO might want to check that the result didn't change but not now
         T.assertFailure(xhr, "Update should fail");
       }
@@ -214,15 +216,15 @@
   T.coreTest("Destroy", "user", destroy, true);
   T.coreTest("Destroy", "public", destroy, false);
 
-  function destroy(chain, temp, succcess){
+  function destroy(chain, temp, succcess) {
     temp.params = {};
 
     chain
-    .push(createEmail, successAndParams)
-    .push(G.email.destroy, [temp.params], succcess ? T.succeed : T.fail)
-    .appPush(G.email.read, [temp.params], succcess ? T.fail : T.succeed)
+      .push(createEmail, successAndParams)
+      .push(G.email.destroy, [temp.params], succcess ? T.succeed : T.fail)
+      .appPush(G.email.read, [temp.params], succcess ? T.fail : T.succeed)
 
-    function successAndParams(model, xhr){
+    function successAndParams(model, xhr) {
       T.baseSuccessAndParams(temp.params, model, xhr);
     }
   }
