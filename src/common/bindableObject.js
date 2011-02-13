@@ -23,9 +23,9 @@
  */
 
 G.provide("", {
-  newBindableObject: function(obj, deep, debug) {
+  newBindableObject: function(obj, shallow, debug) {
     var bindable = new G.BindableObject.Base(debug);
-    bindable.extend(obj, deep);
+    bindable.extend(obj, shallow);
     return bindable;
   }
 
@@ -39,30 +39,23 @@ G.provide("BindableObject", {
       self = this,
       data = {};
 
-    this.extend = function(obj, deep) {
+    //Opt into shallow copy for optimization
+    this.extend = function(obj, shallow) {
       if (!obj) return;
-      var copy = deep ? G.deepCopy : G.copy;
-      copy(data, obj, true);
 
       //Only generate getters and setters for first level (no deep)
       for (var key in obj) {
         generateGetterSetter(key); //overrides previously existing g&s
+        generateCallback(key);
+        self[key](obj[key], shallow); //Extend is just looping through the set methods
       }
     };
 
-    this.bind = function(key, fn) {
-      listeners[key] = listeners[key] || [];
-      self.unbind(key, fn); //Ensure no duplicates are created on accident
-      listeners[key].push(fn);
-    };
-
-    this.unbind = function(key, fn) {
-      listeners[key] = listeners[key] || [];
-      for (var i = 0,len = listeners[key].length; i < len; ++i) {
-        var listenerFn = listeners[key][i];
-        if (listenerFn == fn) {
-          listeners[key].splice(i, 1);
-        }
+    //Simply calls all the event handlers in the system. Useful when the handlers
+    //are disabled and the client wants to get caught up with the current state
+    this.flush = function(){
+      for (var key in data) {
+        fireOnKey(key);
       }
     };
 
@@ -72,32 +65,58 @@ G.provide("BindableObject", {
       G.log(listeners);
     };
 
+    function callbackName(name){
+      return "on" + name[0].toUpperCase() + name.slice(1);
+    }
+    function generateCallback(name) {
+      var keyName = callbackName(name);
+      self[keyName] = function(fn, remove) {
+        listeners[name] = listeners[name] || {};
+        if (remove) {
+          //remove that key in hash from listener data-store
+          delete listeners[name][fn];
+        } else {
+          //duplicates not possible with te hash
+          listeners[name][fn] = fn;
+        }
+      }
+    }
 
     function generateGetterSetter(name) {
       self[name] = function() {
         var args = Array.prototype.slice.call(arguments);
         if (args.length == 0) {
+          G.d = data;
           return data[name];
         } else {
           var value = args.shift(),
-            deepCopy = args.shift();
-          return set(name, value, deepCopy);
+            shallow = args.shift();
+          return set(name, value, shallow);
         }
       }
     }
 
-    function set(key, value, deepCopy) {
+    function fireOnKey(key) {
+      for (var fn in listeners[key]) {
+        if (listeners[key][fn]) {
+          if (debug) G.log("--Event Listener on key: " + key + " Fired--");
+          listeners[key][fn](data[key]);
+        }
+      }
+    }
+
+    //default to deep copy and opt into shallow optimization
+    function set(key, value, shallow) {
       listeners[key] = listeners[key] || [];
-      if (deepCopy && typeof value === 'object') {
+      //Null's type is "object"... doh
+      if (!shallow && typeof value === 'object' && value != null) {
         var empty = (value instanceof Array) ? [] : {};
         data[key] = G.deepCopy(empty, value, true)
       } else {
         data[key] = value;
       }
-      for (var i in listeners[key]) {
-        if (debug) G.log("--Event Listener on key: " + key + " Fired--");
-        listeners[key][i](data[key]);
-      }
+
+      fireOnKey(key);
       return data[key];
     }
 

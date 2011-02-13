@@ -50,17 +50,17 @@ G.provide("ViewModel", {
     var listeners = {};
 
     this.get = function(key) {
-      G.log("Get is Deprecated");
+//      G.log("Get is Deprecated");
       return data[key];
     };
 
     this.set = function(key, value) {
-      G.log("Set is Deprecated");
+//      G.log("Set is Deprecated");
       _set(key, value, true);
     };
 
     this.bind = function(key, context, fn) {
-      G.log("Bind is Deprecated");
+//      G.log("Bind is Deprecated");
       listeners[key] = listeners[key] || [];
       var listener = {
         fn:fn,

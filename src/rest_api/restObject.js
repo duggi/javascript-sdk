@@ -125,31 +125,6 @@ G.provide("RestObject", {
     function stripNamespace(json, xhr) {
       return (xhr.success) ? json[objectName] : json;
     }
-
-    //TODO might be nice to have the underscores go to camelcase
-//    function railsNamesToJsNames(json){
-//      var newJson = {};
-//      for(var key in json){
-//        var value = json[key];
-//        var newKey = toCamelCase(key);
-//        newJson[newKey] = value;
-//      }
-//      return newJson;
-//    }
-//
-//    function toCamelCase(string) {
-//      var newString = "",
-//        re = /(_)([a-z])/gi,
-//        matchResult = re.exec(string);
-//      while (matchResult) {
-//        if (matchResult[2]) {
-//          newString += matchResult[2].toUpperCase();
-//        }
-//        matchResult = re.exec();
-//      }
-//      return newString
-//    }
-
   },
 
   /**
