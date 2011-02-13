@@ -108,8 +108,24 @@ var G = G || {
       }
     }
     return target;
-  }
-  ,
+  },
+
+  deepCopy: function(target, source, overwrite, transform) {
+    /*
+     * Absolutely critical that copy is called first. That way the tree is
+     * copied top down (so the references for sub objects are overridden with
+     * our blank copies rather than pointers to the original source
+     */
+
+    G.copy(target, source, overwrite, transform);
+    for (var key in source) {
+      if (typeof source[key] === 'object') {
+        target[key] = (source[key] instanceof Array) ? [] : {};
+        G.deepCopy(target[key], source[key], overwrite, transform);
+      }
+    }
+    return target
+  },
 
   /**
    * Removes standard groupit bindings from global namespace and

@@ -99,11 +99,12 @@
 //  loadTest("api/api.test.js");
 //  loadTest("api/chaining.test.js");
 //  loadTest("common/common.test.js");
+    loadTest("common/bindableObject.test.js");
 //  loadTest("provide.test.js");
 
 
     //restObject must be loaded before all other rails objects
-    loadTest("api/rails/restObject.test.js");
+//    loadTest("api/rails/restObject.test.js");
 //    loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
 //    loadTest("api/rails/groupit.test.js");
 //    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
@@ -114,7 +115,7 @@
 //    loadTest("api/rails/email.test.js");
 //    loadTest("api/rails/authentication.test.js");
 //    loadTest("api/rails/app.test.js");
-    loadTest("api/rails/address.test.js");
+//    loadTest("api/rails/address.test.js");
 //    loadTest("api/rails/userSession.test.js");
 
 //TODO Need To called DestroyTestUser down here somewhere after
