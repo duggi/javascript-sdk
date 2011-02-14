@@ -59,6 +59,11 @@ G.provide("BindableObject", {
       }
     };
 
+    //Nice to get at the raw data without all the getter calls.
+    this.data = function(){
+      return G.deepCopy({},data, true);
+    };
+
     //Dumps to console if possible
     this.dump = function() {
       G.log(data);

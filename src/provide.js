@@ -119,7 +119,8 @@ var G = G || {
 
     G.copy(target, source, overwrite, transform);
     for (var key in source) {
-      if (typeof source[key] === 'object') {
+      //Null is also a object, but we don't want to copy null as a blank obj
+      if (typeof source[key] === 'object' && source[key] != null) {
         target[key] = (source[key] instanceof Array) ? [] : {};
         G.deepCopy(target[key], source[key], overwrite, transform);
       }
