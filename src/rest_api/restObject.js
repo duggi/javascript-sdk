@@ -25,7 +25,7 @@
 
 G.provide("RestObject", {
 
-  sessionToken: null,
+  persistenceToken: null,
   appSecret:null,
 
   init:function() {
@@ -34,7 +34,8 @@ G.provide("RestObject", {
   },
 
   Base:function(rootPath, objectName) {
-    var requestType = ".json";
+    var self = this;
+    this.requestType = ".json";
     this.rootPath = rootPath;
     this.objectName = objectName;
 
@@ -42,8 +43,8 @@ G.provide("RestObject", {
      * Base Index call for all RestObject Objects
      */
     this.index = function(params, callback) {
-      var path = rootPath + requestType;
-      params = railify(params, objectName);
+      var path = rootPath + self.requestType;
+      params = self.railify(params);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "get", params, callback);
     };
@@ -53,54 +54,63 @@ G.provide("RestObject", {
      * Automatically pulls out a singular object from the json response
      */
     this.create = function(params, callback) {
-      var path = rootPath + requestType;
-      params = railify(params, objectName);
+      var path = rootPath + self.requestType;
+      params = self.railify(params);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
-        callback(stripNamespace(json, xhr), xhr);
+       if(callback) callback(self.stripNamespace(json, xhr), xhr);
       });
     };
 
     /**
      * Base Read call for all RestObject Objects
      * Automatically pulls out a singular object from the json response
+     * 
+     * Undefined is the key word to bypass id based lookup and fallback to
+     * other methods like hashes
      */
     this.read = function(params, callback) {
-      var path = rootPath + "/" + params.id + requestType;
-      params = railify(params, objectName);
+      var path = rootPath + "/" + (params.id || "undefined") + self.requestType;
+      params = self.railify(params);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr) {
-        callback(stripNamespace(json, xhr), xhr);
+        if(callback) callback(self.stripNamespace(json, xhr), xhr);
       });
     };
 
     /**
      * Base Update call for all RestObject Objects.
      * Per rails convention this call updates and doesn't return the updated model
+     *
+     * Undefined is the key word to bypass id based lookup and fallback to
+     * other methods like hashes
      */
     this.update = function(params, callback) {
-      var path = rootPath + "/" + params.id + requestType;
-      params = railify(params, objectName);
+      var path = rootPath + "/" + (params.id || "undefined") + self.requestType;
+      params = self.railify(params);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "put", params, callback);
     };
     /**
      * Base Destroy call for all RestObject Objects
+     *
+     * Undefined is the key word to bypass id based lookup and fallback to
+     * other methods like hashes
      */
     this.destroy = function(params, callback) {
-      var path = rootPath + "/" + params.id + requestType;
-      params = railify(params, objectName);
+      var path = rootPath + "/" + (params.id || "undefined") + self.requestType;
+      params = self.railify(params);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "delete", params, callback);
     };
 
     //Is intended only for framework polling
     this.pollOnce = function(params, callback) {
-      var path = rootPath + "/poll";
-      params = railify(params, objectName);
+      var path = rootPath + "/poll" + self.requestType;
+      params = self.railify(params);
       params = G.RestObject.injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr) {
-        callback(stripNamespace(json, xhr), xhr);
+        if(callback) callback(self.stripNamespace(json, xhr), xhr);
       });
     };
 
@@ -109,7 +119,7 @@ G.provide("RestObject", {
      * to a model. Example : user[:id] where user is the model name and id is
      * the attribute to be sent to the server.
      */
-    function railify(params, objectName) {
+    this.railify = function(params) {
       var rails_params = {};
       for (var key in params) {
         if (key == "id") continue;
@@ -120,11 +130,13 @@ G.provide("RestObject", {
         rails_params[objectName + "[" + key + "]"] = params[key];
       }
       return rails_params;
-    }
+    };
 
-    function stripNamespace(json, xhr) {
+    this.stripNamespace = function(json, xhr) {
       return (xhr.success) ? json[objectName] : json;
-    }
+    };
+
+
   },
 
   /**
@@ -133,7 +145,13 @@ G.provide("RestObject", {
    *
    */
   injectRailsParams: function(params) {
-    params['session_token'] = G.RestObject.sessionToken;
+    params = params || {};
+
+    //Set the token only if we have one and the client didn't set it
+    if(!params["user[persistence_token]"] && G.RestObject.persistenceToken){
+      params["user[persistence_token]"] = G.RestObject.persistenceToken;  
+    }
+
     params['app_key'] = G.appKey;
 
     //Should only be used while testing
@@ -151,7 +169,6 @@ G.provide("RestObject", {
     return params;
   }
 
-
 });
 
 
@@ -163,57 +180,69 @@ G.provide("RestObject", {
 G.provide("", {
 
   user:function() {
+
+    var base = new G.RestObject.Base("/users", "user");
+
     //We allow a couple convenience functions for logging in users
     function Override() {
+      var self = this;
+
+      //TODO this should not be namespaced, instead it should go to our domain
+      //and lookup the current session from there
+      var cookieName = "__groupit__persistenceToken";
+
+      /**
+       * Login is special in that it expects a user object with either the
+       * persistenceToken set or the username and password.
+       * @param params
+       * @param callback
+       */
       this.login = function(params, callback) {
-        G.userSession.create(params, callback);
-      };
-
-      this.logout = function(callback) {
-        G.userSession.destroy({}, callback);
-      };
-
-      this.isLoggedIn = function() {
-        return !!G.RestObject.sessionToken
-      };
-
-    }
-
-    Override.prototype = new G.RestObject.Base("/users", "user");
-
-    return new Override();
-  }(),
-
-  userSession:function() {
-
-    var base = new G.RestObject.Base("/user_sessions", "user");
-
-    function Override() {
-      this.create = function(params, callback) {
-        base.create(params, function(user, xhr) {
-          G.RestObject.sessionToken = user.persistence_token;
-          if (callback) {
-            callback(user, xhr);
+        var path = self.rootPath + "/login" + self.requestType;
+        params = self.railify(params, self.objectName);
+        params = G.RestObject.injectRailsParams(params);
+        G.api(path, "post", params, function(json, xhr) {
+          json = self.stripNamespace(json, xhr);
+          if (xhr.success) {
+            G.RestObject.persistenceToken = json.persistence_token;
+            G.cookie.setCookie(cookieName, json.persistence_token,
+              G.cookie.getExpDate(7, 0, 0), "/");
           }
+
+         if(callback) callback(json, xhr);
         });
       };
 
-      delete this.update;
-      delete this.read;
-      delete this.index;
+      this.logout = function(callback) {
+        var params = {}, self = this;
 
-      this.destroy = function(params, callback) {
-        G.RestObject.sessionToken = null;
-        params = {
-          id:0 //Simple hack to make rails route correctly
-        };
-        base.destroy(params, callback);
-      }
+        //Clear the persistenceToken from the client.
+        G.RestObject.persistenceToken = null;
+        G.cookie.deleteCookie(cookieName, "/");
+
+        //Tell the server to reset the persistenceToken
+        var path = self.rootPath + "/logout" + self.requestType;
+        params = self.railify(params, self.objectName);
+        params = G.RestObject.injectRailsParams(params);
+        G.api(path, "post", params, function(json, xhr) {
+          if(callback) callback(json, xhr);
+        });
+      };
+
+      this.currentPersistenceToken = function() {
+        var cookieToken = G.cookie.getCookie("__groupit__persistenceToken");
+        return G.RestObject.persistenceToken || cookieToken;
+      };
+
+
+      this.isLoggedIn = function() {
+        return !!G.RestObject.persistenceToken
+      };
     }
 
     Override.prototype = base;
-
     return new Override();
+
   }(),
 
   paymentResponse:function() {

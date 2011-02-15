@@ -67,7 +67,7 @@ G.provide("ViewModel", {
         context:context
       };
       //Ensure no duplicates are created on accident
-      this.unbind(key, context, fn);
+      self.unbind(key, context, fn);
       listeners[key].push(listener);
     };
 

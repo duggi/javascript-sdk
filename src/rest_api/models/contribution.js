@@ -48,7 +48,7 @@ G.provide("models.contribution", {
         pollTicket = G.polling.randomTicket();
 
       //Get the contribution settings
-      G.api("/contributions/new", "get", newParams, function(json) {
+      G.api("/contributions/new.json", "get", newParams, function(json) {
         var brainTreeUrl = json.url,
           tr_data = json.tr_data,
           c = G.models.contribution;
