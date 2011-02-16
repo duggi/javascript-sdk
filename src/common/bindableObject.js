@@ -91,7 +91,6 @@ G.provide("BindableObject", {
       self[name] = function() {
         var args = Array.prototype.slice.call(arguments);
         if (args.length == 0) {
-          G.d = data;
           return data[name];
         } else {
           var value = args.shift(),

@@ -28,19 +28,14 @@
 G.provide('', {
 
   //Indirection method for the api calls. Can expand out
-  //for richer debuging support, etc
+  //for richer debugging support, etc
   api: function() {
     G.ApiClient.rest.apply(G.ApiClient, arguments);
   },
 
   //Allows for posting of forms to remote destinations
-  postViaForm:function(path, method, params, fullPath) {
-    var form = G.ApiClient.createForm(path, method, params, fullPath);
-    G.ApiClient.iframeRequest(form);
-  },
-
-  postForm: function(form) {
-    G.ApiClient.iframeRequest.call(G.ApiClient, form);
+  postViaForm: function(path, method, params, fullPath) {
+    G.ApiClient.remotePost(path, method, params, fullPath);
   }
 
 });
@@ -115,15 +110,25 @@ G.provide('ApiClient', {
   },
 
   corsRequest:function(path, method, params, cb) {
-    var isGet = method.toLowerCase() == "get";
-    var queryString = G.QS.encode(params);
+    method = method.toLowerCase(); //std ize the method
 
+    //Translate all RESTful actions to post and get (ie8 and other browsers)
+    if (method == 'put') {
+      method = 'post';
+      params["_method"] = 'put';
+    } else if (method == 'delete') {
+      method = 'get';
+      params['_method'] = 'delete';
+    }
+
+    //Construct the url
     var url = G.endPoint + path;
-    if (isGet) {
+    var queryString = G.QS.encode(params);
+    if (method == 'get') {
       url += "?" + queryString;
     }
 
-
+    //Setup the XHR
     var xhr = new XMLHttpRequest();
 
     if ("withCredentials" in xhr) {
@@ -136,13 +141,14 @@ G.provide('ApiClient', {
     }
 
 
+    //The callback
     if (cb) {
       xhr.onload = function() {
 
         //Custom contentType and standardization of response
         //TODO this goes into our custom XHR object
         if (!xhr.contentType) {
-          if (xhr.getResponseHeader){
+          if (xhr.getResponseHeader) {
             xhr.contentType = xhr.getResponseHeader("Content-Type");
           }
         }
@@ -171,7 +177,7 @@ G.provide('ApiClient', {
       }
     }
 
-    if (isGet) {
+    if (method == "get") {
       xhr.send();
     } else {
       //IE 8 doesn't support header
@@ -191,6 +197,48 @@ G.provide('ApiClient', {
   },
 
   /**
+   * Does a post to a remote location, handles iframe, and form for you.
+   * 
+   * @param path
+   * @param method
+   * @param params
+   * @param fullPath
+   */
+  remotePost: function(path, method, params, fullPath) {
+    var iframe = G.ApiClient.createHiddenIframe(function(iframe, doc) {
+      var form = G.ApiClient.createForm(path, method, params, fullPath, doc);
+      if (form) {
+        doc.body.appendChild(form);
+        form.submit();
+      }
+    });
+
+    //30 seconds from now clean out that iframe
+    setTimeout(function() {
+      if (iframe.parentNode)
+        iframe.parentNode.removeChild(iframe)
+    }, 30000);
+
+  },
+
+  createHiddenIframe: function(callback){
+    var iframe = document.createElement('iframe');
+    iframe.style.position = "absolute";
+    iframe.style.top = "-10000px";
+    iframe.style.height = "0px";
+    iframe.style.width = "0px";
+
+    //initializes iframe
+    document.body.appendChild(iframe);
+    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+    iframeDocument.open();
+    iframeDocument.close();
+    if (callback) callback(iframe, iframeDocument);
+
+    return iframe;
+  },
+
+  /**
    *  createForm: Creates a form to submit as a substitute for XHRs.
    *
    * @access private
@@ -198,11 +246,13 @@ G.provide('ApiClient', {
    * @param method    {String}   the http method
    * @param params    {Object}   the parameters for the query
    * @param fullPath  {Boolean}  If the path is a fullpath to a resource
+   * @param doc  {Object}[Opt]   A document where the form should be created in
    *
    */
 
-  createForm:function(path, method, params, fullPath) {
-    var form = document.createElement('form');
+  createForm:function(path, method, params, fullPath, doc) {
+    doc = doc || document;
+    var form = doc.createElement('form');
 
     form.action = (fullPath) ? path : G.endPoint + path;
 
@@ -210,47 +260,13 @@ G.provide('ApiClient', {
     form.method = method;
 
     for (var key in params) {
-      var input = document.createElement('input');
-      input.type = 'hidden'; //DEBUG text
+      var input = doc.createElement('input');
+      input.type ="hidden"; //'hidden'; //DEBUG text
       input.name = key;
       input.value = params[key];
       form.appendChild(input);
     }
 
     return form;
-  },
-
-  /**
-   * iframeRequest: Submits a form using a spawned Iframe.
-   *
-   * @access private
-   * @param form      {object}   Dom node representing a form for submission
-   */
-  iframeRequest: function(form, clone) {
-    //Prevents form passed in from being destroyed in call.
-    if (clone) form = form.cloneNode(true);
-
-    var iframe = document.createElement('iframe');
-    iframe.style.display = "none";
-    iframe.style.position = "absolute";
-    iframe.style.top = "-10000px";
-    iframe.style.height = "0px";
-    iframe.style.width = "0px";
-
-    document.body.appendChild(iframe); //initializes iframe
-
-    G.iframe = iframe;
-    //ie 8 needs document.body everyone else uses contentWindow
-    var body = iframe.contentWindow.document.body || iframe.document.body;
-    body.appendChild(form);
-    form.submit();
-
-    //30 seconds from now clean out that iframe
-    setTimeout(function() {
-      if (iframe.parentNode)
-        iframe.parentNode.removeChild(iframe)
-    }, 30000);
   }
-
-
 });

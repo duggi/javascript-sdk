@@ -27,7 +27,7 @@
  */
 
 G.provide("", {
-  //public handle 
+  //public handle
   contribution:null
 });
 
@@ -47,6 +47,7 @@ G.provide("models.contribution", {
       var newParams = G.RestObject.injectRailsParams({}),
         pollTicket = G.polling.randomTicket();
 
+
       //Get the contribution settings
       G.api("/contributions/new.json", "get", newParams, function(json) {
         var brainTreeUrl = json.url,
@@ -56,6 +57,7 @@ G.provide("models.contribution", {
         params = G.RestObject.injectRailsParams(params);
         var braintreeFormParams = c.braintreeParams(tr_data, pollTicket, params);
 
+//        G.log(braintreeFormParams) //Great little debug line
         //Post the contribution to braintree
         G.postViaForm(brainTreeUrl, "post", braintreeFormParams, true);
 
@@ -66,6 +68,10 @@ G.provide("models.contribution", {
 
       function pollForResponse(requestParams, attempts) {
         G.contribution.pollOnce(requestParams, function(json, xhr) {
+          //TODO typeof is a slight hack for ie8's stupid XDR
+          var loaded = (xhr.status == "200" || typeof json === 'object'),
+            waiting = (xhr.status == "204" || typeof json === 'string');
+
           if (attempts > 10) {
             var hash = {
               error:{
@@ -73,9 +79,9 @@ G.provide("models.contribution", {
               }
             };
             if (callback) callback(hash, xhr);
-          } else if (xhr.status == "204") {//No content means still looking
+          } else if (waiting) {//No content means still looking
             continuePolling(1500);
-          } else if (xhr.status == "200") { //JSON should be loaded
+          } else if (loaded) { //JSON should be loaded
             if (callback) callback(json, xhr);
           } else {
             G.log("Polling returned a unexpected status:" + xhr.status);
