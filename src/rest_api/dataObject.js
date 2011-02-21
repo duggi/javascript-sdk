@@ -109,8 +109,9 @@ G.provide("DataObject", {
         keys = G.Array.map(keys, G.String.toCamelCase);
 
         //Fixup the constructor name
-        var constructorName = G.String.toCamelCase(name);
-        constructorName = "new" + constructorName[0].toUpperCase() + constructorName.slice(1);
+        var camelCased = G.String.toCamelCase(name),
+          capName = camelCased[0].toUpperCase() + camelCased.slice(1),
+          constructorName = "new" + capName;
 
         //Define the constructor
         G[constructorName] = function(json) {
@@ -122,6 +123,42 @@ G.provide("DataObject", {
           if (json) base.extend(json);
           return base;
         };
+
+
+        /**
+         * Config object is a hash. We currently support the following keys
+         *
+         * success
+         * error
+         * complete
+         * offset
+         * limit
+         *
+         * @param config
+         */
+        G[capName + ".index"] = function(config) {
+          config = config || {};
+          var params = {};
+          //Converts the camel cased names to underscores for the server
+          for (var key in config.params) {
+            params[G.String.toUnderscore(key)] = config.params[key];
+          }
+
+          var path = path + ".json"; //TODO need to parameterize this
+          params = G.dogfort.injectRailsParams(params);
+          G.api(path, "get", params, function(json, xhr) {
+            if (xhr.success) {
+              var models = [];
+              for (var i in models) {
+                models.push(G[constructorName](json[i][name]));
+              }
+              if (config.success) config.success(models, xhr);
+            } else {
+              if (config.error) config.error(json, xhr);
+            }
+            if (config.complete) config.complete(json, xhr);
+          });
+        }
 
       })();
     }
@@ -144,45 +181,9 @@ G.provide("DataObject", {
     //--------------------------------------------- API CALLS
 
     /**
-     * Config object is a hash. We currently support the following keys
+     * Create takes a hash of configuration options
      *
-     * success
-     * error
-     * complete
-     * offset
-     * limit
-     *
-     * TODO this is a speical case and should be used in a class method manner
-     * @param config
-     */
-
-    this.index = function(config) {
-      config = config || {};
-      var path = objectPath + self.requestType;
-      var params = {};
-      if (config.offset) params.offset = config.offset;
-      if (config.limit) params.limit = config.limit;
-
-      //TODO migrate that function here
-      params = self.injectRailsParams(params);
-      G.api(path, "get", params, function(json, xhr) {
-        if (xhr.success) {
-          var groupits = [];
-          for (var i in groupits) {
-            groupits.push(self.constructorFn(groupits[i].groupit));
-          }
-          if (config.success) config.success(groupits, xhr);
-        } else {
-          if (config.error) config.error(json, xhr);
-        }
-        if(config.complete) config.complete(json, xhr);
-      });
-    };
-
-    /**
-     * Also takes a hash of configuration options
-     *
-     * success and error are supported
+     * success, error, complete are supported
      *
      * @param config
      */
@@ -192,7 +193,7 @@ G.provide("DataObject", {
       var path = objectPath + self.requestType;
       var params = self.data();
       params = self.railify(params);
-      params = self.injectRailsParams(params);
+      params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
         if (xhr.success && config.success) {
           self.extend(self.stripNamespace(json));
@@ -200,7 +201,7 @@ G.provide("DataObject", {
         } else {
           if (config.error) config.error(json, xhr);
         }
-        if(config.complete) config.complete(json, xhr);
+        if (config.complete) config.complete(json, xhr);
       });
     };
 
@@ -217,7 +218,7 @@ G.provide("DataObject", {
         path = objectPath + "/" + (params.id || "undefined") + self.requestType;
 
       params = self.railify(params);
-      params = self.injectRailsParams(params);
+      params = G.dogfort.injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr) {
         if (xhr.success && config.success) {
           json = self.stripNamespace(json);
@@ -225,7 +226,7 @@ G.provide("DataObject", {
         } else {
           if (config.error) config.error(json, xhr);
         }
-        if(config.complete) config.complete(json, xhr);
+        if (config.complete) config.complete(json, xhr);
       });
     };
 
@@ -242,7 +243,7 @@ G.provide("DataObject", {
         path = objectPath + "/" + (params.id || "undefined") + self.requestType;
 
       params = self.railify(params);
-      params = self.injectRailsParams(params);
+      params = G.dogfort.injectRailsParams(params);
       G.api(path, "put", params, function(json, xhr) {
         if (xhr.success && config.success) {
           //Update doesn't return the object
@@ -250,7 +251,7 @@ G.provide("DataObject", {
         } else {
           if (config.error) config.error(json, xhr);
         }
-        if(config.complete) config.complete(json, xhr);
+        if (config.complete) config.complete(json, xhr);
       });
     };
     /**
@@ -265,7 +266,7 @@ G.provide("DataObject", {
         path = objectPath + "/" + (params.id || "undefined") + self.requestType;
 
       params = self.railify(params);
-      params = self.injectRailsParams(params);
+      params = G.dogfort.injectRailsParams(params);
       G.api(path, "delete", params, function(json, xhr) {
         if (xhr.success && config.success) {
           //Destroy doesn't return the object
@@ -273,7 +274,7 @@ G.provide("DataObject", {
         } else {
           if (config.error) config.error(json, xhr);
         }
-        if(config.complete) config.complete(json, xhr);
+        if (config.complete) config.complete(json, xhr);
       });
     };
 
@@ -298,33 +299,6 @@ G.provide("DataObject", {
     this.stripNamespace = function(json) {
       return json[self.objectName];
     };
-
-
-    /**
-     * Injects the session token and app key into the params passed in.
-     * @param params {Object} Params going to the server without auth tokens
-     *
-     */
-    this.injectRailsParams = function(params) {
-      params = params || {};
-
-      //Set the token only if we have one and the client didn't set it
-      if (!params["user[persistence_token]"] && G.persistenceToken) {
-        params["user[persistence_token]"] = G.persistenceToken;
-      }
-
-      params['app_key'] = G.appKey;
-
-      //Should only be used while testing
-      if (G.appSecret)
-        params['app_secret'] = G.appSecret;
-
-      if (params['app_secret'] && !G.appSecret)
-        throw "App secret not set using G.RestObject.appSecret";
-
-      return params;
-    };
-
   }
 
 });

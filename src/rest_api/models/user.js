@@ -117,7 +117,7 @@ G.provide("models.user", {
     };
 
     //Allows client to check for persistenceToken presence
-    this.currentPersistenceToken = function() {
+    self.currentPersistenceToken = function() {
       var cookieToken = G.cookie.getCookie(cookieName);
       return G.persistenceToken || cookieToken;
     };

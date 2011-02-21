@@ -39,22 +39,23 @@ G.provide("dogfort", {
     params = params || {};
 
     //Set the token only if we have one and the client didn't set it
-    if (!params["user[persistence_token]"] && G.RestObject.persistenceToken) {
-      params["user[persistence_token]"] = G.RestObject.persistenceToken;
+    if (!params["user[persistence_token]"] && G.persistenceToken) {
+      params["user[persistence_token]"] = G.persistenceToken;
     }
 
     params['app_key'] = G.appKey;
 
     //Should only be used while testing
-    if (G.RestObject.appSecret)
-      params['app_secret'] = G.RestObject.appSecret;
+    if (G.appSecret)
+      params['app_secret'] = G.appSecret;
 
-    if (params['app_secret'] && !G.RestObject.appSecret)
+    if (params['app_secret'] && !G.appSecret)
       throw "App secret not set using G.RestObject.appSecret";
 
     return params;
   },
 
+  //TODO this isn't used yet, is it needed?
   injectPollTicket: function(params, pollTicket) {
     params.poll_ticket = pollTicket;
     return params;

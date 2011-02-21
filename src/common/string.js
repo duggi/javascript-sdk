@@ -24,16 +24,23 @@
 
 G.provide("String", {
 
-    toCamelCase: function(string) {
-      var re = /(_)([a-z].*?)/gi,
-        matchResult = re.exec(string);
-      while (matchResult) {
-        if (matchResult[2]) {
-          string = string.replace(matchResult[0], matchResult[2].toUpperCase())
-        }
-        matchResult = re.exec();
+  toCamelCase: function(string) {
+    var re = /(_)([a-z].*?)/gi,
+      matchResult = re.exec(string);
+    while (matchResult) {
+      if (matchResult[2]) {
+        string = string.replace(matchResult[0], matchResult[2].toUpperCase())
       }
-      return string
+      matchResult = re.exec();
     }
+    return string
+  },
+
+  toUnderscore: function(string) {
+    if (!string) return string;
+    return string.replace(/([A-Z])/g, function($1) {
+      return "_" + $1.toLowerCase();
+    });
+  }
 
 });
