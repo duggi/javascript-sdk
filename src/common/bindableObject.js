@@ -39,29 +39,54 @@ G.provide("BindableObject", {
       self = this,
       data = {};
 
+    /**
+     * Extends the current object with a object or array.
+     *
+     * If passed a object both the keys and values will be mapped into the
+     * bindable object. Setters will fire callbacks on the newly set and
+     * defined key/value pairs.
+     * 
+     * Note: Objects may pass a boolean value to determine if deep copy or
+     * shallow copying should occur. By default we shallow copy.
+     *
+     * If passed a array only the setters/getters will be mapped using the
+     * values in the array as keys. No callbacks are issued as the data has
+     * not changed.
+     * 
+     * @param obj
+     * @param shallow
+     */
     //Opt into shallow copy for optimization
     this.extend = function(obj, shallow) {
       if (!obj) return;
+      if(typeof obj !== "object") throw("Must pass object/array to extend");
 
-      //Only generate getters and setters for first level (no deep)
-      for (var key in obj) {
-        generateGetterSetter(key); //overrides previously existing g&s
-        generateCallback(key);
-        self[key](obj[key], shallow); //Extend is just looping through the set methods
+      if (obj instanceof Array) {
+        G.Array.map(obj, function(val) {
+          self.generateGetterSetter(val); //overrides previously existing g&s
+          self.generateCallback(val);
+        });
+      } else {
+        //Only generate getters and setters for first level (no deep)
+        for (var key in obj) {
+          self.generateGetterSetter(key); //overrides previously existing g&s
+          self.generateCallback(key);
+          self[key](obj[key], shallow); //Extend is just looping through the set methods
+        }
       }
     };
 
     //Simply calls all the event handlers in the system. Useful when the handlers
     //are disabled and the client wants to get caught up with the current state
-    this.flush = function(){
+    this.flush = function() {
       for (var key in data) {
         fireOnKey(key);
       }
     };
 
     //Nice to get at the raw data without all the getter calls.
-    this.data = function(){
-      return G.deepCopy({},data, true);
+    this.data = function() {
+      return G.deepCopy({}, data, true);
     };
 
     //Dumps to console if possible
@@ -70,11 +95,19 @@ G.provide("BindableObject", {
       G.log(listeners);
     };
 
-    function callbackName(name){
+    //Overridable method to create a different interface without changing the
+    //underlying data
+    this.nameConversion = function(name) {
+      return name;
+    };
+
+    this.callbackName = function(name) {
+      name = self.nameConversion(name);
       return "on" + name[0].toUpperCase() + name.slice(1);
-    }
-    function generateCallback(name) {
-      var keyName = callbackName(name);
+    };
+
+    this.generateCallback = function(name) {
+      var keyName = self.callbackName(name);
       self[keyName] = function(fn, remove) {
         listeners[name] = listeners[name] || {};
         if (remove) {
@@ -85,20 +118,21 @@ G.provide("BindableObject", {
           listeners[name][fn] = fn;
         }
       }
-    }
+    };
 
-    function generateGetterSetter(name) {
+    this.generateGetterSetter = function (name) {
+      name = self.nameConversion(name);
       self[name] = function() {
         var args = Array.prototype.slice.call(arguments);
         if (args.length == 0) {
           return data[name];
         } else {
           var value = args.shift(),
-            shallow = args.shift();
-          return set(name, value, shallow);
+            deep = args.shift();
+          return set(name, value, deep);
         }
       }
-    }
+    };
 
     function fireOnKey(key) {
       for (var fn in listeners[key]) {
@@ -109,11 +143,12 @@ G.provide("BindableObject", {
       }
     }
 
-    //default to deep copy and opt into shallow optimization
-    function set(key, value, shallow) {
+    //Deep copy is non trivial and in some circumstances doesn't work as expected
+    //if you need a deep copy you can ask for one
+    function set(key, value, deep) {
       listeners[key] = listeners[key] || [];
       //Null's type is "object"... doh
-      if (!shallow && typeof value === 'object' && value != null) {
+      if (deep && typeof value === 'object' && value != null) {
         var empty = (value instanceof Array) ? [] : {};
         data[key] = G.deepCopy(empty, value, true)
       } else {

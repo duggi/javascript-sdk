@@ -89,7 +89,7 @@
 
   test("Placeholder", function() {
     stop();
-    G.initialize("69a0dd420c6eb5b7922bbd2275321a88", "http://localhost:3000/", loadTests);
+    G.initialize("fe7970d31536217638d45939bd45df96", "http://localhost:3000/", loadTests);
   });
 
 
@@ -99,14 +99,14 @@
 //  loadTest("api/api.test.js");
 //  loadTest("api/chaining.test.js");
 //  loadTest("common/common.test.js");
-    loadTest("common/bindableObject.test.js");
+//    loadTest("common/bindableObject.test.js");
 //  loadTest("provide.test.js");
 
 
     //restObject must be loaded before all other rails objects
-//    loadTest("api/rails/restObject.test.js");
+    loadTest("api/rails/restObject.test.js");
 //    loadTest("api/rails/user.test.js"); //Need to fix update (removing T.params)
-//    loadTest("api/rails/groupit.test.js");
+    loadTest("api/rails/groupit.test.js");
 //    loadTest("api/rails/contribution.test.js"); //Need to think out the rest of the API with contribution
 //    loadTest("api/rails/participant.test.js");
 //    loadTest("api/rails/paymentResponse.test.js");

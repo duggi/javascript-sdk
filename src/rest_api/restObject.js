@@ -22,16 +22,16 @@
  *
  */
 
+/**
+ * Deprecated
+ */
+
 
 G.provide("RestObject", {
 
+  //TODO need to delete this class or fix these references
   persistenceToken: null,
   appSecret:null,
-
-  init:function() {
-    G.models.contribution.init();
-
-  },
 
   Base:function(rootPath, objectName) {
     var self = this;

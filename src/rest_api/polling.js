@@ -28,7 +28,7 @@ G.provide("polling", {
    * Creates a unique ticket across all instances of our framework for polling
    */
 
-  randomTicket:function() {
+  uniqueTicket:function() {
     var date = new Date();
     return G.appKey + "" + G.instanceId + "" + date.getTime();
   }

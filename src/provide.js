@@ -39,6 +39,10 @@ var G = G || {
   appKey:null, //(AKA App Identifier)
   endPoint:null, //AKA Server protocol and hostname
 
+  //TODO migrate these tokens from rest Object to here
+  persistenceToken: null,
+  appSecret:null,
+
   init:function(appKey, endPoint, callback) {
     G.appKey = appKey;
     G.endPoint = endPoint;
@@ -116,7 +120,6 @@ var G = G || {
      * copied top down (so the references for sub objects are overridden with
      * our blank copies rather than pointers to the original source
      */
-
     G.copy(target, source, overwrite, transform);
     for (var key in source) {
       //Null is also a object, but we don't want to copy null as a blank obj

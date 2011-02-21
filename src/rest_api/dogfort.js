@@ -22,40 +22,42 @@
  *
  */
 
-//parts borrowed from the fb connect.js libs
-G.provide('Array', {
+/**
+ * Basic support for communicating with dogfort! Injection of params and
+ * stripping json wrappers.
+ *
+ */
 
-  // This is native javascript function HOWEVER IE (7) BLOWS
-  // and we force its definition here if its not defined
-  indexOf: function (array, item) {
-    if (array.indexOf) {
-      return array.indexOf(item);
-    }
-    var length = array.length;
-    if (length) {
-      for (var index = 0; index < length; index++) {
-        if (array[index] === item) {
-          return index;
-        }
-      }
-    }
-    return -1;
-  },
+G.provide("dogfort", {
 
   /**
-   * Create an array by performing transformation on the items in a source
-   * array.
+   * Injects the session token and app key into the params passed in.
+   * @param params {Object} Params going to the server without auth tokens
    *
-   * @param arr {Array} Source array.
-   * @param transform {Function} Transformation function.
-   * @return {Array} The transformed array.
    */
-  map: function(arr, transform) {
-    var ret = [];
-    for (var i = 0; i < arr.length; i++) {
-      ret.push(transform(arr[i]));
+  injectRailsParams: function(params) {
+    params = params || {};
+
+    //Set the token only if we have one and the client didn't set it
+    if (!params["user[persistence_token]"] && G.RestObject.persistenceToken) {
+      params["user[persistence_token]"] = G.RestObject.persistenceToken;
     }
-    return ret;
+
+    params['app_key'] = G.appKey;
+
+    //Should only be used while testing
+    if (G.RestObject.appSecret)
+      params['app_secret'] = G.RestObject.appSecret;
+
+    if (params['app_secret'] && !G.RestObject.appSecret)
+      throw "App secret not set using G.RestObject.appSecret";
+
+    return params;
+  },
+
+  injectPollTicket: function(params, pollTicket) {
+    params.poll_ticket = pollTicket;
+    return params;
   }
 
 });

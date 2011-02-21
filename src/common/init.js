@@ -26,7 +26,7 @@ G.provide("", {
 
   initialize:function(appKey, endPoint, callback) {
     //Construct our rails models and api objects
-    G.RestObject.init();
+    G.DataObject.init();
 
     //Begin routing observation of the window bar
     G.router.init();

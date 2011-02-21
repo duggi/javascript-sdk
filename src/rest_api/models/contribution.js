@@ -22,157 +22,192 @@
  *
  */
 
-/**
- * Models are instantiated in RestObject in restObject.js
- */
-
 G.provide("", {
-  //public handle
-  contribution:null
+
+  newContribution: function(json) {
+    //TODO this and most other constructors can be condensed
+    var data = G.models.contribution;
+    var dataObj = G.newDataObject(data.path, data.objectName, G.newContribution, data.keys);
+    G.models.user.Base.prototype = dataObj;
+    var base = new G.models.user.Base();
+    if (json) base.extend(json);
+    return base;
+  }
+
 });
 
 G.provide("models.contribution", {
 
-  init:function() {
-    var base = new G.RestObject.Base("/contributions", "contribution");
-    G.models.contribution.Base.prototype = base;
-    G.contribution = new G.models.contribution.Base();
-  },
+  objectName: "contribution",
+  path: "/contributions",
+  keys: ["groupit_id", "address_id", "amount", "user_id",
+    "transaction_id", "surcharge", "payment_response_id", "app_key",
+    "is_public", "id", "created_at", "updated_at"],
+
 
   /**
    * Base constructor function for the contribution model
    */
-  Base:function() {
-    this.create = function(params, callback) {
-      var newParams = G.RestObject.injectRailsParams({}),
-        pollTicket = G.polling.randomTicket();
+  Base:function(json) {
+    var self = this;
 
+    this.create = function(config) {
+      config = config || {};
+      var params = self.data(),
+        newParams = self.injectRailsParams({}),
+        pollTicket = G.polling.uniqueTicket();
 
       //Get the contribution settings
       G.api("/contributions/new.json", "get", newParams, function(json) {
         var brainTreeUrl = json.url,
-          tr_data = json.tr_data,
-          c = G.models.contribution;
+          tr_data = json.tr_data;
 
-        params = G.RestObject.injectRailsParams(params);
-        var braintreeFormParams = c.braintreeParams(tr_data, pollTicket, params);
+        params = self.injectRailsParams(params);
+        var braintreeFormParams = self.braintreeParams(tr_data, pollTicket, params);
 
 //        G.log(braintreeFormParams) //Great little debug line
+
         //Post the contribution to braintree
         G.postViaForm(brainTreeUrl, "post", braintreeFormParams, true);
 
         //Initialize the polling mechanism to look for the response on the server
-        var pollingParams = G.RestObject.injectPollTicket({}, pollTicket);
-        pollForResponse(pollingParams, 0);
+        var pollingParams = self.injectPollTicket({}, pollTicket);
+        pollForResponse(pollingParams, 0, config);
       });
 
-      function pollForResponse(requestParams, attempts) {
-        G.contribution.pollOnce(requestParams, function(json, xhr) {
-          //TODO typeof is a slight hack for ie8's stupid XDR
-          var loaded = (xhr.status == "200" || typeof json === 'object'),
-            waiting = (xhr.status == "204" || typeof json === 'string');
 
-          if (attempts > 10) {
-            var hash = {
-              error:{
-                message: "After " + attempts + " attempts no contribution was found"
-              }
-            };
-            if (callback) callback(hash, xhr);
-          } else if (waiting) {//No content means still looking
-            continuePolling(1500);
-          } else if (loaded) { //JSON should be loaded
-            if (callback) callback(json, xhr);
-          } else {
-            G.log("Polling returned a unexpected status:" + xhr.status);
-          }
-
-          function continuePolling(timeout) {
-            setTimeout(function() {
-              pollForResponse(requestParams, attempts + 1);
-            }, timeout);
-          }
-        });
-      }
     };
-  },
 
-  /**
-   * Takes a list of params and converts them into the braintree format for
-   * processing.
-   *
-   * @param tr_data     {Object} Braintree configuration
-   * @param pollTicket  {String} Hash that we use to poll for a response
-   * @param params      {Object} Should be a object
-   *                                   with the following structure:
-   *
-   * params = {
-   *   amount:
-   *   groupitId:
-   *   userId:
-   *   customer: {},
-   *   cc:{},
-   *   billing:{}
-   * }
-   *
-   * customer has the following fields:
-   *   firstName
-   *   lastName
-   *   email
-   *
-   * cc has the following fields:
-   *   cardholderName: Must exactly match the name on the card
-   *   number
-   *   ccv
-   *   month
-   *   year
-   *
-   * billing has the following fields:
-   *   firstName
-   *   lastName
-   *   address1 : first line of the address fields
-   *   address2: second line of the address fields
-   *   locality
-   *   region
-   *   postalCode
-   *   countryCode : Must be in the ISO Standard format
-   *   phone
-   *
-   * We also inject app_key and session token at the base for you
-   *
-   */
-  braintreeParams:function(tr_data, pollTicket, params) {
-    var map = {};
+    function pollForResponse(requestParams, attempts, config) {
+      self.pollOnce(requestParams, function(json, xhr) {
 
-    function mapIfDefined(key, value) {
-      if (!value && value != 0) return;
-      map[key] = value
+        //TODO typeof is a slight hack for ie8's stupid XDR
+        var loaded = (xhr.status == "200" || typeof json === 'object'),
+          waiting = (xhr.status == "204" || typeof json === 'string');
+
+        if (attempts > 10) {
+          var hash = {
+            error:{
+              message: "After " + attempts + " attempts no contribution was found"
+            }
+          };
+          if (config.error) config.error(hash, xhr);
+        } else if (waiting) {//No content means still looking
+          continuePolling(1500);
+        } else if (loaded) { //JSON should be loaded
+          if (config.success) config.success(self, xhr);
+        } else {
+          if (config.error) config.error(json, xhr);
+          G.log("Polling returned a unexpected status:" + xhr.status);
+        }
+
+        function continuePolling(timeout) {
+          setTimeout(function() {
+            pollForResponse(requestParams, attempts + 1, config);
+          }, timeout);
+        }
+      });
     }
 
-    mapIfDefined("tr_data", tr_data);
-    mapIfDefined("transaction[custom_fields][poll_ticket]", pollTicket);
-    mapIfDefined("transaction[custom_fields][groupit_id]", params.groupitId);
-    mapIfDefined("transaction[custom_fields][user_id]", params.userId);
-    mapIfDefined("transaction[custom_fields][app_key]", params.app_key);
-    mapIfDefined("transaction[custom_fields][session_token]", params.session_token);
-    mapIfDefined("transaction[amount]", params.amount);
-    mapIfDefined("transaction[customer][first_name]", params.customer.firstName);
-    mapIfDefined("transaction[customer][last_name]", params.customer.lastName);
-    mapIfDefined("transaction[customer][email]", params.customer.email);
-    mapIfDefined("transaction[credit_card][cardholder_name]", params.cc.cardholderName);
-    mapIfDefined("transaction[credit_card][number]", params.cc.number);
-    mapIfDefined("transaction[credit_card][cvv]", params.cc.cvv);
-    mapIfDefined("transaction[credit_card][expiration_month]", params.cc.month);
-    mapIfDefined("transaction[credit_card][expiration_year]", params.cc.year);
-    mapIfDefined("transaction[billing][first_name]", params.billing.firstName);
-    mapIfDefined("transaction[billing][last_name]", params.billing.lastName);
-    mapIfDefined("transaction[billing][street_address]", params.billing.address1);
-    mapIfDefined("transaction[billing][extended_address]", params.billing.address2);
-    mapIfDefined("transaction[billing][locality]", params.billing.locality);
-    mapIfDefined("transaction[billing][region]", params.billing.region);
-    mapIfDefined("transaction[billing][postal_code]", params.billing.postalCode);
-    mapIfDefined("transaction[billing][country_code_alpha2]", params.billing.countryCode);
-    mapIfDefined("transaction[customer][phone]", params.billing.phone);
-    return map;
+
+    //TODO eventually all models will have polling support for ie 7
+    //Is intended only for framework polling
+    this.pollOnce = function(params, callback) {
+      var path = objectPath + "/poll" + self.requestType;
+      params = self.injectRailsParams(params);
+      G.api(path, "get", params, function(json, xhr) {
+        if (xhr.success) json = self.stripNamespace(json);
+        if (callback) callback(json, xhr);
+      });
+    };
+
+    this.injectPollTicket = function(params, pollTicket) {
+      params.poll_ticket = pollTicket;
+      return params;
+    };
+
+    /**
+     * Takes a list of params and converts them into the braintree format for
+     * processing.
+     *
+     * @param tr_data     {Object} Braintree configuration
+     * @param pollTicket  {String} Hash that we use to poll for a response
+     * @param params      {Object} Should be a object
+     *                                   with the following structure:
+     *
+     * params = {
+     *   amount:
+     *   groupitId:
+     *   userId:
+     *   customer: {},
+     *   cc:{},
+     *   billing:{}
+     * }
+     *
+     * customer has the following fields:
+     *   firstName
+     *   lastName
+     *   email
+     *
+     * cc has the following fields:
+     *   cardholderName: Must exactly match the name on the card
+     *   number
+     *   ccv
+     *   month
+     *   year
+     *
+     * billing has the following fields:
+     *   firstName
+     *   lastName
+     *   address1 : first line of the address fields
+     *   address2: second line of the address fields
+     *   locality
+     *   region
+     *   postalCode
+     *   countryCode : Must be in the ISO Standard format
+     *   phone
+     *
+     * We also inject app_key and session token at the base for you
+     *
+     */
+    this.braintreeParams = function(tr_data, pollTicket, params) {
+      var map = {};
+
+      function mapIfDefined(key, value) {
+        if (!value && value != 0) return;
+        map[key] = value
+      }
+
+      mapIfDefined("tr_data", tr_data);
+      mapIfDefined("transaction[custom_fields][poll_ticket]", pollTicket);
+      mapIfDefined("transaction[custom_fields][groupit_id]", params.groupitId);
+      mapIfDefined("transaction[custom_fields][user_id]", params.userId);
+      mapIfDefined("transaction[custom_fields][app_key]", params.app_key);
+      mapIfDefined("transaction[custom_fields][session_token]", params.session_token);
+      mapIfDefined("transaction[amount]", params.amount);
+      mapIfDefined("transaction[customer][first_name]", params.customer.firstName);
+      mapIfDefined("transaction[customer][last_name]", params.customer.lastName);
+      mapIfDefined("transaction[customer][email]", params.customer.email);
+      mapIfDefined("transaction[credit_card][cardholder_name]", params.cc.cardholderName);
+      mapIfDefined("transaction[credit_card][number]", params.cc.number);
+      mapIfDefined("transaction[credit_card][cvv]", params.cc.cvv);
+      mapIfDefined("transaction[credit_card][expiration_month]", params.cc.month);
+      mapIfDefined("transaction[credit_card][expiration_year]", params.cc.year);
+      mapIfDefined("transaction[billing][first_name]", params.billing.firstName);
+      mapIfDefined("transaction[billing][last_name]", params.billing.lastName);
+      mapIfDefined("transaction[billing][street_address]", params.billing.address1);
+      mapIfDefined("transaction[billing][extended_address]", params.billing.address2);
+      mapIfDefined("transaction[billing][locality]", params.billing.locality);
+      mapIfDefined("transaction[billing][region]", params.billing.region);
+      mapIfDefined("transaction[billing][postal_code]", params.billing.postalCode);
+      mapIfDefined("transaction[billing][country_code_alpha2]", params.billing.countryCode);
+      mapIfDefined("transaction[customer][phone]", params.billing.phone);
+      return map;
+    }
+
+
   }
+
+
+
 });

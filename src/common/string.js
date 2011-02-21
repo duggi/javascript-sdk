@@ -22,40 +22,18 @@
  *
  */
 
-//parts borrowed from the fb connect.js libs
-G.provide('Array', {
+G.provide("String", {
 
-  // This is native javascript function HOWEVER IE (7) BLOWS
-  // and we force its definition here if its not defined
-  indexOf: function (array, item) {
-    if (array.indexOf) {
-      return array.indexOf(item);
-    }
-    var length = array.length;
-    if (length) {
-      for (var index = 0; index < length; index++) {
-        if (array[index] === item) {
-          return index;
+    toCamelCase: function(string) {
+      var re = /(_)([a-z].*?)/gi,
+        matchResult = re.exec(string);
+      while (matchResult) {
+        if (matchResult[2]) {
+          string = string.replace(matchResult[0], matchResult[2].toUpperCase())
         }
+        matchResult = re.exec();
       }
+      return string
     }
-    return -1;
-  },
-
-  /**
-   * Create an array by performing transformation on the items in a source
-   * array.
-   *
-   * @param arr {Array} Source array.
-   * @param transform {Function} Transformation function.
-   * @return {Array} The transformed array.
-   */
-  map: function(arr, transform) {
-    var ret = [];
-    for (var i = 0; i < arr.length; i++) {
-      ret.push(transform(arr[i]));
-    }
-    return ret;
-  }
 
 });
