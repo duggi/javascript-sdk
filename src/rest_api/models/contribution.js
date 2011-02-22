@@ -26,10 +26,10 @@ G.provide("", {
 
   newContribution: function(json) {
     //TODO this and most other constructors can be condensed
-    var data = G.models.contribution;
-    var dataObj = G.newDataObject(data.path, data.objectName, G.newContribution, data.keys);
-    G.models.user.Base.prototype = dataObj;
-    var base = new G.models.user.Base();
+    var ns = G.models.contribution;
+    var dataObj = G.newDataObject(ns.path, ns.objectName, G.newContribution, ns.keys);
+    ns.Base.prototype = dataObj;
+    var base = new ns.Base();
     if (json) base.extend(json);
     return base;
   }
@@ -53,16 +53,18 @@ G.provide("models.contribution", {
 
     this.create = function(config) {
       config = config || {};
-      var params = self.data(),
-        newParams = self.injectRailsParams({}),
+      var params = config.params, //TODO need to either add new keys and admit facade or make exception
+        newParams = G.dogfort.injectRailsParams({}),
         pollTicket = G.polling.uniqueTicket();
+
+      G.copy(params, self.data()); //Copy the data from self
 
       //Get the contribution settings
       G.api("/contributions/new.json", "get", newParams, function(json) {
         var brainTreeUrl = json.url,
           tr_data = json.tr_data;
 
-        params = self.injectRailsParams(params);
+        params = G.dogfort.injectRailsParams(params);
         var braintreeFormParams = self.braintreeParams(tr_data, pollTicket, params);
 
 //        G.log(braintreeFormParams) //Great little debug line
@@ -95,6 +97,7 @@ G.provide("models.contribution", {
         } else if (waiting) {//No content means still looking
           continuePolling(1500);
         } else if (loaded) { //JSON should be loaded
+          self.extend(json); //namespace stripped in pollOnce
           if (config.success) config.success(self, xhr);
         } else {
           if (config.error) config.error(json, xhr);
@@ -113,8 +116,8 @@ G.provide("models.contribution", {
     //TODO eventually all models will have polling support for ie 7
     //Is intended only for framework polling
     this.pollOnce = function(params, callback) {
-      var path = objectPath + "/poll" + self.requestType;
-      params = self.injectRailsParams(params);
+      var path = self.objectPath + "/poll" + self.requestType;
+      params = G.dogfort.injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr) {
         if (xhr.success) json = self.stripNamespace(json);
         if (callback) callback(json, xhr);
@@ -178,13 +181,18 @@ G.provide("models.contribution", {
         map[key] = value
       }
 
+      //Passed via the model
       mapIfDefined("tr_data", tr_data);
       mapIfDefined("transaction[custom_fields][poll_ticket]", pollTicket);
-      mapIfDefined("transaction[custom_fields][groupit_id]", params.groupitId);
-      mapIfDefined("transaction[custom_fields][user_id]", params.userId);
-      mapIfDefined("transaction[custom_fields][app_key]", params.app_key);
-      mapIfDefined("transaction[custom_fields][session_token]", params.session_token);
+      mapIfDefined("transaction[custom_fields][groupit_id]", params.groupit_id);
+      mapIfDefined("transaction[custom_fields][user_id]", params.user_id);
       mapIfDefined("transaction[amount]", params.amount);
+
+      //Framework specified
+      mapIfDefined("transaction[custom_fields][app_key]", G.appKey);
+      mapIfDefined("transaction[custom_fields][session_token]", G.persistenceToken);
+
+      //Passed as user params
       mapIfDefined("transaction[customer][first_name]", params.customer.firstName);
       mapIfDefined("transaction[customer][last_name]", params.customer.lastName);
       mapIfDefined("transaction[customer][email]", params.customer.email);

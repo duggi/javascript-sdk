@@ -76,6 +76,7 @@ G.provide("models.user", {
 
           //Update the model
           self.authd(true);
+          self.extend(json);
 
           //Let the world know
           if (config.success) config.success(self, xhr);
@@ -100,6 +101,7 @@ G.provide("models.user", {
       G.persistenceToken = null;
       G.cookie.deleteCookie(cookieName, "/");
 
+      //TODO what happens to self? Should we delete everything?
       //Update the model
       self.authd(false);
 

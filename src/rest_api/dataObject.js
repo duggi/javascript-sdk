@@ -153,7 +153,8 @@ G.provide("DataObject", {
           G.api(path+".json", "get", params, function(json, xhr) {
             if (xhr.success) {
               var models = [];
-              for (var i in models) {
+              for (var i in json) {
+                //TODO need to do a proper strip namespace
                 models.push(G[constructorName](json[i][name]));
               }
               if (config.success) config.success(models, xhr);
