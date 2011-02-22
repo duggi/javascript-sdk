@@ -40,7 +40,7 @@ G.provide("models.user", {
   objectName: "user",
   path: "/users",
   keys: ["name", "login", "organized_before", "is_public", "id", "created_at",
-    "updated_at", "name", "password"], //TODO password really doesn't belong.
+    "updated_at", "name", "password", "persistence_token"], //TODO password really doesn't belong.
 
   Base: function(json) {
     var self = this;
