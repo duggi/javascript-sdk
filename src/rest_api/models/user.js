@@ -35,7 +35,6 @@ G.provide("", {
 
 });
 
-//TODO was here getting ready to test this in root.
 G.provide("models.user", {
 
   objectName: "user",
@@ -65,7 +64,7 @@ G.provide("models.user", {
       var path = self.objectPath + "/login" + self.requestType;
       var params = self.data();
       params = self.railify(params, self.objectName);
-      params = G.RestObject.injectRailsParams(params);
+      params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
         if (xhr.success) {
           json = self.stripNamespace(json, xhr);
@@ -105,8 +104,8 @@ G.provide("models.user", {
       self.authd(false);
 
       //Tell the server to reset the persistenceToken
-      var path = self.rootPath + "/logout" + self.requestType;
-      params = G.RestObject.injectRailsParams(params);
+      var path = self.objectPath + "/logout" + self.requestType;
+      params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
         if (xhr.success && config.success) {
           config.success(self, xhr);

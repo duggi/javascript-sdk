@@ -32,6 +32,12 @@ G.provide("", {
   newDataObject: function(objectPath, objectName, constructorFn, keys) {
     var bo = G.newBindableObject();
     G.DataObject.Base.prototype = bo;
+
+    //TODO Overridden name conversion... don't like this feel
+    bo.nameConversion = function(name) {
+      return G.String.toCamelCase(name);
+    };
+
     var base = new G.DataObject.Base(objectPath, objectName, constructorFn);
     //overridden methods work here
     base.extend(keys);
@@ -59,8 +65,9 @@ G.provide("DataObject", {
     },
     participant: {
       path: "/participants",
+      //TODO need to do inverntory on keys (organizer, ... etc)
       keys: ["groupit_id", "contacted", "is_public", "user_id", "id",
-        "created_at", "updated_at", "invited"]
+        "created_at", "updated_at", "invited", "organizer", "contributor"]
     },
     invitee: { //TODO this is a index action... facades ugh
       path: "/invitees",
@@ -100,13 +107,12 @@ G.provide("DataObject", {
 
   init: function() {
     //Injecting the api object constructors into the G namespace
-    for (var name in G.DataObject.apiObjects) {
-      (function() {
-        var path = G.DataObject.apiObjects[name].path,
+    for (var key in G.DataObject.apiObjects) {
+      (function() { //Done for the function declarations inside
+        var name = key,
+          path = G.DataObject.apiObjects[name].path,
           keys = G.DataObject.apiObjects[name].keys;
 
-        //camelCase the keys
-        keys = G.Array.map(keys, G.String.toCamelCase);
 
         //Fixup the constructor name
         var camelCased = G.String.toCamelCase(name),
@@ -115,11 +121,8 @@ G.provide("DataObject", {
 
         //Define the constructor
         G[constructorName] = function(json) {
-          var bo = G.newBindableObject();
-          G.DataObject.Base.prototype = bo;
-          var base = new G.DataObject.Base(path, name, G[constructorName]);
+          var base = G.newDataObject(path, name, G[constructorName], keys);
           //overridden methods work here
-          base.extend(keys);
           if (json) base.extend(json);
           return base;
         };
@@ -136,7 +139,8 @@ G.provide("DataObject", {
          *
          * @param config
          */
-        G[capName + ".index"] = function(config) {
+        G[capName] = G[capName] || {};
+        G[capName].index = function(config) {
           config = config || {};
           var params = {};
           //Converts the camel cased names to underscores for the server
@@ -144,9 +148,9 @@ G.provide("DataObject", {
             params[G.String.toUnderscore(key)] = config.params[key];
           }
 
-          var path = path + ".json"; //TODO need to parameterize this
           params = G.dogfort.injectRailsParams(params);
-          G.api(path, "get", params, function(json, xhr) {
+          //TODO path need to be cleaned up
+          G.api(path+".json", "get", params, function(json, xhr) {
             if (xhr.success) {
               var models = [];
               for (var i in models) {
@@ -159,7 +163,6 @@ G.provide("DataObject", {
             if (config.complete) config.complete(json, xhr);
           });
         }
-
       })();
     }
 
@@ -167,16 +170,10 @@ G.provide("DataObject", {
 
   Base: function(objectPath, objectName, constructorFn) {
     var self = this;
-    this.requestType = ".json";
-    this.objectPath = objectPath;
-    this.objectName = objectName;
-    this.constructorFn = constructorFn;
-
-    //-------------------------------------- OVERRIDDEN BINDABLE OBJECT METHODS
-    //Formats the callbacks/getters/setters in JavaScript camelCase conventions
-    this.nameConversion = function(name) {
-      return G.String.toCamelCase(name);
-    };
+    self.requestType = ".json";
+    self.objectPath = objectPath;
+    self.objectName = objectName;
+    self.constructorFn = constructorFn;
 
     //--------------------------------------------- API CALLS
 
@@ -188,16 +185,16 @@ G.provide("DataObject", {
      * @param config
      */
 
-    this.create = function(config) {
+    self.create = function(config) {
       config = config || {};
       var path = objectPath + self.requestType;
       var params = self.data();
       params = self.railify(params);
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
-        if (xhr.success && config.success) {
+        if (xhr.success) {
           self.extend(self.stripNamespace(json));
-          config.success(self, xhr);
+          if(config.success) config.success(self, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
@@ -212,7 +209,7 @@ G.provide("DataObject", {
      * Undefined is the key word to bypass id based lookup and fallback to
      * other methods like hashes
      */
-    this.read = function(config) {
+    self.read = function(config) {
       config = config || {};
       var params = self.data(),
         path = objectPath + "/" + (params.id || "undefined") + self.requestType;
@@ -220,9 +217,9 @@ G.provide("DataObject", {
       params = self.railify(params);
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr) {
-        if (xhr.success && config.success) {
-          json = self.stripNamespace(json);
-          config.success(self.constructorFn(json), xhr);
+        if (xhr.success) {
+          self.extend(self.stripNamespace(json));
+          if (config.success) config.success(self, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
@@ -237,7 +234,7 @@ G.provide("DataObject", {
      * Undefined is the key word to bypass id based lookup and fallback to
      * other methods like hashes
      */
-    this.update = function(config) {
+    self.update = function(config) {
       config = config || {};
       var params = self.data(),
         path = objectPath + "/" + (params.id || "undefined") + self.requestType;
@@ -245,9 +242,9 @@ G.provide("DataObject", {
       params = self.railify(params);
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "put", params, function(json, xhr) {
-        if (xhr.success && config.success) {
+        if (xhr.success) {
           //Update doesn't return the object
-          config.success(json, xhr);
+          if(config.success) config.success(json, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
@@ -260,7 +257,7 @@ G.provide("DataObject", {
      * Undefined is the key word to bypass id based lookup and fallback to
      * other methods like hashes
      */
-    this.destroy = function(config) {
+    self.destroy = function(config) {
       config = config || {};
       var params = self.data(),
         path = objectPath + "/" + (params.id || "undefined") + self.requestType;
@@ -268,9 +265,9 @@ G.provide("DataObject", {
       params = self.railify(params);
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "delete", params, function(json, xhr) {
-        if (xhr.success && config.success) {
+        if (xhr.success) {
           //Destroy doesn't return the object
-          config.success(json, xhr);
+          if(config.success) config.success(json, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
@@ -283,7 +280,7 @@ G.provide("DataObject", {
      * to a model. Example : user[:id] where user is the model name and id is
      * the attribute to be sent to the server.
      */
-    this.railify = function(params) {
+    self.railify = function(params) {
       var rails_params = {};
       for (var key in params) {
         if (key == "id") continue;
@@ -296,7 +293,7 @@ G.provide("DataObject", {
       return rails_params;
     };
 
-    this.stripNamespace = function(json) {
+    self.stripNamespace = function(json) {
       return json[self.objectName];
     };
   }

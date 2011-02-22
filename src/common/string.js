@@ -25,15 +25,16 @@
 G.provide("String", {
 
   toCamelCase: function(string) {
+    var newString = new String(string);
     var re = /(_)([a-z].*?)/gi,
-      matchResult = re.exec(string);
+      matchResult = re.exec(newString);
     while (matchResult) {
       if (matchResult[2]) {
-        string = string.replace(matchResult[0], matchResult[2].toUpperCase())
+        newString = newString.replace(matchResult[0], matchResult[2].toUpperCase())
       }
       matchResult = re.exec();
     }
-    return string
+    return newString
   },
 
   toUnderscore: function(string) {

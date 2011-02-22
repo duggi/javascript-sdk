@@ -45,21 +45,21 @@ G.provide("BindableObject", {
      * If passed a object both the keys and values will be mapped into the
      * bindable object. Setters will fire callbacks on the newly set and
      * defined key/value pairs.
-     * 
+     *
      * Note: Objects may pass a boolean value to determine if deep copy or
      * shallow copying should occur. By default we shallow copy.
      *
      * If passed a array only the setters/getters will be mapped using the
      * values in the array as keys. No callbacks are issued as the data has
      * not changed.
-     * 
+     *
      * @param obj
      * @param shallow
      */
     //Opt into shallow copy for optimization
     this.extend = function(obj, shallow) {
       if (!obj) return;
-      if(typeof obj !== "object") throw("Must pass object/array to extend");
+      if (typeof obj !== "object") throw("Must pass object/array to extend");
 
       if (obj instanceof Array) {
         G.Array.map(obj, function(val) {
@@ -71,7 +71,7 @@ G.provide("BindableObject", {
         for (var key in obj) {
           self.generateGetterSetter(key); //overrides previously existing g&s
           self.generateCallback(key);
-          self[key](obj[key], shallow); //Extend is just looping through the set methods
+          self[self.nameConversion(key)](obj[key], shallow); //Extend is just looping through the set methods
         }
       }
     };
@@ -121,8 +121,7 @@ G.provide("BindableObject", {
     };
 
     this.generateGetterSetter = function (name) {
-      name = self.nameConversion(name);
-      self[name] = function() {
+      self[this.nameConversion(name)] = function() {
         var args = Array.prototype.slice.call(arguments);
         if (args.length == 0) {
           return data[name];
@@ -131,7 +130,7 @@ G.provide("BindableObject", {
             deep = args.shift();
           return set(name, value, deep);
         }
-      }
+      };
     };
 
     function fireOnKey(key) {
