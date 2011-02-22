@@ -25,13 +25,8 @@
 G.provide("", {
 
   newContribution: function(json) {
-    //TODO this and most other constructors can be condensed
-    var ns = G.models.contribution;
-    var dataObj = G.newDataObject(ns.path, ns.objectName, G.newContribution, ns.keys);
-    ns.Base.prototype = dataObj;
-    var base = new ns.Base();
-    if (json) base.extend(json);
-    return base;
+    var namespace = G.models.contribution;
+    return G.DataObject.commonConstructor(namespace, G.newContribution, json);
   }
 
 });

@@ -33,7 +33,7 @@ G.provide("dogfort", {
   /**
    * Injects the session token and app key into the params passed in.
    * @param params {Object} Params going to the server without auth tokens
-   *
+   * TODO should be renamed to framework params
    */
   injectRailsParams: function(params) {
     params = params || {};
@@ -53,6 +53,17 @@ G.provide("dogfort", {
       throw "App secret not set using G.RestObject.appSecret";
 
     return params;
+  },
+
+  /**
+   * Adds specific association includes to the request
+   * @param params
+   * @param includes {Object}
+   */
+  injectIncludes: function(params, includes){
+//    params.includes =
+//    for(var key in para)
+    
   },
 
   //TODO this isn't used yet, is it needed?

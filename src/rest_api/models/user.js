@@ -25,12 +25,8 @@
 G.provide("", {
 
   newUser: function(json) {
-    var data = G.models.user;
-    var dataObj = G.newDataObject(data.path, data.objectName, G.newUser, data.keys);
-    G.models.user.Base.prototype = dataObj;
-    var base = new G.models.user.Base();
-    if (json) base.extend(json);
-    return base;
+    var namespace = G.models.user;
+    return G.DataObject.commonConstructor(namespace, G.newContribution, json);
   }
 
 });

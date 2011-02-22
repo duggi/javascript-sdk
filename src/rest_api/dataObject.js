@@ -76,7 +76,7 @@ G.provide("DataObject", {
     note: {
       path:"/notes",
       keys: ["note", "metadata_id", "metadata_type", "is_public", "user_id",
-        "id", "created_at", "updated_at"]
+        "id", "created_at", "updated_at", "name"]
     },
     feed_post: {
       path:"/feed_posts",
@@ -103,6 +103,25 @@ G.provide("DataObject", {
         "phone_number", "user_id", "is_public", "id", "created_at",
         "updated_at"]
     }
+  },
+
+  /**
+   * Common constructor for all our api objects.
+   *
+   * Namespace must include a restful path, a objectName, the keys available
+   * in underscore type, and a Base constructor fn
+   *
+   * @param namespace {Object}
+   * @param constructorFn {Function} the wrapper function that calls this fn.
+   * @param json 
+   */
+  commonConstructor: function(namespace, constructorFn, json) {
+    var ns = namespace;
+    var dataObj = G.newDataObject(ns.path, ns.objectName, constructorFn, ns.keys);
+    ns.Base.prototype = dataObj;
+    var base = new ns.Base();
+    if (json) base.extend(json);
+    return base;
   },
 
   init: function() {
