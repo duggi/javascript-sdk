@@ -40,7 +40,7 @@ G.provide("models.user", {
   objectName: "user",
   path: "/users",
   keys: ["name", "login", "organized_before", "is_public", "id", "created_at",
-    "updated_at", "name"],
+    "updated_at", "name", "password"], //TODO password really doesn't belong.
 
   Base: function(json) {
     var self = this;
@@ -59,7 +59,7 @@ G.provide("models.user", {
      *
      * config is a hash. We support success, and error keys
      */
-    self.login = function(config) {
+    self.signin = function(config) {
       config = config || {};
       var path = self.objectPath + "/login" + self.requestType;
       var params = self.data();
@@ -92,7 +92,7 @@ G.provide("models.user", {
      * @param config
      */
 
-    self.logout = function(config) {
+    self.signout = function(config) {
       config = config || {};
       var params = {}, self = this;
 

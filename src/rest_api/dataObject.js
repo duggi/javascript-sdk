@@ -190,6 +190,7 @@ G.provide("DataObject", {
       var path = objectPath + self.requestType;
       var params = self.data();
       params = self.railify(params);
+      if(config.params) G.copy(params, config.params, true); //TODO need to convert to underscore!
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
         if (xhr.success) {
