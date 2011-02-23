@@ -22,13 +22,14 @@
  *
  */
 
-G.provide("",{
+G.provide("", {
   newGroupit: function() {
     var namespace = G.models.groupit;
     return G.DataObject.commonConstructor(namespace, G.newContribution, json);
   }
 });
 
+//TODO migrate over to just groupit once we go to restObject
 G.provide("models.groupit", {
 
   //TODO need to do inventory on the keys returned from the server
@@ -39,9 +40,21 @@ G.provide("models.groupit", {
     "active", "lead_url", "support_url", "purchased", "groupit_type",
     "created_at", "updated_at", "hash_digest", "organizer", "amount_raised"],
 
-  Base: function(){
 
-    
+  index: function(config) {
+    //Testing out the includes directive
+    var params = {
+      include: {
+        user: {
+          include: "emails"
+        }
+      }
+    };
+
+    G.DataObject.commonIndex(config, G.models.groupit, G.newGroupit, params);
+  },
+
+  Base: function() {
 
 
   }

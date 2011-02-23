@@ -50,6 +50,10 @@ G.provide("QS", {
     }
     kvPairs.sort();
     return kvPairs.join(seperator);
+  },
+
+  nestedRailsEncode: function(params, seperator, encode){
+    
   }
 
 });

@@ -56,21 +56,14 @@
 //    quantity: 1
 //  });
 
-  var groupit = G.newGroupit();
-  groupit.product("Ipod");
-  groupit.price(234);
-  groupit.surprise(true);
-  groupit.quantity(1);
-
-  
-  groupit.create({
-    success: function(g, xhr){
-      G.log(g);
+  var g = G.models.groupit.index({
+    success: function(groupits){
+      G.log(groupits);
+      G.g = groupits;
       G.log("success");
     },
-    error: function(g, xhr){
-      G.log(g);
-      G.log("failure");
+    error: function(){
+      G.log("Error")
     }
   });
 

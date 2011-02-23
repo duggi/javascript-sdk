@@ -89,13 +89,16 @@ G.provide("models.contribution", {
             }
           };
           if (config.error) config.error(hash, xhr);
+          if (config.complete) config.complete(hash, xhr);
         } else if (waiting) {//No content means still looking
           continuePolling(1500);
         } else if (loaded) { //JSON should be loaded
           self.extend(json); //namespace stripped in pollOnce
           if (config.success) config.success(self, xhr);
+          if(config.complete) config.complete(json, xhr);
         } else {
           if (config.error) config.error(json, xhr);
+          if(config.complete) config.complete(json, xhr);
           G.log("Polling returned a unexpected status:" + xhr.status);
         }
 

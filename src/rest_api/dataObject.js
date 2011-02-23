@@ -105,6 +105,8 @@ G.provide("DataObject", {
     }
   },
 
+  defaultRequestType: ".json",
+
   /**
    * Common constructor for all our api objects.
    *
@@ -113,7 +115,7 @@ G.provide("DataObject", {
    *
    * @param namespace {Object}
    * @param constructorFn {Function} the wrapper function that calls this fn.
-   * @param json 
+   * @param json
    */
   commonConstructor: function(namespace, constructorFn, json) {
     var ns = namespace;
@@ -122,6 +124,33 @@ G.provide("DataObject", {
     var base = new ns.Base();
     if (json) base.extend(json);
     return base;
+  },
+
+  commonIndex: function(config, namespace, constructorFn, params) {
+    config = config || {};
+    params = params || {};
+    var path = namespace.path + G.DataObject.defaultRequestType,
+      name = namespace.objectName;
+
+    //Converts the camel cased names to underscores for the server
+    for (var key in config.params) {
+      params[G.String.toUnderscore(key)] = config.params[key];
+    }
+    params = G.dogfort.injectRailsParams(params);
+
+    G.api(path, "get", params, function(json, xhr) {
+      if (xhr.success) {
+        var models = [];
+        for (var i in json) {
+          //TODO need to do a proper strip namespace
+          models.push(constructorFn(json[i][name]));
+        }
+        if (config.success) config.success(models, xhr);
+      } else {
+        if (config.error) config.error(json, xhr);
+      }
+      if (config.complete) config.complete(json, xhr);
+    });
   },
 
   init: function() {
@@ -169,7 +198,7 @@ G.provide("DataObject", {
 
           params = G.dogfort.injectRailsParams(params);
           //TODO path need to be cleaned up
-          G.api(path+".json", "get", params, function(json, xhr) {
+          G.api(path + ".json", "get", params, function(json, xhr) {
             if (xhr.success) {
               var models = [];
               for (var i in json) {
@@ -185,12 +214,11 @@ G.provide("DataObject", {
         }
       })();
     }
-
   },
 
   Base: function(objectPath, objectName, constructorFn) {
     var self = this;
-    self.requestType = ".json";
+    self.requestType = G.DataObject.defaultRequestType;
     self.objectPath = objectPath;
     self.objectName = objectName;
     self.constructorFn = constructorFn;
@@ -210,12 +238,12 @@ G.provide("DataObject", {
       var path = objectPath + self.requestType;
       var params = self.data();
       params = self.railify(params);
-      if(config.params) G.copy(params, config.params, true); //TODO need to convert to underscore!
+      if (config.params) G.copy(params, config.params, true); //TODO need to convert to underscore!
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
         if (xhr.success) {
           self.extend(self.stripNamespace(json));
-          if(config.success) config.success(self, xhr);
+          if (config.success) config.success(self, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
@@ -265,7 +293,7 @@ G.provide("DataObject", {
       G.api(path, "put", params, function(json, xhr) {
         if (xhr.success) {
           //Update doesn't return the object
-          if(config.success) config.success(json, xhr);
+          if (config.success) config.success(json, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
@@ -288,7 +316,7 @@ G.provide("DataObject", {
       G.api(path, "delete", params, function(json, xhr) {
         if (xhr.success) {
           //Destroy doesn't return the object
-          if(config.success) config.success(json, xhr);
+          if (config.success) config.success(json, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
