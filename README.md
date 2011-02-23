@@ -22,6 +22,9 @@ To run the compiler you must have ruby and the thor gem installed.
 
 thor ./compile.thor [options]  ====> outputs groupit.js
 
+thor compiler:debug
+thor compiler:compile
+
 
 Tests
 -----
