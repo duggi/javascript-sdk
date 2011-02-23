@@ -95,10 +95,10 @@ G.provide("models.contribution", {
         } else if (loaded) { //JSON should be loaded
           self.extend(json); //namespace stripped in pollOnce
           if (config.success) config.success(self, xhr);
-          if(config.complete) config.complete(json, xhr);
+          if (config.complete) config.complete(json, xhr);
         } else {
           if (config.error) config.error(json, xhr);
-          if(config.complete) config.complete(json, xhr);
+          if (config.complete) config.complete(json, xhr);
           G.log("Polling returned a unexpected status:" + xhr.status);
         }
 
