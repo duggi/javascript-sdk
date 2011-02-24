@@ -56,7 +56,7 @@ G.provide("", {
 
 });
 
-// AddEvent and removeEvent Taken from his excellency John Resig
+// AddEvent and removeEvent Taken from John Resig
 G.provide("eventManager", {
   addEvent:function(obj, type, fn) {
     if (obj.attachEvent) {
@@ -73,6 +73,7 @@ G.provide("eventManager", {
 
   removeEvent: function(obj, type, fn) {
     if (obj.detachEvent) {
+      if(!obj[type + fn]) return; //don't detach something that doesn't exist
       obj.detachEvent('on' + type, obj[type + fn]);
       obj[type + fn] = null;
     }
