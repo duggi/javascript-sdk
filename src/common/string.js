@@ -25,7 +25,7 @@
 G.provide("String", {
 
   toCamelCase: function(string) {
-    var newString = new String(string);
+    var newString = String(string);
     var re = /(_)([a-z].*?)/gi,
       matchResult = re.exec(newString);
     while (matchResult) {

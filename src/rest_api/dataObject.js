@@ -163,7 +163,6 @@ G.provide("DataObject", {
           path = G.DataObject.apiObjects[name].path,
           keys = G.DataObject.apiObjects[name].keys;
 
-
         //Fixup the constructor name
         var camelCased = G.String.toCamelCase(name),
           capName = camelCased[0].toUpperCase() + camelCased.slice(1),
