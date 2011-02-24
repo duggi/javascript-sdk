@@ -23,7 +23,7 @@
  */
 
 G.provide("", {
-  newGroupit: function() {
+  newGroupit: function(json) {
     var namespace = G.models.groupit;
     return G.DataObject.commonConstructor(namespace, G.newContribution, json);
   }

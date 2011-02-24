@@ -50,14 +50,6 @@ G.provide("", {
 G.provide("DataObject", {
 
   apiObjects: {
-    groupit: {
-      path: "/groupits",
-      //TODO need to do inventory on the keys returned from the server
-      keys: ["id", "product_image", "product_url", "product", "price",
-        "message", "surprise", "quantity","user_id","recipient", "options",
-        "active", "lead_url", "support_url", "purchased", "groupit_type",
-        "created_at", "updated_at", "hash_digest", "organizer", "amount_raised"]
-    },
     payment_response: {
       path: "/payment_responses",
       keys:["user_id", "groupit_id", "ip_address", "success", "response",
