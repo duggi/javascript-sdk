@@ -82,7 +82,7 @@ G.provide("models.contribution", {
         var loaded = (xhr.status == "200" || typeof json === 'object'),
           waiting = (xhr.status == "204" || typeof json === 'string');
 
-        if (attempts > 10) {
+        if (attempts > 20) { // 20 * .15 = 30 seconds
           var hash = {
             error:{
               message: "After " + attempts + " attempts no contribution was found"

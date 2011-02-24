@@ -71,14 +71,15 @@ G.provide("models.user", {
             G.cookie.getExpDate(7, 0, 0), "/");
 
           //Update the model
-          self.authd(true);
           self.extend(json);
+          self.authd(true);
 
           //Let the world know
           if (config.success) config.success(self, xhr);
         } else {
           if (config.error) config.error(json, xhr);
         }
+        if (config.complete) config.complete(json, xhr);
       });
     };
 
@@ -110,6 +111,7 @@ G.provide("models.user", {
         } else {
           if (config.error) config.error(self, xhr);
         }
+        if (config.complete) config.complete(json, xhr);
       });
     };
 

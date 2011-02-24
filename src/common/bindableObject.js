@@ -34,10 +34,9 @@ G.provide("", {
 G.provide("BindableObject", {
 
   Base:function(debug) {
-
-    var listeners = {},
-      self = this,
-      data = {};
+    var self = this;
+    self._listeners = {};
+    self._data = {};
 
     /**
      * Extends the current object with a object or array.
@@ -76,23 +75,31 @@ G.provide("BindableObject", {
       }
     };
 
+
+    //Takes a bindable object and merges with this one
+    this.merge = function(bindableObject){
+      G.copy(self._listeners, bindableObject._listeners, true);
+      G.copy(self._data, bindableObject._data, true);
+      return self;
+    };
+
     //Simply calls all the event handlers in the system. Useful when the handlers
     //are disabled and the client wants to get caught up with the current state
     this.flush = function() {
-      for (var key in data) {
+      for (var key in self._data) {
         fireOnKey(key);
       }
     };
 
     //Nice to get at the raw data without all the getter calls.
     this.data = function() {
-      return G.deepCopy({}, data, true);
+      return G.deepCopy({}, self._data, true);
     };
 
     //Dumps to console if possible
     this.dump = function() {
-      G.log(data);
-      G.log(listeners);
+      G.log(self._data);
+      G.log(self._listeners);
     };
 
     //Overridable method to create a different interface without changing the
@@ -109,13 +116,13 @@ G.provide("BindableObject", {
     this.generateCallback = function(name) {
       var keyName = self.callbackName(name);
       self[keyName] = function(fn, remove) {
-        listeners[name] = listeners[name] || {};
+        self._listeners[name] = self._listeners[name] || {};
         if (remove) {
           //remove that key in hash from listener data-store
-          delete listeners[name][fn];
+          delete self._listeners[name][fn];
         } else {
           //duplicates not possible with te hash
-          listeners[name][fn] = fn;
+          self._listeners[name][fn] = fn;
         }
       }
     };
@@ -124,7 +131,7 @@ G.provide("BindableObject", {
       self[this.nameConversion(name)] = function() {
         var args = Array.prototype.slice.call(arguments);
         if (args.length == 0) {
-          return data[name];
+          return self._data[name];
         } else {
           var value = args.shift(),
             deep = args.shift();
@@ -134,10 +141,10 @@ G.provide("BindableObject", {
     };
 
     function fireOnKey(key) {
-      for (var fn in listeners[key]) {
-        if (listeners[key][fn]) {
+      for (var fn in self._listeners[key]) {
+        if (self._listeners[key][fn]) {
           if (debug) G.log("--Event Listener on key: " + key + " Fired--");
-          listeners[key][fn](data[key]);
+          self._listeners[key][fn](self._data[key]);
         }
       }
     }
@@ -145,17 +152,17 @@ G.provide("BindableObject", {
     //Deep copy is non trivial and in some circumstances doesn't work as expected
     //if you need a deep copy you can ask for one
     function set(key, value, deep) {
-      listeners[key] = listeners[key] || [];
+      self._listeners[key] = self._listeners[key] || [];
       //Null's type is "object"... doh
       if (deep && typeof value === 'object' && value != null) {
         var empty = (value instanceof Array) ? [] : {};
-        data[key] = G.deepCopy(empty, value, true)
+        self._data[key] = G.deepCopy(empty, value, true)
       } else {
-        data[key] = value;
+        self._data[key] = value;
       }
 
       fireOnKey(key);
-      return data[key];
+      return self._data[key];
     }
 
   }
