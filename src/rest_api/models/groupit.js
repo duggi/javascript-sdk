@@ -44,14 +44,62 @@ G.provide("models.groupit", {
   index: function(config) {
     //Testing out the includes directive
     var params = {
-      include: {
-        user: {
-          include: "emails"
-        }
-      }
+      include: ["user","participants","contributions"]
     };
 
-    G.DataObject.commonIndex(config, G.models.groupit, G.newGroupit, params);
+    G.DataObject.commonIndex(config, G.models.groupit, G.newGroupit,
+      params, wrapIncludes);
+
+    function wrapIncludes(models) {
+      for (var i in models) {
+        var j;
+        var model = models[i];
+
+        //TODO need to add all these to the keys of a groupit... handle not doing the lookups too..
+        //Wrap the user
+        if (model.user) {
+          model.user(G.newUser(model.user()));
+        }
+
+        //Wrap the participants
+        if (model.participants) {
+          var parts = [];
+          for (j in model.participants()) {
+            var participant = model.participants()[j];
+            //TODO need to get the participant wired with the user
+            participant.user = G.newUser(participant.user);
+            //TODO FML need those collection attributes
+            parts.push(G.newParticipant(participant));
+          }
+          model.participants(parts);
+        }
+
+        //Wrap the contributions
+        if (model.contributions) {
+          var contrs = [];
+          for (j in model.contributions()) {
+            var contribution = model.contributions()[j];
+            //TODO holy crap clean this
+            var user = commonUser(contribution.user_id, model.participants());
+            contribution.user = user;
+            contrs.push(G.newContribution(model.contributions()[j]));
+          }
+          model.contributions(contrs);
+        }
+      }
+    }
+
+    //The participants must have a user for the contribution as a contributor => participant
+    function commonUser(userId, participants) {
+      for (var i in participants) {
+        var p = participants[i];
+        if (p.userId() == userId) {
+          return p.user();
+        }
+      }
+      return null;
+    }
+
   },
 
   Base: function() {

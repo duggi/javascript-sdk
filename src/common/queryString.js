@@ -52,8 +52,51 @@ G.provide("QS", {
     return kvPairs.join(seperator);
   },
 
-  nestedRailsEncode: function(params, seperator, encode){
-    
+  /**
+   * Encode parameters to a query string. Handles nested objects by with rails
+   * style bracket notation
+   *
+   * @access private
+   * @param   params {Object}  the parameters to encode
+   * @param   seperator {String}  the separator string (defaults to '&')
+   * @param   encode {Boolean} indicate if the key/value should be URI encoded
+   * @return        {String}  the query string
+   */
+  nestedEncode: function(params, seperator, encode) {
+    seperator = seperator === undefined ? '&' : seperator;
+    encode = encode === false ? function(s) {
+      return s;
+    } : encodeURIComponent;
+
+    //Bracket nested objects
+    function deepCall(prefix, params, array) {
+      for (var key in params) {
+        var val = params[key],
+          type = typeof val;
+        if (val !== null && type !== 'undefined' && type === 'object'
+          && !(val instanceof Array)) {
+          deepCall(prefix + "[" + key + "]", val, array);
+        }
+        else {
+          array.push(encode(prefix + "[" + key + "]") + "=" + encode(val));
+        }
+      }
+    }
+
+    var kvPairs = [];
+    for (var key in params) {
+      var val = params[key],
+        type = typeof val;
+      if (val !== null && type !== 'undefined' && type === 'object'
+        && !(val instanceof Array)) {
+        deepCall(key, val, kvPairs);
+        continue;
+      }
+      kvPairs.push(encode(key) + "=" + encode(val));
+    }
+    kvPairs.sort();
+    return kvPairs.join(seperator);
   }
+
 
 });

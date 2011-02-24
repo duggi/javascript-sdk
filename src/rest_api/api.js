@@ -123,7 +123,7 @@ G.provide('ApiClient', {
 
     //Construct the url
     var url = G.endPoint + path;
-    var queryString = G.QS.encode(params);
+    var queryString = G.QS.encode(params); //nestedEncode(params)
     if (method == 'get') {
       url += "?" + queryString;
     }

@@ -63,6 +63,7 @@ G.provide("DataObject", {
       keys:["user_id", "groupit_id", "ip_address", "success", "response",
         "is_public", "id","created_at", "updated_at"]
     },
+    //TODO need to create the user attribute everywhere and remove from groupit index
     participant: {
       path: "/participants",
       //TODO need to do inverntory on keys (organizer, ... etc)
@@ -126,7 +127,7 @@ G.provide("DataObject", {
     return base;
   },
 
-  commonIndex: function(config, namespace, constructorFn, params) {
+  commonIndex: function(config, namespace, constructorFn, params, callback) {
     config = config || {};
     params = params || {};
     var path = namespace.path + G.DataObject.defaultRequestType,
@@ -145,6 +146,7 @@ G.provide("DataObject", {
           //TODO need to do a proper strip namespace
           models.push(constructorFn(json[i][name]));
         }
+        callback(models);
         if (config.success) config.success(models, xhr);
       } else {
         if (config.error) config.error(json, xhr);
