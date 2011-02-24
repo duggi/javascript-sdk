@@ -43,7 +43,7 @@ G.provide("models.user", {
     var cookieName = "__groupit__persistenceToken"; //TODO do XD cookies
 
     //Add the authd key and listeners
-    self.extend({ authd: false });
+    self.extend(["authd"]);
 
     //Add support for creating users straight from low level api calls
     if (json) self.extend(json);

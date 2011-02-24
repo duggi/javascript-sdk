@@ -78,7 +78,13 @@ G.provide("BindableObject", {
 
     //Takes a bindable object and merges with this one
     this.merge = function(bindableObject){
-      G.copy(self._listeners, bindableObject._listeners, true);
+      for(var key in bindableObject._listeners){
+        var listenerArray = bindableObject._listeners[key];
+        for(var i in listenerArray){
+          self._listeners[key] = self._listeners[key] || [];
+          self._listeners[key].push(listenerArray[i]);
+        }
+      }
       G.copy(self._data, bindableObject._data, true);
       return self;
     };
@@ -116,13 +122,13 @@ G.provide("BindableObject", {
     this.generateCallback = function(name) {
       var keyName = self.callbackName(name);
       self[keyName] = function(fn, remove) {
-        self._listeners[name] = self._listeners[name] || {};
+        self._listeners[name] = self._listeners[name] || [];
         if (remove) {
-          //remove that key in hash from listener data-store
-          delete self._listeners[name][fn];
+          var index = G.Array.indexOf(self._listeners[name], fn);
+          self._listeners[name].splice(index, 1);
         } else {
           //duplicates not possible with te hash
-          self._listeners[name][fn] = fn;
+          self._listeners[name].push(fn);
         }
       }
     };
@@ -141,10 +147,10 @@ G.provide("BindableObject", {
     };
 
     function fireOnKey(key) {
-      for (var fn in self._listeners[key]) {
-        if (self._listeners[key][fn]) {
+      for (var i in self._listeners[key]) {
+        if (self._listeners[key][i]) {
           if (debug) G.log("--Event Listener on key: " + key + " Fired--");
-          self._listeners[key][fn](self._data[key]);
+          self._listeners[key][i](self._data[key]);
         }
       }
     }
