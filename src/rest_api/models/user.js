@@ -107,8 +107,8 @@ G.provide("models.user", {
       var path = self.objectPath + "/logout" + self.requestType;
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
-        if (xhr.success && config.success) {
-          config.success(self, xhr);
+        if (xhr.success) {
+          if(config.success) config.success(self, xhr);
         } else {
           if (config.error) config.error(self, xhr);
         }

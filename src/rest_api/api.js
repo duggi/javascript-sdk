@@ -88,6 +88,7 @@ G.provide('ApiClient', {
       next = args.shift();
     }
 
+
     method = method || 'get';
     params = params || {};
 
@@ -101,7 +102,6 @@ G.provide('ApiClient', {
       G.log('failed on rest methods');
       return; //Need to create a logging mech
     }
-
     G.ApiClient.corsRequest(path, method, params, cb);
 
     //    var form = G.ApiClient.createForm(path, method, params);
@@ -141,10 +141,10 @@ G.provide('ApiClient', {
     }
 
 
+
     //The callback
     if (cb) {
       xhr.onload = function() {
-
         //Custom contentType and standardization of response
         //TODO this goes into our custom XHR object
         if (!xhr.contentType) {
@@ -172,9 +172,10 @@ G.provide('ApiClient', {
           xhr.success = !!xhr.responseText;
           xhr.clientError = xhr.serverError = !xhr.responseText;
         }
-
         cb(response, xhr);
-      }
+      };
+      //TODO need to handle the error function for ie
+      xhr.onerror = xhr.onload;
     }
 
     if (method == "get") {

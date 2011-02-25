@@ -147,6 +147,7 @@ G.provide("BindableObject", {
     };
 
     function fireOnKey(key) {
+      self._listeners[key] = self._listeners[key] || [];
       for (var i in self._listeners[key]) {
         if (self._listeners[key][i]) {
           if (debug) G.log("--Event Listener on key: " + key + " Fired--");
