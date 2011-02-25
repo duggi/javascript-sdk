@@ -121,6 +121,8 @@ G.provide('ApiClient', {
       params['_method'] = 'delete';
     }
 
+    params['__timestamp__'] = (new Date()).toString(); //Attempt to cache bust ie
+    
     //Construct the url
     var url = G.endPoint + path;
     var queryString = G.QS.encode(params); //nestedEncode(params)
