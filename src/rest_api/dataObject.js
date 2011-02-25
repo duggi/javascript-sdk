@@ -76,11 +76,6 @@ G.provide("DataObject", {
       keys: ["message", "groupit_id", "is_public", "user_id", "id",
         "created_at", "updated_at"]
     },
-    email: {
-      path: "/emails",
-      keys: ["address", "primary", "user_id", "retail_contact", "id",
-        "created_at", "updated_at"]
-    },
     authentication: {
       path: "/authentications",
       keys: ["user_id", "provider", "uid", "is_public", "id",

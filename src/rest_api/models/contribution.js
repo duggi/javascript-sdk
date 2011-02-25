@@ -43,7 +43,7 @@ G.provide("models.contribution", {
   /**
    * Base constructor function for the contribution model
    */
-  Base:function(json) {
+  Base:function() {
     var self = this;
 
     this.create = function(config) {

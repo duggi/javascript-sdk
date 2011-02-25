@@ -38,16 +38,12 @@ G.provide("models.user", {
   keys: ["name", "login", "organized_before", "is_public", "id", "created_at",
     "updated_at", "name", "password", "persistence_token"], //TODO password really doesn't belong.
 
-  Base: function(json) {
+  Base: function() {
     var self = this;
     var cookieName = "__groupit__persistenceToken"; //TODO do XD cookies
 
     //Add the authd key and listeners
     self.extend(["authd"]);
-
-    //Add support for creating users straight from low level api calls
-    if (json) self.extend(json);
-
     /**
      * Login is special in that it expects a user object with either the
      * persistenceToken set or the username and password.
