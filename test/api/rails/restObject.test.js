@@ -123,7 +123,7 @@
       else if (type === 'boolean') {
         params[key] = !value;
       }
-      else if (G.date.isIso8601Date(value)) {
+      else if (G.Date.isIso8601Date(value)) {
         params[key] = testValues.testDate;
       }
       else {
@@ -159,8 +159,8 @@
       else if (type === 'boolean') {
         notEqual(value, originalModel[key], key + " should be opposite of original");
       }
-      else if (G.date.isIso8601Date(value)) {
-        var expected = G.date.iso8601DateString(testValues.testDate);
+      else if (G.Date.isIso8601Date(value)) {
+        var expected = G.Date.iso8601DateString(testValues.testDate);
         equal(value, expected, key + " should be " + expected);
       }
       else {

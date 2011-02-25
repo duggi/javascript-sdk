@@ -42,6 +42,10 @@ G.provide("String", {
     return string.replace(/([A-Z])/g, function($1) {
       return "_" + $1.toLowerCase();
     });
+  },
+  
+  reverse: function(s) {
+    return s.split("").reverse().join("");
   }
 
 });
