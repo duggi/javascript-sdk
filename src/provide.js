@@ -48,13 +48,13 @@ var G = G || {
     G.endPoint = endPoint;
 
 
+    //TODO need to defer until needed 
     //Needs the app key before call
     G.api("/misc/random_hash.json", function(json) {
       G.instanceId = json.hash_digest;
       callback();
     });
-  }
-  ,
+  },
 
   /**
    * Copy from one object to the specified namespace that is G.<target>.
