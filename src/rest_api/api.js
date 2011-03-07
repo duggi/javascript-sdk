@@ -142,8 +142,6 @@ G.provide('ApiClient', {
       throw("corsRequest: cross site xhr not available");
     }
 
-
-
     //The callback
     if (cb) {
       xhr.onload = function() {
@@ -163,6 +161,7 @@ G.provide('ApiClient', {
         if (contentType.indexOf("application/json") != -1 && response.replace(/\s*/, "")) {
           eval('response = ' + "(" + response + ")"); //ie needs braces
         }
+
 
         //For cool kids
         if (xhr.status) {

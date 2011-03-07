@@ -152,7 +152,7 @@ G.provide("DataObject", {
 
         //Fixup the constructor name
         var camelCased = G.String.toCamelCase(name),
-          capName = camelCased[0].toUpperCase() + camelCased.slice(1),
+          capName = camelCased.charAt(0).toUpperCase() + camelCased.slice(1),
           constructorName = "new" + capName;
 
         //Define the constructor
