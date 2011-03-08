@@ -162,7 +162,6 @@ G.provide('ApiClient', {
           eval('response = ' + "(" + response + ")"); //ie needs braces
         }
 
-
         //For cool kids
         if (xhr.status) {
           //Set flags in xhr denoting success and errors

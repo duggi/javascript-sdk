@@ -78,7 +78,7 @@ G.provide("models.contribution", {
     function pollForResponse(requestParams, attempts, config) {
       self.pollOnce(requestParams, function(json, xhr) {
 
-        //TODO typeof is a slight hack for ie8's stupid XDR
+        //TODO typeof is a slight hack for ie8's stupid XDR .. ff also needs the right side
         var loaded = (xhr.status == "200" || typeof json === 'object'),
           waiting = (xhr.status == "204" || typeof json === 'string');
 
@@ -93,6 +93,7 @@ G.provide("models.contribution", {
         } else if (waiting) {//No content means still looking
           continuePolling(1500);
         } else if (loaded) { //JSON should be loaded
+
           if (xhr.success) {
             self.extend(json); //namespace stripped in pollOnce
             if (config.success) config.success(self, xhr);
@@ -121,6 +122,9 @@ G.provide("models.contribution", {
       var path = self.objectPath + "/poll" + self.requestType;
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "get", params, function(json, xhr) {
+        //TODO DUGGI hack to support billing messages. Passes status in response
+        //200 is the only way to get a response in FF
+        xhr.success = json.status == 200;
         if (xhr.success) json = self.stripNamespace(json);
         if (callback) callback(json, xhr);
       });
