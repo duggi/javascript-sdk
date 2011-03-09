@@ -124,7 +124,9 @@ G.provide("models.contribution", {
       G.api(path, "get", params, function(json, xhr) {
         //TODO DUGGI hack to support billing messages. Passes status in response
         //200 is the only way to get a response in FF
-        xhr.success = json.status == 200;
+        if(json.status){
+           xhr.success = json.status == 200;
+        }
         if (xhr.success) json = self.stripNamespace(json);
         if (callback) callback(json, xhr);
       });
