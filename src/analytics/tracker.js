@@ -32,7 +32,6 @@ G.provide("Tracker", {
   // -------------------------------------------- INIT
   init: function() {
     G.Tracker.iframe = G.ApiClient.createHiddenIframe();
-    G.log('tracker inited');
   },
 
 
