@@ -38,29 +38,21 @@ G.provide("Tracker", {
 
   // -------------------------------------------- TRACK EVENT
   trackEvent: function (category, action, optLabel, optValue) {
-    //accountToken = accountToken || G.Tracker.accountToken; TODO abstract for general use
-    //                                                            should be checked in init, not here
     if (!category || !action) {
       G.log("trackEvent requires category and action arguments");
       return;
     }
 
-    var qs = G.QS.encode({
-      'ga': 'trackEvent',
-      'category': category,
-      'action': action,
-      'optLabel': optLabel,
-      'optValue': optValue
-    });
+    // preconstruct
+    var pre = {
+      'trackevent': category,
+      'action': action
+    }
+    if(optLabel) pre['optlabel'] = optLabel;
+    if(optValue) pre['optvalue'] = optValue;
 
-    G.Tracker.iframe.src = G.Tracker.endpoint + "?" + qs; // TODO abstract to allow batching
-
-/*
-    var result = ['_trackEvent', category, action];
-    if (optLabel) result.push(optLabel);
-    if (optValue) result.push(optValue);
-    if (typeof _gaq != 'undefined') _gaq.push(result);
-*/
+    var qs = G.QS.encode(pre);
+    G.Tracker.iframe.src = G.Tracker.endpoint + "?" + qs;
   },
 
 
@@ -68,15 +60,37 @@ G.provide("Tracker", {
   trackPageview: function (path) {
     if(!path) {
       G.log('trackPageview requires a path argument');
+      return;
+    }
+    var qs = G.QS.encode({
+      'trackpageview': path
+    });
+    G.Tracker.iframe.src = G.Tracker.endpoint + "?" + qs;
+
+  },
+
+
+  // -------------------------------------------- DOUBLE TRACK
+  doubleTrack: function (obj) {
+    if(!obj && !obj.trackPageview && !obj.trackEvent) {
+      G.log('doubleTrack requires a complete object argument');
+      return;
     }
 
-    var qs = G.QS.encode({
-      'ga': 'trackPageview',
-      'path': path
-    });
-    G.Tracker.iframe.src = G.Tracker.endpoint + "?" + qs; // TODO abstract to allow batching
+    te = obj.trackEvent;
+    tpv = obj.trackPageview;
 
-    //if (typeof _gaq != 'undefined') _gaq.push(['_trackPageview', path]);
+    // preconstruct here
+    var pre = {
+      'trackpageview': tpv.path,
+      'trackevent': te.category,  // we use category to define partner acct
+      'action': te.action
+    }
+    if(te.optLabel) pre['optlabel'] = te.optLabel;
+    if(te.optValue) pre['optvalue'] = te.optValue;
+
+    var qs = G.QS.encode(pre);
+    G.Tracker.iframe.src = G.Tracker.endpoint + "?" + qs;
   }
 
 });
