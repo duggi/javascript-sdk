@@ -25,7 +25,7 @@
 G.provide("Tracker", {
 
   iframe: null,
-  endpoint: "http://analytics.groupit.com", // TODO need https support on this domain
+  endpoint: "https://analytics.groupit.com", // TODO need https support on this domain
   accountToken: null,                       // TODO support accountToken
 
 
