@@ -37,8 +37,9 @@ G.provide("models.groupit", {
   path: "/groupits",
   keys: ["id", "product_image", "product_uri", "product", "price",
     "message", "surprise", "quantity","user_id","recipient", "options",
-    "active", "lead_uri", "support_uri", "purchased", "groupit_type",
-    "created_at", "updated_at", "hash_digest", "organizer", "amount_raised"],
+    "active", "lead_uri", "support_uri", "purchase_date", "groupit_type",
+    "created_at", "updated_at", "hash_digest", "organizer", "amount_raised",
+    "end_date", "redeem_date"],
 
 
   index: function(config) {
