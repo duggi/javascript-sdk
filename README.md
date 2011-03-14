@@ -1,7 +1,7 @@
 Groupit Javascript SDK
 ===============================
 
-Groupit is a group purchasing solution that easily plugs into any site. 
+Groupit is a group purchasing solution that easily plugs into any site.
 Checkout groupit.com/partners for more information
 
 

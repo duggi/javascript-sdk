@@ -53,10 +53,9 @@ G.provide("BindableObject", {
      * not changed.
      *
      * @param obj
-     * @param shallow
+     * @param deep
      */
-    //Opt into shallow copy for optimization
-    this.extend = function(obj, shallow) {
+    this.extend = function(obj, deep) {
       if (!obj) return;
       if (typeof obj !== "object") throw("Must pass object/array to extend");
 
@@ -70,7 +69,7 @@ G.provide("BindableObject", {
         for (var key in obj) {
           self.generateGetterSetter(key); //overrides previously existing g&s
           self.generateCallback(key);
-          self[self.nameConversion(key)](obj[key], shallow); //Extend is just looping through the set methods
+          self[self.nameConversion(key)](obj[key], deep); //Extend is just looping through the set methods
         }
       }
     };
@@ -116,7 +115,7 @@ G.provide("BindableObject", {
 
     this.callbackName = function(name) {
       name = self.nameConversion(name);
-      return "on" + name[0].toUpperCase() + name.slice(1);
+      return "on" + name.charAt(0).toUpperCase() + name.slice(1);
     };
 
     this.generateCallback = function(name) {

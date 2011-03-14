@@ -83,7 +83,7 @@ G.provide("DataObject", {
     },
     app: {
       path: "/apps",
-      keys: ["name", "user_id", "is_public", "id", "created_at", "updated_at"]
+      keys: ["name", "user_id", "is_public", "id", "created_at", "updated_at", "key"]
     },
     address: {
       path: "/addresses",
@@ -152,7 +152,7 @@ G.provide("DataObject", {
 
         //Fixup the constructor name
         var camelCased = G.String.toCamelCase(name),
-          capName = camelCased[0].toUpperCase() + camelCased.slice(1),
+          capName = camelCased.charAt(0).toUpperCase() + camelCased.slice(1),
           constructorName = "new" + capName;
 
         //Define the constructor

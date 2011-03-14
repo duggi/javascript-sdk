@@ -35,8 +35,9 @@ G.provide("models.user", {
 
   objectName: "user",
   path: "/users",
+  //TODO password really doesn't belong.
   keys: ["name", "login", "organized_before", "is_public", "id", "created_at",
-    "updated_at", "name", "password", "persistence_token"], //TODO password really doesn't belong.
+    "updated_at", "name", "password", "persistence_token", "single_access_token"],
 
   Base: function() {
     var self = this;
@@ -108,9 +109,31 @@ G.provide("models.user", {
       params = G.dogfort.injectRailsParams(params);
       G.api(path, "post", params, function(json, xhr) {
         if (xhr.success) {
-          if(config.success) config.success(self, xhr);
+          if (config.success) config.success(self, xhr);
         } else {
-          if (config.error) config.error(self, xhr);
+          if (config.error) config.error(json, xhr);
+        }
+        if (config.complete) config.complete(json, xhr);
+      });
+    };
+
+    //Send the reset password email for this user
+    self.resetPasswordEmail = function(config) {
+      config = config || {};
+      var self = this,
+        path = self.objectPath + "/reset_password_email" + self.requestType,
+        params = self.data();
+
+      //setup the params for sending to api
+      params = self.railify(params, self.objectName);
+      params = G.dogfort.injectRailsParams(params);
+
+      //post and handle response
+      G.api(path, "post", params, function(json, xhr) {
+        if (xhr.success) {
+          if (config.success) config.success(self, xhr);
+        } else {
+          if (config.error) config.error(json, xhr);
         }
         if (config.complete) config.complete(json, xhr);
       });

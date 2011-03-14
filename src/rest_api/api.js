@@ -142,8 +142,6 @@ G.provide('ApiClient', {
       throw("corsRequest: cross site xhr not available");
     }
 
-
-
     //The callback
     if (cb) {
       xhr.onload = function() {
