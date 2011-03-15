@@ -39,7 +39,7 @@ G.provide("models.groupit", {
     "message", "surprise", "quantity","user_id","recipient", "options",
     "active", "lead_uri", "support_uri", "purchase_date", "groupit_type",
     "created_at", "updated_at", "hash_digest", "organizer", "amount_raised",
-    "end_date", "redeem_date"],
+    "end_date", "redeem_date", "hide_participants"],
 
 
   index: function(config) {
