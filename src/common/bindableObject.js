@@ -127,7 +127,6 @@ G.provide("BindableObject", {
             var fn2 = self._listeners[name][i];
             if(fn2.toString() == fn.toString()){
               self._listeners[name].splice(i, 1);
-              G.log("removing");
             }
           }
         } else {
