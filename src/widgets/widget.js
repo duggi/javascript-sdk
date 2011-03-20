@@ -65,11 +65,12 @@ G.provide("widget", {
     function initRootNode() {
       var div = document.createElement("div"); //garbage collected automatically
       div.innerHTML = G.widget.html[widgetType];
-      var frag = document.createDocumentFragment();
-      for(var i in div.childNodes){
-        frag.appendChild(div.childNodes[i]);
-      }
-      return frag;
+      return div;
+//      var frag = document.createDocumentFragment();
+//      for(var i in div.childNodes){
+//        frag.appendChild(div.childNodes[i]);
+//      }
+//      return frag;
     }
 
     this.hashOnAttribute = function(hash, attr) {
@@ -134,6 +135,7 @@ G.provide("widget", {
       //in that page. (<3 closures). Do before instance is created so
       //pids hash can be referenced during instantiation.
       base = new realG.widget.Base(name, widgetType);
+      //TODO need to remove this eval
       eval(widgetType + ".prototype = base");
 //      fn.prototype = base;
       base.hashOnAttribute(pids, "pid");
@@ -177,91 +179,17 @@ G.provide("widget", {
 
     G.widget.require.pages[widgetType] = widgetType;
 
-
-    if (!G.widget.constructors[widgetType]) {
-      G.widget.fetch(path, widgetType);
-    }
+    //TODO would be greate to fetch the widget here
+//    if (!G.widget.constructors[widgetType]) {
+//      G.widget.fetch(path, widgetType);
+//    }
 
   },
 
-  ready:function(widgetTypes, callback) {
-    var intervalId,
-            timeWaiting = 0,
-            interval = 50;
-
-    intervalId = setInterval(function() {
-      timeWaiting += interval
-      if (timeWaiting > 1000) {
-        G.log("G.widget.ready waiting over a second for ready state.");
-        timeWaiting = 0;
-      }
-
-      for (var i in widgetTypes) {
-        var widgetType = widgetTypes[i];
-        if (!G.widget.constructors[widgetType]) {
-          return;
-        }
-      }
-      clearInterval(intervalId);
-
-      callback();
-
-    }, interval);
-  },
-
-  fetch: function() {
-    var args = Array.prototype.slice.call(arguments),
-            path = args.shift(),
-            next = args.shift(),
-            widgetType,
-            callback;
-
-    while (next) {
-      var type = typeof next;
-
-      if (type === 'string' && !widgetType) {
-        widgetType = next;
-      } else if (type === 'function' && !callback) {
-        callback = next;
-      }
-      else {
-        G.log('Invalid argument passed to G.widget.fetch(): ' + next);
-        return;
-      }
-      next = args.shift();
-    }
-
-
-    //Default widgetType will be the route to it with / replaced with undescores
-    widgetType = widgetType || G.widget.pathToName(path);
-
-    G.widget.fetchRequest(path, widgetType, callback);
-  },
 
   pathToName:function(path) {
     return path.replace(/\//g, "_");
-  },
-
-
-  /**
-   *
-   */
-
-  fetchRequest: function(path, widgetType, callback) {
-
-    //Preamble = dirty magic to pull references into iframe,
-    //couples js with controller :(
-    var preamble = "<script>window.G = top." + globalName + ";</script>";
-
-    G.ApiClient.rest('widgets/show', 'get', {
-      path: path,
-      preamble: preamble,
-      page_name: widgetType
-    }, function(html) {
-
-      if (!!callback) {
-        callback(G.widget.constructors[widgetType]);
-      }
-    });
   }
+
+
 });
