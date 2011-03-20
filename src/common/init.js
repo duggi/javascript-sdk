@@ -28,9 +28,8 @@ G.provide("", {
    * First call to G to initialize all of its sub-components
    * @param appKey {string} The API key issued by groupit.com
    * @param endPoint {string} The groupit server url
-   * @param callback {Function} Callback once G is finished initializing
    */
-  initialize:function(appKey, endPoint, callback) {
+  initialize:function(appKey, endPoint) {
     //Construct our rails models and api objects
     G.DataObject.init();
 
@@ -39,8 +38,6 @@ G.provide("", {
 
     //Sets our endpoint (ie where we send api requests)
     //Setup our tokens and keys for this G instance
-    G.init(appKey, endPoint, function() {
-      callback();
-    });
+    G.init(appKey, endPoint);
   }
 });

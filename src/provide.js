@@ -37,23 +37,18 @@ var _isLogging = true;
 var G = G || {
   instanceId:null, //(AKA instance-private key)
   appKey:null, //(AKA App Identifier)
-  endPoint:null, //AKA Server protocol and hostname
+  endPoint:null, //(AKA Server protocol and hostname)
 
   //TODO migrate these tokens from rest Object to here
   persistenceToken: null,
   appSecret:null,
 
-  init:function(appKey, endPoint, callback) {
+  init:function(appKey, endPoint) {
     G.appKey = appKey;
     G.endPoint = endPoint;
-
-
-    //TODO need to defer until needed 
-    //Needs the app key before call
-    G.api("/misc/random_hash.json", function(json) {
-      G.instanceId = json.hash_digest;
-      callback();
-    });
+    //Generate a unique random key for this specific instance of the JDK
+    G.instanceId = (new Date().getTime()).toString() +
+            Math.floor(Math.random() * 1000001).toString();
   },
 
   /**
@@ -67,10 +62,10 @@ var G = G || {
    */
   provide: function(target, source, overwrite) {
     return this.copy(
-      typeof target == 'string' ? this.create(target) : target,
-      source,
-      overwrite
-      );
+            typeof target == 'string' ? this.create(target) : target,
+            source,
+            overwrite
+            );
   }
   ,
   /**
@@ -82,8 +77,8 @@ var G = G || {
    */
   create: function(name, value) {
     var node = G,
-      nameParts = name ? name.split('.') : [],
-      len = nameParts.length;
+            nameParts = name ? name.split('.') : [],
+            len = nameParts.length;
     for (var i = 0; i < len; i++) {
       var part = nameParts[i];
       var nso = node[part]; //nso = namespaced object
@@ -152,7 +147,7 @@ var G = G || {
     return G;
   }
 }
-  ;
+        ;
 
 //Do the proper bindings for the window.
 window.G = G;

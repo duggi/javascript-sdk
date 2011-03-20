@@ -65,7 +65,11 @@ G.provide("widget", {
     function initRootNode() {
       var div = document.createElement("div"); //garbage collected automatically
       div.innerHTML = G.widget.html[widgetType];
-      return div;
+      var frag = document.createDocumentFragment();
+      for(var i in div.childNodes){
+        frag.appendChild(div.childNodes[i]);
+      }
+      return frag;
     }
 
     this.hashOnAttribute = function(hash, attr) {
@@ -182,8 +186,8 @@ G.provide("widget", {
 
   ready:function(widgetTypes, callback) {
     var intervalId,
-      timeWaiting = 0,
-      interval = 50;
+            timeWaiting = 0,
+            interval = 50;
 
     intervalId = setInterval(function() {
       timeWaiting += interval
@@ -207,10 +211,10 @@ G.provide("widget", {
 
   fetch: function() {
     var args = Array.prototype.slice.call(arguments),
-      path = args.shift(),
-      next = args.shift(),
-      widgetType,
-      callback;
+            path = args.shift(),
+            next = args.shift(),
+            widgetType,
+            callback;
 
     while (next) {
       var type = typeof next;
