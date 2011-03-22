@@ -122,9 +122,9 @@ G.provide('ApiClient', {
     }
 
 //    params['__timestamp__'] = (new Date()).toString(); //Attempt to cache bust ie
-    
+
     //Construct the url
-    var url = G.endPoint + path;
+    var url = G.endPoint + "/"+ path;
     var queryString = G.QS.encode(params); //nestedEncode(params)
     if (method == 'get') {
       url += "?" + queryString;
@@ -199,7 +199,7 @@ G.provide('ApiClient', {
 
   /**
    * Does a post to a remote location, handles iframe, and form for you.
-   * 
+   *
    * @param path
    * @param method
    * @param params
@@ -255,7 +255,7 @@ G.provide('ApiClient', {
     doc = doc || document;
     var form = doc.createElement('form');
 
-    form.action = (fullPath) ? path : G.endPoint + path;
+    form.action = (fullPath) ? path : G.endPoint + "/" + path;
 
     form.enctype = "multipart/form-data";
     form.method = method;

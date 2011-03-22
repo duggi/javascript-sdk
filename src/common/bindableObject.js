@@ -23,9 +23,9 @@
  */
 
 G.provide("", {
-  newBindableObject: function(obj, shallow, debug) {
-    var bindable = new G.BindableObject.Base(debug);
-    bindable.extend(obj, shallow);
+  newBindableObject: function(obj, deep) {
+    var bindable = new G.BindableObject.Base();
+    bindable.extend(obj, deep);
     return bindable;
   }
 
@@ -33,7 +33,7 @@ G.provide("", {
 
 G.provide("BindableObject", {
 
-  Base:function(debug) {
+  Base:function() {
     var self = this;
     self._listeners = {};
     self._data = {};
@@ -153,7 +153,6 @@ G.provide("BindableObject", {
       self._listeners[key] = self._listeners[key] || [];
       for (var i in self._listeners[key]) {
         if (self._listeners[key][i]) {
-          if (debug) G.log("--Event Listener on key: " + key + " Fired--");
           self._listeners[key][i](self._data[key]);
         }
       }
