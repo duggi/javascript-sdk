@@ -43,7 +43,9 @@ G.provide("dogfort", {
       params["user[persistence_token]"] = G.persistenceToken;
     }
 
-    params['app_key'] = G.appKey;
+    //Allows us to specify no appkey to be transmitted
+    if(params['app_key'] == "undefined") delete params["app_key"];
+    else params["app_key"] = G.appKey;
 
     //Should only be used while testing
     if (G.appSecret)
@@ -65,7 +67,7 @@ G.provide("dogfort", {
 
 //    params.includes =
 //    for(var key in para)
-    
+
   },
 
   //TODO this isn't used yet, is it needed?

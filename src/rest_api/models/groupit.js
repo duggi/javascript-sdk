@@ -45,7 +45,7 @@ G.provide("models.groupit", {
   index: function(config) {
     //Testing out the includes directive
     var params = {
-      include: ["user","participants","contributions"]
+      include: ["user","participants","contributions", "app"]
     };
 
     G.DataObject.commonIndex(config, G.models.groupit, G.newGroupit,
@@ -61,6 +61,12 @@ G.provide("models.groupit", {
         if (model.user) {
           model.user(G.newUser(model.user()));
         }
+
+        //Wrap the App
+        if(model.app){
+          model.app(G.newApp(model.app()));
+        }
+
 
         //Wrap the participants
         if (model.participants) {
