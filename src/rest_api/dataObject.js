@@ -58,7 +58,7 @@ G.provide("DataObject", {
     //TODO need to create the user attribute everywhere and remove from groupit index
     participant: {
       path: "/participants",
-      //TODO need to do inverntory on keys (organizer, ... etc)
+      //TODO need to do inventory on keys (organizer, ... etc)
       keys: ["groupit_id", "contacted", "is_public", "user_id", "id",
         "created_at", "updated_at", "invited", "organizer", "contributor"]
     },
@@ -84,7 +84,7 @@ G.provide("DataObject", {
     app: {
       path: "/apps",
       keys: ["name", "user_id", "is_public", "id", "created_at", "updated_at",
-        "key", "pathname"]
+        "key", "pathname", "modal_blurb"]
     },
     address: {
       path: "/addresses",
