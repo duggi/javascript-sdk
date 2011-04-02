@@ -37,11 +37,11 @@ G.provide("Window", {
    *   | |_____________________________| <--|  |          |
    *   |_______________________________________| <--------|
    *
-   *   Note: You also have to take into account where the scroll position is
-   *   when centering sometimes.
    *
    *   All of our window methods allow passing of a specific window object so
    *   you can compute on iframes.
+   *
+   *   IE 8, FF, Chrome compat - April 2011
    */
 
   innerHeight: function(_window) {
@@ -77,11 +77,11 @@ G.provide("Window", {
     _window = _window || window;
     if (!domElement) return;
 
-    var innerHeight = G.Window.innerHeight(),
-            innerWidth = G.Window.innerWidth(),
-            verticalOffset = G.Window.pageYOffset(),
-            horizontalOffset = G.Window.pageXOffset(),
-            scrollBarPadding = G.Window.scrollBarPadding();
+    var innerHeight = G.Window.innerHeight(_window),
+            innerWidth = G.Window.innerWidth(_window),
+            verticalOffset = G.Window.pageYOffset(_window),
+            horizontalOffset = G.Window.pageXOffset(_window),
+            scrollBarPadding = G.Window.scrollBarPadding(_window);
 
     domElement.style.top = ((verticalOffset + innerHeight / 2) -
             (scrollBarPadding + domElement.offsetHeight / 2 )) + "px";
