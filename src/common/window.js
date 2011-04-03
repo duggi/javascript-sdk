@@ -46,12 +46,12 @@ G.provide("Window", {
 
   innerHeight: function(_window) {
     _window = _window || window;
-    return _window.innerHeight || (_window.document.body && _window.document.body.clientHeight);
+    return _window.innerHeight || (_window.document.documentElement && _window.document.documentElement.clientHeight);
   },
 
   innerWidth: function(_window) {
     _window = _window || window;
-    return _window.innerWidth || (_window.document.body && _window.document.body.clientWidth);
+    return _window.innerWidth || (_window.document.documentElement && _window.document.documentElement.clientWidth);
   },
 
   //Scroll Y position
