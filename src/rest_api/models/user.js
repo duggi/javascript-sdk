@@ -101,6 +101,7 @@ G.provide("models.user", {
       //TODO need to get a list of getters and setters or define a clear function
       self.name("");
       self.login("");
+      self.id("");
       self.persistenceToken("");
 
 
