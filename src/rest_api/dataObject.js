@@ -84,7 +84,7 @@ G.provide("DataObject", {
     app: {
       path: "/apps",
       keys: ["name", "user_id", "is_public", "id", "created_at", "updated_at",
-        "key", "pathname", "modal_blurb"]
+        "key", "pathname", "modal_blurb", "resource_uri"]
     },
     address: {
       path: "/addresses",
