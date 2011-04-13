@@ -33,7 +33,26 @@ G.provide("router", {
   routes: {},
 
   init:function() {
-    G.addEvent(window, 'hashchange', G.router.execRoute);
+    if (window.onhashchange) {
+      G.addEvent(window, 'hashchange', function() {
+        G.router.execRoute();
+      });
+    } else {
+      /**
+       * If we don't support onhashchange then we must poll the hash
+       * and update when it changes... Firefox 3.5 is an example where
+       * we need this
+       */
+      G.log("onhashchange not supported falling back to timer polls");
+      var prevHash = null;
+      setInterval(function() {
+        if (prevHash != window.location.hash) {
+          G.router.execRoute();
+          prevHash = window.location.hash;
+        }
+      }, 400);
+    }
+
   },
 
   route:function(hashName, callback) {
@@ -44,7 +63,9 @@ G.provide("router", {
     var hash = window.location.hash.slice(1),
       urlParams = hash.split("/"),
       name = urlParams.shift();
+
     var callback = G.router.routes[name];
+
     if (!callback) callback = G.router.routes["*"];
     if (callback) callback(name, urlParams);
   }
