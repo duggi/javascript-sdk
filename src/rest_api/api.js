@@ -121,10 +121,8 @@ G.provide('ApiClient', {
       params['_method'] = 'delete';
     }
 
-//    params['__timestamp__'] = (new Date()).toString(); //Attempt to cache bust ie
-
     //Construct the url
-    var url = G.endPoint + "/"+ path;
+    var url = G.endPoint + "/" + path;
     var queryString = G.QS.encode(params); //nestedEncode(params)
     if (method == 'get') {
       url += "?" + queryString;
@@ -198,6 +196,176 @@ G.provide('ApiClient', {
   },
 
   /**
+   * Handles image uploading in a XD way. Complicated enough that this is
+   * a primitive of the API.
+   *
+   * Our image upload process:
+   *
+   * Post via form:
+   *   In order to upload images we must submit a form via a post request
+   *   (ajax doesn't yet support multipart/form-data). We submit this data
+   *   to dogfort using the REST route on the form action.
+   *
+   * Poll S3 with timestamps:
+   *   We then poll for the image on S3 (rather than dogfort) to reduce load
+   *   on our heroku servers. We have generate a unique timestamp to have
+   *   the browser reload the image after uploading 1+ times (otherwise the
+   *   same image will be cached in both the browser and possibly the CDN).
+   *
+   * Format of S3 uploads are always:
+   *
+   *  https://S3root/modelClassName/modelId/imageName/timestamp/imageSize.png
+   *  All images are converted to 24 bit png on dogfort.
+   *
+   *
+   * @param params {Object} Parameters for the function
+   *
+   * params = {
+   *   path:           RESTful path to for model update TODO support image uploads on groupit creation as well
+   *   httpMethod:     http method for rails -- defaults to 'PUT'
+   *   modelClassName: name of the model this image is attached to
+   *   modelId:        if of the model this image is attached to
+   *   imageName:      name of image (lead, support, profile, etc)
+   *   imageSize:      size of image to check for. (proxy, full, thumb, etc)
+   *   s3Root:         the s3 url where to poll for the image (includes protocol)
+   *   timeStamp: (optional) defaults to current ms since epoch
+   *   start: {Function} Upon initiation of upload this callback is executed
+   *   success: (optional Callback)
+   *   error: (optional Callback)
+   *   complete: (optional Callback)
+   *   doc: (optional) defaults to current document
+   * }
+   *
+   * Dear world i apologize for the complexity... (TC) One day i will come
+   * back and make it better.
+   */
+
+  uploadImageForm: function(params) {
+    params = params || {};
+    var path = params.path,
+      httpMethod = params.httpMethod || 'PUT',
+      s3Root = params.s3Root,
+      modelClassName = params.modelClassName,
+      modelId = params.modelId,
+      imageName = params.imageName,
+      imageSize = params.imageSize,
+      successCb = params.success,
+      errorCb = params.error,
+      completeCb = params.complete,
+      startCb = params.start,
+      doc = params.doc || document;
+
+    if (!path || !modelClassName || !httpMethod || !modelId || !imageName || !s3Root) {
+      G.log("G.ApiClient.uploadImage: parameters invalid. Failing image upload");
+      return null;
+    }
+
+    var form = doc.createElement('form'),
+      appKeyInput = doc.createElement('input'),
+      fileInput = doc.createElement('input'),
+      httpMethodInput = doc.createElement("input"),
+      stampInput = doc.createElement("input"),
+      noResponseInput = doc.createElement("input"),
+      hiddenFrame = G.ApiClient.createHiddenIframe(null, doc),
+      timestamp = (new Date()).getTime().toString();
+
+    initializeInputs();
+    initializeForm();
+
+    function initializeInputs() {
+      //Setup the appKeyInput
+      appKeyInput.type = "hidden";
+      appKeyInput.value = G.appKey;
+      appKeyInput.name = "app_key";
+
+      //Setup the fileInput
+      fileInput.type = "file";
+      fileInput.name = modelClassName + "[" + imageName + "_image" + "]";
+
+      //Setup the httpMethodInput
+      httpMethodInput.type = "hidden";
+      httpMethodInput.name = "_method";
+      httpMethodInput.value = httpMethod;
+
+      //Setup the stampInput
+      stampInput.type = "hidden";
+      stampInput.name = modelClassName + "[stamp]";
+      stampInput.value = timestamp;
+
+      //Tell Dogfort we don't want a response (will cause download dialogs on ie)
+      noResponseInput.type = "hidden";
+      noResponseInput.name = "no_response";
+      noResponseInput.value = "true";
+
+    }
+
+    function initializeForm() {
+      //Setup the form properties
+      form.enctype = "multipart/form-data";
+      form.method = "POST"; //httpMethodInput will drive rails to the correct rest route
+      form.target = hiddenFrame.name;
+      form.action = path;
+
+      //Append all the form inputs
+      form.appendChild(appKeyInput);
+      form.appendChild(fileInput);
+      form.appendChild(httpMethodInput);
+      form.appendChild(appKeyInput);
+      form.appendChild(stampInput);
+      form.appendChild(noResponseInput);
+
+      form.onsubmit = function() {
+        if (startCb) startCb();
+
+        //Setup the image src
+        /**
+         * Format of S3 uploads are always:
+         * s3root included protocol
+         * s3root/modelClassName/modelId/imageName/timestamp/imageSize.png
+         */
+        var src = s3Root + "/" + modelClassName + "/" + modelId +
+          "/" + imageName + "/" + timestamp + "/" + imageSize + ".png";
+        checkForFile(src);
+      };
+    }
+
+    function checkForFile(src) {
+      var test = testImage(), fails = 0;
+      test.src = src;
+
+      //Checks for the image using a series of img elements
+      function testImage() {
+        var test = doc.createElement("img");
+        test.onerror = function() {
+          fails++;
+          var cacheBustedSrc = src + "?time=" + (new Date()).getTime();
+          if (fails > 20) {
+            G.log("After Polling for image 20 times we couldn't find the image");
+            if (errorCb) errorCb(src);
+            if (completeCb) completeCb(src);
+            hiddenFrame.parentNode.removeChild(hiddenFrame); //cleanup
+            return;
+          }
+          setTimeout(function() {
+            test = testImage();
+            test.src = cacheBustedSrc;
+          }, 1000);
+        };
+
+        test.onload = function() {
+          if (successCb) successCb(src);
+          if (completeCb) completeCb(src);
+          hiddenFrame.parentNode.removeChild(hiddenFrame); //cleanup
+        };
+
+        return test;
+      }
+    }
+
+    return form;
+  },
+
+  /**
    * Does a post to a remote location, handles iframe, and form for you.
    *
    * @param path
@@ -222,15 +390,25 @@ G.provide('ApiClient', {
 
   },
 
-  createHiddenIframe: function(callback){
-    var iframe = document.createElement('iframe');
+  /**
+   * Creates a hidden frame with a unique name (for targeting).
+   *
+   * @param {Function} callback
+   * @param {Object} doc
+   */
+
+  createHiddenIframe: function(callback, doc) {
+    doc = doc || document;
+    var iframe = doc.createElement('iframe');
     iframe.style.position = "absolute";
     iframe.style.top = "-10000px";
     iframe.style.height = "0px";
     iframe.style.width = "0px";
+    iframe.name = "hiddenFrame" + (new Date()).getTime().toString() +
+      (Math.floor(Math.random() * 1000001).toString());
 
     //initializes iframe
-    document.body.appendChild(iframe);
+    doc.body.appendChild(iframe);
     var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     iframeDocument.open();
     iframeDocument.close();
@@ -262,7 +440,7 @@ G.provide('ApiClient', {
 
     for (var key in params) {
       var input = doc.createElement('input');
-      input.type ="hidden"; //'hidden'; //DEBUG text
+      input.type = "hidden"; //'hidden'; //DEBUG text
       input.name = key;
       input.value = params[key];
       form.appendChild(input);

@@ -63,7 +63,7 @@ G.provide("models.groupit", {
         }
 
         //Wrap the App
-        if(model.app){
+        if (model.app) {
           model.app(G.newApp(model.app()));
         }
 
@@ -109,7 +109,38 @@ G.provide("models.groupit", {
 
   },
 
+
+
   Base: function() {
+    /**
+     * Returns a form for image uploads. Only works if the record already exists
+     *
+     * TODO Add support for uploading on creation.
+     *
+     * @param {Object} params
+     *
+     *   imageName:{String}  name of image (lead, support, profile, etc)
+     *   imageSize:{String}  size of image to check for. (proxy, full, thumb, etc)
+     *   s3Root:   {String}  the s3 url where to poll for the image
+     *   timeStamp {Function} (optional) defaults to current ms since epoch
+     *   success   {Function} (optional) Success callback
+     *   error     {Function} (optional) Error callback
+     *   complete: {Function} (optional) Complete callback
+     *   doc:      {Object}   (optional) defaults to current document
+     *
+     * Note submit is intentionally left off so the client can add whatever
+     * submit verbage that is needed.
+     *
+     */
+    this.uploadImageForm = function(params) {
+      params = params || {};
+      params.httpMethod = "PUT";
+      params.modelClassName = "groupit";
+      params.modelId = params.modelId || this.id && this.id();
+      params.path = G.endPoint + "/groupits/" + params.modelId; //Update path
+
+      return G.ApiClient.uploadImageForm(params);
+    }
 
 
   }
