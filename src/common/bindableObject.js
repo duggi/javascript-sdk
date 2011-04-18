@@ -84,6 +84,7 @@ G.provide("BindableObject", {
           self._listeners[key].push(listenerArray[i]);
         }
       }
+      //TODO this whole function needs to be reevaluated....
       G.copy(self._data, bindableObject._data, true);
       return self;
     };

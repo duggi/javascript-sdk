@@ -38,4 +38,4 @@ G.provide("browser", {
     return rv;
   }
 
-})
+});

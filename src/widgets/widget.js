@@ -66,6 +66,7 @@ G.provide("widget", {
       var div = document.createElement("div"); //garbage collected automatically
       div.innerHTML = G.widget.html[widgetType];
       return div;
+      //TODO was working on frags instead of divs here
 //      var frag = document.createDocumentFragment();
 //      for(var i in div.childNodes){
 //        frag.appendChild(div.childNodes[i]);
@@ -138,7 +139,7 @@ G.provide("widget", {
       //TODO need to remove this eval
       eval(widgetType + ".prototype = base");
 //      fn.prototype = base;
-      base.hashOnAttribute(pids, "pid");
+//      base.hashOnAttribute(pids, "pid");
 
       eval("instance = new " + widgetType + "()");
 //      instance = new fn();

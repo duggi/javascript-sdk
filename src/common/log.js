@@ -25,8 +25,12 @@
 G.provide("", {
 
   log:function(message) {
-    if (window.console) {
-      window.console.log(message);
+    if (window.top && window.top.console) {
+      window.top.console.log(message);
     }
   }
+
+
+
+
 });

@@ -146,8 +146,7 @@ var G = G || {
     globalName = altName;
     return G;
   }
-}
-        ;
+};
 
 //Do the proper bindings for the window.
 window.G = G;
